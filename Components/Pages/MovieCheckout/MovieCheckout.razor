@@ -1,0 +1,198 @@
+﻿@page "/checkout"
+@using G5_MovieTicketBookingSystem.Repositories
+@using G5_MovieTicketBookingSystem.Services.Impl
+@inject IMovieService MovieService
+@inject ISeatLockService SeatLockService
+
+@code {
+    private MovieDto? movie;
+    private string remainingTime = "Loading...";
+    private DateTime? lockExpiryTime;
+    private DateTime? lockStartTime;
+
+    // Khi trang được khởi tạo, tính toán thời gian còn lại và bắt đầu đếm ngược
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            movie = await MovieService.GetMovieByIdAsync(1); // Lấy thông tin phim
+
+            if (movie != null)
+            {
+                int userId = 1; // Ví dụ lấy userId
+                await CalculateRemainingTime(userId); // Tính toán thời gian còn lại
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+    }
+
+    // Tính toán thời gian còn lại từ thời gian hết hạn của vé
+    private async Task CalculateRemainingTime(int userId)
+    {
+        try
+        {
+            var latestSeatLock = await SeatLockService.GetLatestSeatLockByUserIdAsync(userId);
+
+            if (latestSeatLock != null)
+            {
+                lockExpiryTime = latestSeatLock.LockExpiryTime; // Lấy thời gian hết hạn vé
+                lockStartTime = latestSeatLock.LockStartTime; // Lấy thời gian bắt đầu vé
+
+                if (lockExpiryTime.HasValue && lockStartTime.HasValue)
+                {
+                    var timeRemaining = lockExpiryTime.Value - lockStartTime.Value;
+                    remainingTime = $"{timeRemaining.Minutes:D2}:{timeRemaining.Seconds:D2}"; // Hiển thị thời gian chênh lệch
+                }
+            }
+            else
+            {
+                remainingTime = "No seat locks found for this user."; // Nếu không có vé đã được giữ
+            }
+        }
+        catch (Exception ex)
+        {
+            remainingTime = $"Error: {ex.Message}";
+            Console.WriteLine($"Error calculating remaining time: {ex.Message}");
+        }
+    }
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/animate.css">
+    <link rel="stylesheet" href="assets/css/flaticon.css">
+    <link rel="stylesheet" href="assets/css/magnific-popup.css">
+    <link rel="stylesheet" href="assets/css/odometer.css">
+    <link rel="stylesheet" href="assets/css/owl.carousel.min.css">
+    <link rel="stylesheet" href="assets/css/owl.theme.default.min.css">
+    <link rel="stylesheet" href="assets/css/nice-select.css">
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="shortcut icon" href="assets/images/favicon.png" type="image/x-icon">
+    <title>Boleto - Online Ticket Booking Website</title>
+</head>
+<body>
+    <section class="details-banner hero-area bg_img seat-plan-banner" data-background="assets/images/banner/banner04.jpg">
+        <div class="container">
+            <div class="details-banner-wrapper">
+                <div class="details-banner-content style-two">
+                    <h3 class="title">@(movie?.Title ?? "Loading...")</h3>
+                    <div class="tags">
+                        <a href="#0">@(movie?.Genre ?? "N/A")</a>
+                        <a href="#0">@(movie?.Language ?? "N/A")</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="page-title bg-one">
+        <div class="container">
+            <div class="page-title-area">
+                <div class="item md-order-1">
+                    <a href="movie-ticket-plan.html" class="custom-button back-button">
+                        <i class="flaticon-double-right-arrows-angles"></i>Back
+                    </a>
+                </div>
+                <div class="item date-item">
+                    <span class="date">@movie?.Showtimes.FirstOrDefault()?.ShowDate.ToString("yyyy-MM-dd")</span>
+                    <select class="select-bar">
+                        @foreach (var showtime in movie?.Showtimes ?? new List<ShowtimeDto>())
+                        {
+                            <option value="@showtime.ShowtimeId">@showtime.ShowTime.ToString(@"hh\:mm")</option>
+                        }
+                    </select>
+                </div>
+                <div class="item">
+                    <h5 class="title">Remaining Time</h5>
+                    <p>@remainingTime</p> <!-- This will show the remaining time -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="movie-facility padding-bottom padding-top">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="checkout-widget d-flex flex-wrap align-items-center justify-cotent-between">
+                        <div class="title-area">
+                            <h5 class="title">Already a Boleto Member?</h5>
+                            <p>Sign in to earn points and make booking easier!</p>
+                        </div>
+                        <a href="#0" class="sign-in-area">
+                            <i class="fas fa-user"></i><span>Sign in</span>
+                        </a>
+                    </div>
+                    <div class="checkout-widget checkout-contact">
+                        <h5 class="title">Share your Contact Details</h5>
+                        <form class="checkout-contact-form">
+                            <div class="form-group">
+                                <input type="text" placeholder="Full Name">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" placeholder="Enter your Mail">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" placeholder="Enter your Phone Number">
+                            </div>
+                            <div class="form-group">
+                                <input type="submit" value="Continue" class="custom-button">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="booking-summery bg-one">
+                        <h4 class="title">Booking Summary</h4>
+                        <ul>
+                            <li>
+                                <h6 class="subtitle">Venus</h6>
+                                <span class="info">English-2d</span>
+                            </li>
+                            <li>
+                                <h6 class="subtitle"><span>City Walk</span><span>02</span></h6>
+                                <div class="info"><span>10 SEP TUE, 11:00 PM</span> <span>Tickets</span></div>
+                            </li>
+                            <li>
+                                <h6 class="subtitle mb-0"><span>Tickets Price</span><span>$150</span></h6>
+                            </li>
+                        </ul>
+                        <ul class="side-shape">
+                            <li>
+                                <h6 class="subtitle"><span>Combos</span><span>$57</span></h6>
+                                <span class="info"><span>2 Nachos Combo</span></span>
+                            </li>
+                            <li>
+                                <h6 class="subtitle"><span>Food & Beverage</span></h6>
+                            </li>
+                        </ul>
+                        <ul>
+                            <li>
+                                <span class="info"><span>Price</span><span>$207</span></span>
+                                <span class="info"><span>VAT</span><span>$15</span></span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="proceed-area text-center">
+                        <h6 class="subtitle"><span>Amount Payable</span><span>$222</span></h6>
+                        <a href="#0" class="custom-button back-button">Proceed</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/jquery-3.3.1.min.js"></script>
+    <script src="assets/js/bootstrap.min.js"></script>
+    <script src="assets/js/main.js"></script>
+</body>
+</html>
