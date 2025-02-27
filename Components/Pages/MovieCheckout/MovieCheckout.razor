@@ -1,4 +1,5 @@
 ﻿@page "/checkout"
+
 @using G5_MovieTicketBookingSystem.Repositories
 @using G5_MovieTicketBookingSystem.Services.Impl
 @inject IMovieService MovieService
@@ -130,32 +131,27 @@
                         </a>
                     </div>
                     <div class="checkout-widget checkout-contact">
-                        <h5 class="title">Share your Contact  Details </h5>
+                        <h5 class="title">Share your Contact Details </h5>
                         <form class="checkout-contact-form">
                             <div class="form-group">
-                                <input type="text" placeholder="Full Name">
+                                <label for="FullName"><i class="fas fa-user"></i> Full Name</label>
+                                <input type="text" id="FullName" name="FullName" placeholder="Enter your full name" class="form-control" oninput="validateFullName()">
+                                <span class="text-danger" id="errorFullName"></span>
                             </div>
                             <div class="form-group">
-                                <input type="text" placeholder="Enter your Mail">
+                                <label for="Email"><i class="fas fa-envelope"></i> Email</label>
+                                <input type="email" id="Email" name="Email" placeholder="Enter your email" class="form-control" oninput="validateEmail()">
+                                <span class="text-danger" id="errorEmail"></span>
                             </div>
                             <div class="form-group">
-                                <input type="text" placeholder="Enter your Phone Number ">
-                            </div>
-                            <div class="form-group">
-                                <input type="submit" value="Continue" class="custom-button">
+                                <label for="Phone"><i class="fas fa-phone"></i> Phone Number</label>
+                                <input type="text" id="Phone" name="Phone" placeholder="Enter your phone number" class="form-control" oninput="validatePhone()">
+                                <span class="text-danger" id="errorPhone"></span>
                             </div>
                         </form>
-                    </div>
-                    <div class="checkout-widget checkout-contact">
-                        <h5 class="title">Promo Code </h5>
-                        <form class="checkout-contact-form">
-                            <div class="form-group">
-                                <input type="text" placeholder="Please enter promo code">
-                            </div>
-                            <div class="form-group">
-                                <input type="submit" value="Verify" class="custom-button">
-                            </div>
-                        </form>
+
+
+
                     </div>
                     <div class="checkout-widget checkout-card mb-0">
                         <h5 class="title">Payment Option </h5>
@@ -163,19 +159,13 @@
                             <li class="active">
                                 <a href="#0">
                                     <img src="assets/images/payment/card.png" alt="payment">
-                                    <span>Credit Card</span>
+                                    <span>VNPAY</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="#0">
                                     <img src="assets/images/payment/card.png" alt="payment">
-                                    <span>Debit Card</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#0">
-                                    <img src="assets/images/payment/paypal.png" alt="payment">
-                                    <span>paypal</span>
+                                    <span>QR Code</span>
                                 </a>
                             </li>
                         </ul>
@@ -262,7 +252,7 @@
                                 $@(movie?.Showtimes.FirstOrDefault()?.Screen?.ScreenSeats?.Sum(seat => seat.SeatType.BasePrice) ?? 0)
                             </span>
                         </h6>
-                        <a href="#0" class="custom-button back-button">Proceed</a>
+                        <a href="/" class="custom-button back-button">Change </a>
                     </div>
                 </div>
 
@@ -273,5 +263,57 @@
     <script src="assets/js/jquery-3.3.1.min.js"></script>
     <script src="assets/js/bootstrap.min.js"></script>
     <script src="assets/js/main.js"></script>
+  <script>
+    function validateFullName() {
+        let fullName = document.getElementById("FullName").value;
+        let errorSpan = document.getElementById("errorFullName");
+
+        if (!fullName.trim()) {
+            errorSpan.textContent = "Full Name is required";
+            errorSpan.style.color = "red";
+        } else if (fullName.length > 100) {
+            errorSpan.textContent = "Full Name cannot exceed 100 characters";
+            errorSpan.style.color = "red";
+        } else {
+            errorSpan.textContent = "";
+        }
+    }
+
+    function validateEmail() {
+        let email = document.getElementById("Email").value;
+        let errorSpan = document.getElementById("errorEmail");
+             let emailPattern = /^[^@@\s]+@@[^@@\s]+\.[^@@\s]+$/;
+
+        if (!email.trim()) {
+            errorSpan.textContent = "Email is required";
+            errorSpan.style.color = "red";
+        } else if (!emailPattern.test(email)) {
+            errorSpan.textContent = "Invalid Email Address";
+            errorSpan.style.color = "red";
+        } else {
+            errorSpan.textContent = "";
+        }
+    }
+
+    function validatePhone() {
+        let phone = document.getElementById("Phone").value;
+        let errorSpan = document.getElementById("errorPhone");
+        let phonePattern = /^(09|01)[0-9]{8}$/; // Kiểm tra số điện thoại hợp lệ
+
+        if (!phone.trim()) {
+            errorSpan.textContent = "Phone number is required";
+            errorSpan.style.color = "red";
+        } else if (!phonePattern.test(phone)) {
+            errorSpan.textContent = "Phone number must be 10 digits and start with 09 or 01";
+            errorSpan.style.color = "red";
+        } else {
+            errorSpan.textContent = "";
+        }
+    }
+</script>
+
+
+
+
 </body>
 </html>
