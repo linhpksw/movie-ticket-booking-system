@@ -4,7 +4,6 @@ namespace G5_MovieTicketBookingSystem.Services
 {
     public interface IMovieService
     {
-        Task<MovieDto> GetMovieByIdAsync(int id);
-
+        Task<MovieDto?> GetMovieWithShowtimeAndCinemaAsync(int id);
     }
 }
