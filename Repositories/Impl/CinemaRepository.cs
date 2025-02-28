@@ -14,12 +14,12 @@ public class CinemaRepository : ICinemaRepository
 
     public async Task<IEnumerable<Cinema>> GetAllAsync()
     {
-        return await _context.Cinemas.ToListAsync();
+        return await _context.Cinemas.Include(c => c.Screens).ToListAsync();
     }
 
     public async Task<Cinema?> GetByIdAsync(int id)
     {
-        return await _context.Cinemas.FirstOrDefaultAsync(c => c.CinemaId == id);
+        return await _context.Cinemas.Include(c => c.Screens).FirstOrDefaultAsync(c => c.CinemaId == id);
     }
 
     public async Task<Cinema> CreateAsync(Cinema entity)
@@ -49,14 +49,5 @@ public class CinemaRepository : ICinemaRepository
     public async Task<IEnumerable<Cinema>> GetCinemasWithScreensAsync()
     {
         return await _context.Cinemas.Include(c => c.Screens).ToListAsync();
-    }
-
-    public async Task<Cinema?> GetCinemaByMovieIdAsync(int movieId)
-    {
-        return await _context.Cinemas
-            .Include(c => c.Screens)
-            .ThenInclude(s => s.Showtimes)
-            .ThenInclude(st => st.Movie)
-            .FirstOrDefaultAsync(c => c.Screens.Any(s => s.Showtimes.Any(st => st.MovieId == movieId)));
     }
 }

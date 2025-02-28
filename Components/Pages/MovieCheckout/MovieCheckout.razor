@@ -6,7 +6,15 @@
 @inject ISeatLockService SeatLockService
 
 @code {
-    private MovieDto? movie;
+    private MovieDto movie = new MovieDto
+        {
+            Title = "Unknown Movie",
+            Genre = "Unknown Genre",
+            Language = "Unknown Language",
+            Description = "No description available",
+            Showtimes = new List<ShowtimeDto>()
+        };
+
     private string remainingTime = "Loading...";
     private DateTime? lockExpiryTime;
     private DateTime? lockStartTime;
@@ -15,13 +23,18 @@
     {
         try
         {
-            movie = await MovieService.GetMovieWithShowtimeAndCinemaAsync(1);
+            var fetchedMovie = await MovieService.GetMovieWithShowtimeAndCinemaAsync(1);
+            movie = fetchedMovie ?? new MovieDto
+                {
+                    Title = "Unknown Movie",
+                    Genre = "Unknown Genre",
+                    Language = "Unknown Language",
+                    Description = "No description available",
+                    Showtimes = new List<ShowtimeDto>()
+                };
 
-            if (movie != null)
-            {
-                int userId = 1;
-                await CalculateRemainingTime(userId);
-            }
+            int userId = 1;
+            await CalculateRemainingTime(userId);
         }
         catch (Exception ex)
         {
@@ -42,8 +55,12 @@
 
                 if (lockExpiryTime.HasValue && lockStartTime.HasValue)
                 {
-                    var timeRemaining = lockExpiryTime.Value - lockStartTime.Value;
-                    remainingTime = $"{timeRemaining.Minutes:D2}:{timeRemaining.Seconds:D2}";
+                    var timeRemaining = lockExpiryTime.Value - DateTime.UtcNow;
+                    remainingTime = timeRemaining.TotalSeconds > 0 ? $"{timeRemaining.Minutes:D2}:{timeRemaining.Seconds:D2}" : "Expired";
+                }
+                else
+                {
+                    remainingTime = "Expired";
                 }
             }
             else
@@ -58,7 +75,6 @@
         }
     }
 }
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -217,7 +233,16 @@
                             <li>
                                 <h6 class="subtitle">
                                     <span>@movie?.Showtimes.FirstOrDefault()?.Cinema?.CinemaName</span>
-                                    <span> Room: @movie?.Showtimes.FirstOrDefault()?.Screen?.ScreenName</span>
+                                    @if (movie?.Showtimes?.FirstOrDefault()?.ScreenSeat?.Screen?.ScreenName != null)
+                                    {
+                                        <span>Room: @movie.Showtimes.FirstOrDefault().ScreenSeat.Screen.ScreenName</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Room: Not Available</span>
+                                    }
+
+
                                 </h6>
                                 <div class="info">
                                     <span>@movie?.Showtimes.FirstOrDefault()?.ShowDate.ToString("yyyy-MM-dd")</span>
@@ -227,11 +252,10 @@
                             <li>
                                 <h6 class="subtitle">Seats:</h6>
                                 <ul>
-                                    @foreach (var seat in movie?.Showtimes.FirstOrDefault()?.Screen?.ScreenSeats ?? new List<ScreenSeatDto>())
+                                    @if (movie?.Showtimes?.FirstOrDefault()?.ScreenSeat != null)
                                     {
-                                        <li>
-                                            <span>@seat.SeatLabel (@seat.SeatType.SeatTypeName) - $@seat.SeatType.BasePrice</span>
-                                        </li>
+                                        var seat = movie.Showtimes.FirstOrDefault().ScreenSeat;
+                                        <li>@seat.SeatLabel (@seat.SeatType?.SeatTypeName) - $@(seat.SeatType?.BasePrice ?? 0)</li>
                                     }
                                 </ul>
                             </li>
@@ -239,7 +263,7 @@
                                 <h6 class="subtitle mb-0">
                                     <span>Tickets Price</span>
                                     <span>
-                                        $@(movie?.Showtimes.FirstOrDefault()?.Screen?.ScreenSeats?.Sum(seat => seat.SeatType.BasePrice) ?? 0)
+                                        $@(movie?.Showtimes?.FirstOrDefault()?.ScreenSeat?.SeatType?.BasePrice ?? 0)
                                     </span>
                                 </h6>
                             </li>
@@ -249,7 +273,8 @@
                         <h6 class="subtitle">
                             <span>Amount Payable</span>
                             <span>
-                                $@(movie?.Showtimes.FirstOrDefault()?.Screen?.ScreenSeats?.Sum(seat => seat.SeatType.BasePrice) ?? 0)
+                                $@(movie?.Showtimes?.FirstOrDefault()?.ScreenSeat?.SeatType?.BasePrice ?? 0)
+
                             </span>
                         </h6>
                         <a href="/" class="custom-button back-button">Change </a>
@@ -263,54 +288,54 @@
     <script src="assets/js/jquery-3.3.1.min.js"></script>
     <script src="assets/js/bootstrap.min.js"></script>
     <script src="assets/js/main.js"></script>
-  <script>
-    function validateFullName() {
-        let fullName = document.getElementById("FullName").value;
-        let errorSpan = document.getElementById("errorFullName");
+    <script>
+        function validateFullName() {
+            let fullName = document.getElementById("FullName").value;
+            let errorSpan = document.getElementById("errorFullName");
 
-        if (!fullName.trim()) {
-            errorSpan.textContent = "Full Name is required";
-            errorSpan.style.color = "red";
-        } else if (fullName.length > 100) {
-            errorSpan.textContent = "Full Name cannot exceed 100 characters";
-            errorSpan.style.color = "red";
-        } else {
-            errorSpan.textContent = "";
+            if (!fullName.trim()) {
+                errorSpan.textContent = "Full Name is required";
+                errorSpan.style.color = "red";
+            } else if (fullName.length > 100) {
+                errorSpan.textContent = "Full Name cannot exceed 100 characters";
+                errorSpan.style.color = "red";
+            } else {
+                errorSpan.textContent = "";
+            }
         }
-    }
 
-    function validateEmail() {
-        let email = document.getElementById("Email").value;
-        let errorSpan = document.getElementById("errorEmail");
-             let emailPattern = /^[^@@\s]+@@[^@@\s]+\.[^@@\s]+$/;
+        function validateEmail() {
+            let email = document.getElementById("Email").value;
+            let errorSpan = document.getElementById("errorEmail");
+                 let emailPattern = /^[^@@\s]+@@[^@@\s]+\.[^@@\s]+$/;
 
-        if (!email.trim()) {
-            errorSpan.textContent = "Email is required";
-            errorSpan.style.color = "red";
-        } else if (!emailPattern.test(email)) {
-            errorSpan.textContent = "Invalid Email Address";
-            errorSpan.style.color = "red";
-        } else {
-            errorSpan.textContent = "";
+            if (!email.trim()) {
+                errorSpan.textContent = "Email is required";
+                errorSpan.style.color = "red";
+            } else if (!emailPattern.test(email)) {
+                errorSpan.textContent = "Invalid Email Address";
+                errorSpan.style.color = "red";
+            } else {
+                errorSpan.textContent = "";
+            }
         }
-    }
 
-    function validatePhone() {
-        let phone = document.getElementById("Phone").value;
-        let errorSpan = document.getElementById("errorPhone");
-        let phonePattern = /^(09|01)[0-9]{8}$/; // Kiểm tra số điện thoại hợp lệ
+        function validatePhone() {
+            let phone = document.getElementById("Phone").value;
+            let errorSpan = document.getElementById("errorPhone");
+            let phonePattern = /^(09|01)[0-9]{8}$/; // Kiểm tra số điện thoại hợp lệ
 
-        if (!phone.trim()) {
-            errorSpan.textContent = "Phone number is required";
-            errorSpan.style.color = "red";
-        } else if (!phonePattern.test(phone)) {
-            errorSpan.textContent = "Phone number must be 10 digits and start with 09 or 01";
-            errorSpan.style.color = "red";
-        } else {
-            errorSpan.textContent = "";
+            if (!phone.trim()) {
+                errorSpan.textContent = "Phone number is required";
+                errorSpan.style.color = "red";
+            } else if (!phonePattern.test(phone)) {
+                errorSpan.textContent = "Phone number must be 10 digits and start with 09 or 01";
+                errorSpan.style.color = "red";
+            } else {
+                errorSpan.textContent = "";
+            }
         }
-    }
-</script>
+    </script>
 
 
 

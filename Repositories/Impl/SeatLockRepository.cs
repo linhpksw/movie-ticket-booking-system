@@ -33,7 +33,7 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
         public async Task<SeatLock?> GetLatestByMovieIdAsync(int movieId)
         {
             return await _dbContext.SeatLocks
-                .Where(sl => sl.ScreenSeat.Screen.Showtimes.Any(s => s.MovieId == movieId))
+                .Where(sl => sl.ScreenSeat != null && sl.ScreenSeat.Showtimes.Any(s => s.MovieId == movieId))
                 .OrderByDescending(sl => sl.LockStartTime)
                 .FirstOrDefaultAsync();
         }
