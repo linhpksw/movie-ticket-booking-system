@@ -21,6 +21,10 @@ namespace G5_MovieTicketBookingSystem
             builder.Services.AddRazorPages();
             builder.Services.AddServerSideBlazor();
             builder.Services.AddSignalR();
+            builder.Services.AddHttpContextAccessor();
+            builder.Services.AddAntiforgery();
+            builder.Services.AddHttpClient();
+
 
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -32,6 +36,8 @@ namespace G5_MovieTicketBookingSystem
             builder.Services.AddScoped<IShowtimeRepository, ShowtimeRepository>();
             builder.Services.AddScoped<ISeatLockRepository, SeatLockRepository>();
             builder.Services.AddScoped<ISeatLockService, SeatLockService>();
+            builder.Services.AddScoped<IVnPayService, VnPayService>();
+
 
             var app = builder.Build();
 
@@ -44,6 +50,7 @@ namespace G5_MovieTicketBookingSystem
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseAntiforgery();
+        
 
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();

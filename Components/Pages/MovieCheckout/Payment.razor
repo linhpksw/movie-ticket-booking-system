@@ -1,0 +1,33 @@
+﻿@page "/payment"
+@using G5_MovieTicketBookingSystem.Services
+@using G5_MovieTicketBookingSystem.Models.VNPAY
+@inject IVnPayService VnPayService
+@inject NavigationManager Navigation
+@inject IHttpContextAccessor HttpContextAccessor
+@layout MainLayout
+@code {
+    private PaymentInformationModel paymentModel = new()
+        {
+            Name = "Hiếu Tấn",
+            Amount = 500000,
+            OrderDescription = "Thanh toán vé xem phim qua VNPAY",
+            OrderType = "movie_ticket"
+        };
+
+    protected override async Task OnInitializedAsync()
+    {
+        var httpContext = HttpContextAccessor.HttpContext;
+        if (httpContext != null)
+        {
+            var paymentUrl = VnPayService.CreatePaymentUrl(paymentModel, httpContext);
+            if (!string.IsNullOrEmpty(paymentUrl))
+            {
+                Navigation.NavigateTo(paymentUrl, true); // Chuyển hướng đến VNPAY ngay lập tức
+            }
+            else
+            {
+                Console.WriteLine("❌ Lỗi: Không thể tạo URL thanh toán VNPAY.");
+            }
+        }
+    }
+}

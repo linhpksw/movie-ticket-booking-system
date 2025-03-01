@@ -1,0 +1,40 @@
+﻿@page "/payment-success"
+@layout MainLayout
+
+@using G5_MovieTicketBookingSystem.Models.VNPAY
+@inject IHttpContextAccessor HttpContextAccessor
+
+<h3>Chi tiết thanh toán</h3>
+
+@if (paymentInfo != null)
+{
+    <p><strong>Loại đơn hàng:</strong> @paymentInfo.OrderType</p>
+    <p><strong>Số tiền:</strong> @paymentInfo.Amount.ToString("N0") VND</p>
+    <p><strong>Mô tả:</strong> @paymentInfo.OrderDescription</p>
+    <p><strong>Khách hàng:</strong> @paymentInfo.Name</p>
+
+    <a href="/" class="btn btn-primary">Quay lại trang chủ</a>
+}
+else
+{
+    <p>Không tìm thấy thông tin thanh toán.</p>
+}
+
+@code {
+    private PaymentInformationModel? paymentInfo;
+
+    protected override void OnInitialized()
+    {
+        var queryCollection = HttpContextAccessor.HttpContext?.Request.Query;
+        if (queryCollection != null)
+        {
+            paymentInfo = new PaymentInformationModel
+                {
+                    OrderType = queryCollection["vnp_OrderType"],
+                    Amount = Convert.ToDouble(queryCollection["vnp_Amount"]) / 100, // Chia 100 để lấy giá trị thực
+                    OrderDescription = queryCollection["vnp_OrderInfo"],
+                    Name = "Khách hàng"
+                };
+        }
+    }
+}

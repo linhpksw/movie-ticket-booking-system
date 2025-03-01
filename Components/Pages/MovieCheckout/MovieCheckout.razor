@@ -4,9 +4,14 @@
 @using G5_MovieTicketBookingSystem.Services.Impl
 @inject IMovieService MovieService
 @inject ISeatLockService SeatLockService
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@inject IHttpContextAccessor HttpContextAccessor
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+
+
 
 @code {
-    private MovieDto movie = new MovieDto
+    private MovieDto movie = new()
         {
             Title = "Unknown Movie",
             Genre = "Unknown Genre",
@@ -18,6 +23,7 @@
     private string remainingTime = "Loading...";
     private DateTime? lockExpiryTime;
     private DateTime? lockStartTime;
+    private string antiforgeryToken = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -35,6 +41,10 @@
 
             int userId = 1;
             await CalculateRemainingTime(userId);
+
+            // Lấy Anti-Forgery Token
+            var tokens = Antiforgery.GetAndStoreTokens(HttpContextAccessor.HttpContext);
+            antiforgeryToken = tokens.RequestToken;
         }
         catch (Exception ex)
         {
@@ -75,6 +85,7 @@
         }
     }
 }
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -173,53 +184,24 @@
                         <h5 class="title">Payment Option </h5>
                         <ul class="payment-option">
                             <li class="active">
-                                <a href="#0">
-                                    <img src="assets/images/payment/card.png" alt="payment">
-                                    <span>VNPAY</span>
-                                </a>
+                                <button class="btn btn-primary" onclick="redirectToPayment()">Pay with VNPAY</button>
+
+
+
+
+
+
+
                             </li>
-                            <li>
-                                <a href="#0">
-                                    <img src="assets/images/payment/card.png" alt="payment">
-                                    <span>QR Code</span>
-                                </a>
-                            </li>
+
+                            @* <li> *@
+                            @*     <a href="#0"> *@
+                            @*         <img src="assets/images/payment/card.png" alt="payment"> *@
+                            @*         <span>QR Code</span> *@
+                            @*     </a> *@
+                            @* </li> *@
                         </ul>
-                        <h6 class="subtitle">Enter Your Card Details </h6>
-                        <form class="payment-card-form">
-                            <div class="form-group w-100">
-                                <label for="card1">Card Details</label>
-                                <input type="text" id="card1">
-                                <div class="right-icon">
-                                    <i class="flaticon-lock"></i>
-                                </div>
-                            </div>
-                            <div class="form-group w-100">
-                                <label for="card2"> Name on the Card</label>
-                                <input type="text" id="card2">
-                            </div>
-                            <div class="form-group">
-                                <label for="card3">Expiration</label>
-                                <input type="text" id="card3" placeholder="MM/YY">
-                            </div>
-                            <div class="form-group">
-                                <label for="card4">CVV</label>
-                                <input type="text" id="card4" placeholder="CVV">
-                            </div>
-                            <div class="form-group check-group">
-                                <input id="card5" type="checkbox" checked>
-                                <label for="card5">
-                                    <span class="title">QuickPay</span>
-                                    <span class="info">Save this card information to my Boleto  account and make faster payments.</span>
-                                </label>
-                            </div>
-                            <div class="form-group">
-                                <input type="submit" class="custom-button" value="make payment">
-                            </div>
-                        </form>
-                        <p class="notice">
-                            By Clicking "Make Payment" you agree to the <a href="#0">terms and conditions</a>
-                        </p>
+                   
                     </div>
                 </div>
                 <div class="col-lg-4">
@@ -336,6 +318,14 @@
             }
         }
     </script>
+    <script>
+        function redirectToPayment() {
+            window.location.href = "/payment"; // Chuyển hướng sang trang Payment
+        }
+    </script>
+
+
+
 
 
 
