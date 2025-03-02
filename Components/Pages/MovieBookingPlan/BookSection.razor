@@ -7,7 +7,7 @@
                     <img src="assets/images/ticket/city.png" alt="ticket">
                 </div>
                 <span class="type">City</span>
-                <select class="select-bar" @bind="SelectedCity" @onchange="CityChanged">
+                <select class="select-bar" @bind="SelectedCity" @bind:event="onchange">
                     <option value="">Select a city</option>
                     @foreach (var city in cities)
                     {
@@ -22,7 +22,7 @@
                     <img src="assets/images/ticket/date.png" alt="ticket">
                 </div>
                 <span class="type">Date</span>
-                <select class="select-bar" @bind="SelectedDate" @onchange="DateChanged">
+                <select class="select-bar" @bind="SelectedDate" @bind:event="onchange">
                     @foreach (var date in availableDates)
                     {
                         <option value="@date.ToString("yyyy-MM-dd")"
@@ -39,7 +39,7 @@
                     <img src="assets/images/ticket/cinema.png" alt="ticket">
                 </div>
                 <span class="type">Cinema</span>
-                <select class="select-bar" @bind="SelectedCinema" @onchange="CinemaChanged">
+                <select class="select-bar" @bind="SelectedCinema" @bind:event="onchange">
                     <option value="">Select a cinema</option>
                     @foreach (var cinema in cinemas)
                     {
@@ -54,7 +54,7 @@
                     <img src="assets/images/ticket/exp.png" alt="ticket">
                 </div>
                 <span class="type">Experience</span>
-                <select class="select-bar" @bind="SelectedExperience" @onchange="ExperienceChanged">
+                <select class="select-bar" @bind="SelectedExperience" @bind:event="onchange">
                     <option value="">Select an experience</option>
                     @foreach (var experience in experiences)
                     {
@@ -84,31 +84,9 @@
     private string SelectedCinema { get; set; } = string.Empty;
     private string SelectedExperience { get; set; } = string.Empty;
 
-    // Gửi dữ liệu lên component cha
-    private async Task CityChanged(ChangeEventArgs e)
-    {
-        SelectedCity = e.Value?.ToString() ?? "";
-        await OnCitySelected.InvokeAsync(SelectedCity);
-    }
-
-    private async Task DateChanged(ChangeEventArgs e)
-    {
-        if (DateTime.TryParse(e.Value?.ToString(), out var date))
-        {
-            SelectedDate = date;
-            await OnDateSelected.InvokeAsync(SelectedDate);
-        }
-    }
-
-    private async Task CinemaChanged(ChangeEventArgs e)
-    {
-        SelectedCinema = e.Value?.ToString() ?? "";
-        await OnCinemaSelected.InvokeAsync(SelectedCinema);
-    }
-
-    private async Task ExperienceChanged(ChangeEventArgs e)
-    {
-        SelectedExperience = e.Value?.ToString() ?? "";
-        await OnExperienceSelected.InvokeAsync(SelectedExperience);
-    }
+    // Gửi dữ liệu lên component cha khi giá trị thay đổi
+    private async Task CityChanged() => await OnCitySelected.InvokeAsync(SelectedCity);
+    private async Task DateChanged() => await OnDateSelected.InvokeAsync(SelectedDate);
+    private async Task CinemaChanged() => await OnCinemaSelected.InvokeAsync(SelectedCinema);
+    private async Task ExperienceChanged() => await OnExperienceSelected.InvokeAsync(SelectedExperience);
 }

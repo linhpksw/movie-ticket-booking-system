@@ -29,8 +29,13 @@ namespace G5_MovieTicketBookingSystem
             builder.Services.AddScoped<ICinemaService, CinemaService>();
 
             // Inject the ShowtimeRepository and ShowtimeService
-            builder.Services.AddScoped<ICinemaRepository, CinemaRepository>();
-            builder.Services.AddScoped<ICinemaService, CinemaService>();
+            builder.Services.AddScoped<IShowtimeRepository, ShowtimeRepository>();
+            builder.Services.AddScoped<IShowtimeService, ShowtimeService>();
+            // Inject the MovieRepository and MovieService
+            builder.Services.AddScoped<IMovieRepository, MovieRepository>();
+            builder.Services.AddScoped<IMovieService, MovieService>();
+
+            
 
             var app = builder.Build();
 

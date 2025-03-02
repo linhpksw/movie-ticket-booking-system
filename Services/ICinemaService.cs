@@ -11,5 +11,6 @@ namespace G5_MovieTicketBookingSystem.Services
         Task DeleteAsync(int id);
         Task<IEnumerable<string>> GetCitiesAsync();
         Task<IEnumerable<string>> GetCinemasAsync();
+        
     }
 }
