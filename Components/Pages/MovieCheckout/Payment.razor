@@ -4,30 +4,45 @@
 @inject IVnPayService VnPayService
 @inject NavigationManager Navigation
 @inject IHttpContextAccessor HttpContextAccessor
+@inject Microsoft.AspNetCore.Components.NavigationManager UriHelper
 @layout MainLayout
+
 @code {
-    private PaymentInformationModel paymentModel = new()
-        {
-            Name = "Hiếu Tấn",
-            Amount = 500000,
-            OrderDescription = "Thanh toán vé xem phim qua VNPAY",
-            OrderType = "movie_ticket"
-        };
+    private PaymentInformationModel paymentModel = new();
 
     protected override async Task OnInitializedAsync()
     {
-        var httpContext = HttpContextAccessor.HttpContext;
-        if (httpContext != null)
+        // Lấy dữ liệu từ query parameters
+        var uri = UriHelper.ToAbsoluteUri(UriHelper.Uri.ToString());
+        var queryParams = System.Web.HttpUtility.ParseQueryString(uri.Query);
+
+        // Cập nhật paymentModel từ query parameters
+        paymentModel.OrderType = queryParams["orderType"];
+        paymentModel.Amount = double.TryParse(queryParams["amount"], out double amount) ? amount : 0;
+        paymentModel.OrderDescription = queryParams["orderDescription"];
+        paymentModel.Name = queryParams["name"];
+
+        // Kiểm tra nếu dữ liệu đầy đủ
+        if (!string.IsNullOrEmpty(paymentModel.OrderType) && paymentModel.Amount > 0)
         {
-            var paymentUrl = VnPayService.CreatePaymentUrl(paymentModel, httpContext);
-            if (!string.IsNullOrEmpty(paymentUrl))
+            var httpContext = HttpContextAccessor.HttpContext;
+            if (httpContext != null)
             {
-                Navigation.NavigateTo(paymentUrl, true); // Chuyển hướng đến VNPAY ngay lập tức
+                var paymentUrl = VnPayService.CreatePaymentUrl(paymentModel, httpContext);
+                if (!string.IsNullOrEmpty(paymentUrl))
+                {
+                    // Chuyển hướng ngay lập tức tới URL thanh toán
+                    Navigation.NavigateTo(paymentUrl, true);
+                }
+                else
+                {
+                    Console.WriteLine("❌ Lỗi: Không thể tạo URL thanh toán VNPAY.");
+                }
             }
-            else
-            {
-                Console.WriteLine("❌ Lỗi: Không thể tạo URL thanh toán VNPAY.");
-            }
+        }
+        else
+        {
+            Console.WriteLine("❌ Lỗi: Dữ liệu thanh toán không hợp lệ.");
         }
     }
 }

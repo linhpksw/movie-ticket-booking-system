@@ -157,52 +157,30 @@
                             <i class="fas fa-user"></i><span>Sign in</span>
                         </a>
                     </div>
-                    <div class="checkout-widget checkout-contact">
-                        <h5 class="title">Share your Contact Details </h5>
-                        <form class="checkout-contact-form">
-                            <div class="form-group">
-                                <label for="FullName"><i class="fas fa-user"></i> Full Name</label>
-                                <input type="text" id="FullName" name="FullName" placeholder="Enter your full name" class="form-control" oninput="validateFullName()">
-                                <span class="text-danger" id="errorFullName"></span>
-                            </div>
-                            <div class="form-group">
-                                <label for="Email"><i class="fas fa-envelope"></i> Email</label>
-                                <input type="email" id="Email" name="Email" placeholder="Enter your email" class="form-control" oninput="validateEmail()">
-                                <span class="text-danger" id="errorEmail"></span>
-                            </div>
-                            <div class="form-group">
-                                <label for="Phone"><i class="fas fa-phone"></i> Phone Number</label>
-                                <input type="text" id="Phone" name="Phone" placeholder="Enter your phone number" class="form-control" oninput="validatePhone()">
-                                <span class="text-danger" id="errorPhone"></span>
-                            </div>
-                        </form>
+                    <form class="checkout-contact-form" onsubmit="event.preventDefault(); redirectToPayment();">
+                        <div class="form-group">
+                            <label for="FullName"><i class="fas fa-user"></i> Full Name</label>
+                            <input type="text" id="FullName" name="FullName" placeholder="Enter your full name" class="form-control" oninput="validateFullName()">
+                            <span class="text-danger" id="errorFullName"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="Email"><i class="fas fa-envelope"></i> Email</label>
+                            <input type="email" id="Email" name="Email" placeholder="Enter your email" class="form-control" oninput="validateEmail()">
+                            <span class="text-danger" id="errorEmail"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="Phone"><i class="fas fa-phone"></i> Phone Number</label>
+                            <input type="text" id="Phone" name="Phone" placeholder="Enter your phone number" class="form-control" oninput="validatePhone()">
+                            <span class="text-danger" id="errorPhone"></span>
+                        </div>
 
-
-
-                    </div>
-                    <div class="checkout-widget checkout-card mb-0">
-                        <h5 class="title">Payment Option </h5>
-                        <ul class="payment-option">
-                            <li class="active">
-                                <button class="btn btn-primary" onclick="redirectToPayment()">Pay with VNPAY</button>
+                        <!-- Nút thanh toán -->
+                        <button class="btn btn-primary" onclick="redirectToPayment()">Pay with VNPAY</button>
+                    </form>
 
 
 
 
-
-
-
-                            </li>
-
-                            @* <li> *@
-                            @*     <a href="#0"> *@
-                            @*         <img src="assets/images/payment/card.png" alt="payment"> *@
-                            @*         <span>QR Code</span> *@
-                            @*     </a> *@
-                            @* </li> *@
-                        </ul>
-                   
-                    </div>
                 </div>
                 <div class="col-lg-4">
                     <div class="booking-summery bg-one">
@@ -320,9 +298,41 @@
     </script>
     <script>
         function redirectToPayment() {
-            window.location.href = "/payment"; // Chuyển hướng sang trang Payment
+            // Lấy giá trị từ các trường input trong form
+            const fullName = document.getElementById('FullName').value;
+
+            // Lấy các giá trị động từ Razor
+            const amount = @(movie?.Showtimes?.FirstOrDefault()?.ScreenSeat?.SeatType?.BasePrice ?? 0); // Lấy giá trị động cho amount
+            const movieTitle = `@movie?.Title`;  // Tiêu đề phim
+            const seatLabel = `@movie?.Showtimes?.FirstOrDefault()?.ScreenSeat?.SeatLabel`;  // Nhãn ghế
+            const cinemaName = `@movie?.Showtimes?.FirstOrDefault()?.Cinema?.CinemaName`;  // Tên rạp
+
+            // Cập nhật đối tượng paymentInfo
+            const paymentInfo = {
+                orderType: "movie_ticket",  // Loại đơn hàng
+                amount: amount,  // Số tiền thanh toán
+                orderDescription: `Thanh toán vé xem phim ${movieTitle} tại ${cinemaName} - Ghế: ${seatLabel}`,  // Mô tả đơn hàng
+                name: fullName,  // Tên người thanh toán
+            };
+
+            // Kiểm tra xem paymentInfo có hợp lệ không
+            if (!paymentInfo || !paymentInfo.orderType || !paymentInfo.amount) {
+                console.error("Thông tin thanh toán không hợp lệ", paymentInfo);
+                return;
+            }
+
+            // Tạo URL với các tham số query
+            const url = new URL("/payment", window.location.origin);
+            url.searchParams.append("orderType", paymentInfo.orderType);
+            url.searchParams.append("amount", paymentInfo.amount);
+            url.searchParams.append("orderDescription", paymentInfo.orderDescription);
+            url.searchParams.append("name", paymentInfo.name);
+
+            // Chuyển hướng người dùng sang trang thanh toán
+            window.location.href = url.toString();
         }
     </script>
+
 
 
 
