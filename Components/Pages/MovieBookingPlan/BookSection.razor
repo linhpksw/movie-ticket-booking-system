@@ -1,0 +1,114 @@
+﻿<div class="book-section bg-one">
+    <div class="container">
+        <form class="ticket-search-form two">
+            <!-- Chọn Thành Phố -->
+            <div class="form-group">
+                <div class="thumb">
+                    <img src="assets/images/ticket/city.png" alt="ticket">
+                </div>
+                <span class="type">City</span>
+                <select class="select-bar" @bind="SelectedCity" @onchange="CityChanged">
+                    <option value="">Select a city</option>
+                    @foreach (var city in cities)
+                    {
+                        <option value="@city">@city</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Chọn Ngày -->
+            <div class="form-group">
+                <div class="thumb">
+                    <img src="assets/images/ticket/date.png" alt="ticket">
+                </div>
+                <span class="type">Date</span>
+                <select class="select-bar" @bind="SelectedDate" @onchange="DateChanged">
+                    @foreach (var date in availableDates)
+                    {
+                        <option value="@date.ToString("yyyy-MM-dd")"
+                                selected="@(date.Date == DateTime.Today)">
+                            @date.ToString("dd/MM/yyyy")
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <!-- Chọn Rạp -->
+            <div class="form-group">
+                <div class="thumb">
+                    <img src="assets/images/ticket/cinema.png" alt="ticket">
+                </div>
+                <span class="type">Cinema</span>
+                <select class="select-bar" @bind="SelectedCinema" @onchange="CinemaChanged">
+                    <option value="">Select a cinema</option>
+                    @foreach (var cinema in cinemas)
+                    {
+                        <option value="@cinema">@cinema</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Chọn Trải Nghiệm -->
+            <div class="form-group">
+                <div class="thumb">
+                    <img src="assets/images/ticket/exp.png" alt="ticket">
+                </div>
+                <span class="type">Experience</span>
+                <select class="select-bar" @bind="SelectedExperience" @onchange="ExperienceChanged">
+                    <option value="">Select an experience</option>
+                    @foreach (var experience in experiences)
+                    {
+                        <option value="@experience">@experience</option>
+                    }
+                </select>
+            </div>
+        </form>
+    </div>
+</div>
+
+@code {
+    // Lấy dữ liệu từ component cha
+    [Parameter] public IEnumerable<string> cities { get; set; } = Array.Empty<string>();
+    [Parameter] public IEnumerable<DateTime> availableDates { get; set; } = Array.Empty<DateTime>();
+    [Parameter] public IEnumerable<string> cinemas { get; set; } = Array.Empty<string>();
+    [Parameter] public IEnumerable<string> experiences { get; set; } = Array.Empty<string>();
+
+    // Truyền dữ liệu về component cha
+    [Parameter] public EventCallback<string> OnCitySelected { get; set; }
+    [Parameter] public EventCallback<DateTime> OnDateSelected { get; set; }
+    [Parameter] public EventCallback<string> OnCinemaSelected { get; set; }
+    [Parameter] public EventCallback<string> OnExperienceSelected { get; set; }
+
+    private string SelectedCity { get; set; } = string.Empty;
+    private DateTime SelectedDate { get; set; } = DateTime.Today;
+    private string SelectedCinema { get; set; } = string.Empty;
+    private string SelectedExperience { get; set; } = string.Empty;
+
+    // Gửi dữ liệu lên component cha
+    private async Task CityChanged(ChangeEventArgs e)
+    {
+        SelectedCity = e.Value?.ToString() ?? "";
+        await OnCitySelected.InvokeAsync(SelectedCity);
+    }
+
+    private async Task DateChanged(ChangeEventArgs e)
+    {
+        if (DateTime.TryParse(e.Value?.ToString(), out var date))
+        {
+            SelectedDate = date;
+            await OnDateSelected.InvokeAsync(SelectedDate);
+        }
+    }
+
+    private async Task CinemaChanged(ChangeEventArgs e)
+    {
+        SelectedCinema = e.Value?.ToString() ?? "";
+        await OnCinemaSelected.InvokeAsync(SelectedCinema);
+    }
+
+    private async Task ExperienceChanged(ChangeEventArgs e)
+    {
+        SelectedExperience = e.Value?.ToString() ?? "";
+        await OnExperienceSelected.InvokeAsync(SelectedExperience);
+    }
+}

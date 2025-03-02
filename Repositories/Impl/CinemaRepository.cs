@@ -1,5 +1,4 @@
-﻿
-using G5_MovieTicketBookingSystem.Data;
+﻿using G5_MovieTicketBookingSystem.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace G5_MovieTicketBookingSystem.Repositories.Impl
@@ -47,6 +46,24 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
                 _dbContext.Cinemas.Remove(cinema);
                 await _dbContext.SaveChangesAsync();
             }
+        }
+
+        public async Task<IEnumerable<string>> GetAllCitiesAsync()
+        {
+            return await _dbContext.Cinemas
+                .Select(c => c.City)
+                .Distinct()
+                .OrderBy(c => c)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<string>> GetAllCinemaAsync()
+        {
+            return await _dbContext.Cinemas
+                .Select(c => c.CinemaName)
+                .Distinct()
+                .OrderBy(c => c)
+                .ToListAsync();
         }
     }
 }

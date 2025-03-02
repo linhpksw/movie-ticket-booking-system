@@ -89,5 +89,30 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
             await _cinemaRepository.DeleteAsync(id);
             _logger.LogInformation("Deleted Cinema with ID {CinemaId}", id);
         }
+
+        public async Task<IEnumerable<string>> GetCitiesAsync()
+        {
+            try
+            {
+                return await _cinemaRepository.GetAllCitiesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting cities list");
+                throw;
+            }
+        }
+        public async Task<IEnumerable<string>> GetCinemasAsync()
+        {
+            try
+            {
+                return await _cinemaRepository.GetAllCinemaAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting cinemas list");
+                throw;
+            }
+        }
     }
 }

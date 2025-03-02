@@ -7,5 +7,7 @@
         Task<Cinema> CreateAsync(Cinema entity);
         Task<Cinema> UpdateAsync(Cinema entity);
         Task DeleteAsync(int id);
+        Task<IEnumerable<string>> GetAllCitiesAsync();
+        Task<IEnumerable<string>> GetAllCinemaAsync();
     }
 }

@@ -9,5 +9,7 @@ namespace G5_MovieTicketBookingSystem.Services
         Task<CinemaDto> CreateAsync(CinemaDto dto);
         Task<CinemaDto> UpdateAsync(int id, CinemaDto dto);
         Task DeleteAsync(int id);
+        Task<IEnumerable<string>> GetCitiesAsync();
+        Task<IEnumerable<string>> GetCinemasAsync();
     }
 }
