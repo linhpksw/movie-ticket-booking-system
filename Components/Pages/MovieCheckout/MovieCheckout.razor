@@ -11,6 +11,8 @@
 
 
 @code {
+    private int? userId ;  
+
     private MovieDto movie = new()
         {
             Title = "Unknown Movie",
@@ -39,7 +41,7 @@
                     Showtimes = new List<ShowtimeDto>()
                 };
 
-            int userId = 1;
+            userId = 1;
             await CalculateRemainingTime(userId);
 
             // Lấy Anti-Forgery Token
@@ -52,7 +54,7 @@
         }
     }
 
-    private async Task CalculateRemainingTime(int userId)
+    private async Task CalculateRemainingTime(int? userId)
     {
         try
         {
@@ -148,15 +150,19 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-8">
-                    <div class="checkout-widget d-flex flex-wrap align-items-center justify-cotent-between">
-                        <div class="title-area">
-                            <h5 class="title">Already a Boleto  Member?</h5>
-                            <p>Sign in to earn points and make booking easier!</p>
+                    @if (@userId == null)
+                    {
+                        <div class="checkout-widget d-flex flex-wrap align-items-center justify-cotent-between">
+                            <div class="title-area">
+                                <h5 class="title">Already a Boleto Member?</h5>
+                                <p>Sign in to earn points and make booking easier!</p>
+                            </div>
+                            <a href="#0" class="sign-in-area">
+                                <i class="fas fa-user"></i><span>Sign in</span>
+                            </a>
                         </div>
-                        <a href="#0" class="sign-in-area">
-                            <i class="fas fa-user"></i><span>Sign in</span>
-                        </a>
-                    </div>
+                    }
+
                     <form class="checkout-contact-form" onsubmit="event.preventDefault(); redirectToPayment();">
                         <div class="form-group">
                             <label for="FullName"><i class="fas fa-user"></i> Full Name</label>

@@ -2,5 +2,5 @@
 
 public interface ISeatLockService
 {
-    Task<SeatLock?> GetLatestSeatLockByUserIdAsync(int userId);
+    Task<SeatLock?> GetLatestSeatLockByUserIdAsync(int? userId);
 }

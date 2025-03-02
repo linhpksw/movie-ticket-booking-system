@@ -14,7 +14,7 @@ public class SeatLockService : ISeatLockService
         _hubContext = hubContext;
     }
 
-    public async Task<SeatLock?> GetLatestSeatLockByUserIdAsync(int userId)
+    public async Task<SeatLock?> GetLatestSeatLockByUserIdAsync(int? userId)
     {
         var seatLock = await _seatLockRepository.GetLatestByUserIdAsync(userId);
         return seatLock;

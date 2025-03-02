@@ -22,7 +22,7 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<SeatLock?> GetLatestByUserIdAsync(int userId)
+        public async Task<SeatLock?> GetLatestByUserIdAsync(int? userId)
         {
             return await _dbContext.SeatLocks
                 .Where(sl => sl.UserId == userId)
