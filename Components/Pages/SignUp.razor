@@ -1,0 +1,97 @@
+﻿@page "/SignUp"
+@using System.ComponentModel.DataAnnotations
+
+<h3>Sign Up</h3>
+<div class="preloader">
+    <div class="preloader-inner">
+        <div class="preloader-icon">
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+</div>
+<section class="account-section bg_img" data-background="./assets/images/account/account-bg.jpg">
+    <div class="container">
+        <div class="padding-top padding-bottom">
+            <div class="account-area">
+                <div class="section-header-3">
+                    <span class="cate">welcome</span>
+                    <h2 class="title">to Boleto </h2>
+                </div>
+                <EditForm Model="@signUpModel" OnValidSubmit="@HandleSignUp">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <div class="form-group">
+                        <label for="email1">Email<span>*</span></label>
+                        <InputText id="email1" class="form-control" @bind-Value="signUpModel.Email" placeholder="Enter Your Email" />
+                        <ValidationMessage For="@(() => signUpModel.Email)" />
+                    </div>
+                    <div class="form-group">
+                        <label for="pass1">Password<span>*</span></label>
+                        <InputText id="pass1" type="password" class="form-control" @bind-Value="signUpModel.Password" placeholder="Password" />
+                        <ValidationMessage For="@(() => signUpModel.Password)" />
+                    </div>
+                    <div class="form-group">
+                        <label for="pass2">Confirm Password<span>*</span></label>
+                        <InputText id="pass2" type="password" class="form-control" @bind-Value="signUpModel.ConfirmPassword" placeholder="Password" />
+                        <ValidationMessage For="@(() => signUpModel.ConfirmPassword)" />
+                    </div>
+                    <div class="form-group checkgroup">
+                        <InputCheckbox id="bal" @bind-Value="signUpModel.AgreeToTerms" />
+                        <label for="bal">I agree to the <a href="#0">Terms, Privacy Policy</a> and <a href="#0">Fees</a></label>
+                        <ValidationMessage For="@(() => signUpModel.AgreeToTerms)" />
+                    </div>
+                    <div class="form-group text-center">
+                        <button type="submit">Sign Up</button>
+                    </div>
+                </EditForm>
+                <div class="option">
+                    Already have an account? <a href="/Login">Login</a>
+                </div>
+                <div class="or"><span>Or</span></div>
+                <ul class="social-icons">
+                    <li><a href="#0"><i class="fab fa-facebook-f"></i></a></li>
+                    <li><a href="#0" class="active"><i class="fab fa-twitter"></i></a></li>
+                    <li><a href="#0"><i class="fab fa-google"></i></a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+@code {
+    // Model để lưu trữ dữ liệu từ form
+    private SignUpModel signUpModel = new();
+
+    // Class định nghĩa các trường dữ liệu và validation
+    public class SignUpModel
+    {
+        [Required(ErrorMessage = "Email is required")]
+        [EmailAddress(ErrorMessage = "Invalid email format")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Password is required")]
+        [StringLength(100, MinimumLength = 6, ErrorMessage = "Password must be at least 6 characters long")]
+        public string Password { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Please confirm your password")]
+        [Compare("Password", ErrorMessage = "Passwords do not match")]
+        public string ConfirmPassword { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "You must agree to the terms")]
+        public bool AgreeToTerms { get; set; }
+    }
+
+    // Xử lý khi form được submit
+    private void HandleSignUp()
+    {
+        // Ở đây bạn có thể truy cập dữ liệu từ signUpModel
+        Console.WriteLine($"Email: {signUpModel.Email}");
+        Console.WriteLine($"Password: {signUpModel.Password}");
+        Console.WriteLine($"Confirm Password: {signUpModel.ConfirmPassword}");
+        Console.WriteLine($"Agreed to Terms: {signUpModel.AgreeToTerms}");
+
+        // Thêm logic của bạn, ví dụ: gọi API để đăng ký người dùng
+    }
+}
