@@ -51,6 +51,9 @@ public class Program
         builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddScoped<IScreenSeatService, ScreenSeatService>();
 
+        // Đăng ký thêm IOrderItemService và OrderItemService
+        builder.Services.AddScoped<IOrderItemService, OrderItemService>();
+
         var app = builder.Build();
 
         // Cấu hình Middleware

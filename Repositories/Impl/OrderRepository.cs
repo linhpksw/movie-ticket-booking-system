@@ -12,6 +12,15 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
             _context = context;
         }
 
+        public async Task<Order> GetLatestOrderByUserIdAsync(int userId)
+        {
+            return await _context.Orders
+                .Where(o => o.UserId == userId)
+                .Include(o => o.OrderItems)
+                .OrderByDescending(o => o.OrderTimestamp)  // Hoặc bạn có thể sử dụng OrderId tùy theo trường hợp
+                .FirstOrDefaultAsync();
+        }
+
         public async Task<Order> GetOrderByIdAsync(int orderId)
         {
             return await _context.Orders

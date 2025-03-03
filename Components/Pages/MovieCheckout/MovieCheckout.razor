@@ -193,7 +193,6 @@
                             <input type="text" id="Phone" name="Phone" placeholder="Enter your phone number" class="form-control" oninput="validatePhone()">
                             <span class="text-danger" id="errorPhone"></span>
                         </div>
-
                     </form>
                     <button type="button" onclick="redirectToPayment()" class="btn btn-primary">Pay with VNPAY</button>
                 </div>
@@ -313,16 +312,18 @@
     </script>
 
     <script>
-        // Hàm chuyển hướng sau khi thanh toán
          function redirectToPayment() {
             // Lấy giá trị từ các trường input trong form
             const fullName = document.getElementById('FullName').value;
 
             // Lấy các giá trị động từ Razor
-            const amount = @(movie?.Showtimes?.FirstOrDefault()?.ScreenSeat?.SeatType?.BasePrice ?? 0); // Lấy giá trị động cho amount
-            const movieTitle = `@movie?.Title`;  // Tiêu đề phim
-            const seatLabel = `@movie?.Showtimes?.FirstOrDefault()?.ScreenSeat?.SeatLabel`;  // Nhãn ghế
-            const cinemaName = `@movie?.Showtimes?.FirstOrDefault()?.Cinema?.CinemaName`;  // Tên rạp
+              const amount = @(movie?.Showtimes?.FirstOrDefault()?.ScreenSeat?.SeatType?.BasePrice ?? 0);
+            const movieTitle = `@movie?.Title`;
+            const seatLabel = `@movie?.Showtimes?.FirstOrDefault()?.ScreenSeat?.SeatLabel`;
+            const cinemaName = `@movie?.Showtimes?.FirstOrDefault()?.Cinema?.CinemaName`;
+            const userId = @userId;
+            const screenSeatId = `@movie?.Showtimes?.FirstOrDefault()?.ScreenSeat?.ScreenSeatId`; // Đúng tên thuộc tính
+
 
             // Cập nhật đối tượng paymentInfo
             const paymentInfo = {
@@ -337,16 +338,35 @@
                 console.error("Thông tin thanh toán không hợp lệ", paymentInfo);
                 return;
             }
-
+                const orderItem = {
+                orderItemId: 123, 
+                orderId: 456, 
+                movieTitle: movieTitle,
+                seatLabel: seatLabel,
+                cinemaName: cinemaName,
+                fullName: fullName,
+                amount: amount,
+                screenSeatId: screenSeatId, 
+                userId: userId
+            };
             // Tạo URL với các tham số query
-            const url = new URL("/payment", window.location.origin);
-            url.searchParams.append("orderType", paymentInfo.orderType);
+             const url = new URL("/payment", window.location.origin);
+              url.searchParams.append("orderType", paymentInfo.orderType);
             url.searchParams.append("amount", paymentInfo.amount);
             url.searchParams.append("orderDescription", paymentInfo.orderDescription);
             url.searchParams.append("name", paymentInfo.name);
+          url.searchParams.append("orderItemId", orderItem.orderItemId);
+        url.searchParams.append("orderId", orderItem.orderId);
+        url.searchParams.append("movieTitle", orderItem.movieTitle);
+        url.searchParams.append("seatLabel", orderItem.seatLabel);
+        url.searchParams.append("cinemaName", orderItem.cinemaName);
+        url.searchParams.append("fullName", orderItem.fullName);
+        url.searchParams.append("screenSeatId", orderItem.screenSeatId);
+        url.searchParams.append("userId", orderItem.userId);
             // Chuyển hướng người dùng sang trang thanh toán
             window.location.href = url.toString();
         }
+
     </script>
 
 </body>

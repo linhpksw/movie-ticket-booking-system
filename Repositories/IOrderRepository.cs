@@ -4,6 +4,7 @@
     {
         Task<Order> GetOrderByIdAsync(int orderId);
         Task AddOrderAsync(Order order);
-      
+
+        Task<Order> GetLatestOrderByUserIdAsync(int userId);
     }
 }

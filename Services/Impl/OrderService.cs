@@ -47,30 +47,30 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
             await using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                // 🔹 Kiểm tra UserId có hợp lệ không
+                // Kiểm tra UserId có hợp lệ không
                 var userExists = await _context.Users.AnyAsync(u => u.UserId == order.UserId);
                 if (!userExists)
                 {
                     throw new Exception("❌ User không tồn tại! Vui lòng kiểm tra lại.");
                 }
 
-                // 🔹 1. Thêm Order vào database trước
+                // Thêm Order vào database trước
                 _context.Orders.Add(order);
                 await _context.SaveChangesAsync(); // Lưu để có OrderId
 
                 Console.WriteLine($"✅ Order đã tạo! Order ID: {order.OrderId}");
 
-                // 🔹 2. Cập nhật OrderId cho OrderItems
-                foreach (var orderItem in orderItems)
-                {
-                    orderItem.OrderId = order.OrderId; // Gán lại OrderId chính xác
-                    orderItem.Order = order;
-                    _context.OrderItems.Add(orderItem);
-                }
+                // Cập nhật OrderId cho OrderItems
+                //foreach (var orderItem in orderItems)
+                //{
+                //    orderItem.OrderId = order.OrderId; // Gán lại OrderId chính xác
+                //    orderItem.Order = order;
+                //    _context.OrderItems.Add(orderItem);
+                //}
 
-                // 🔹 3. Lưu OrderItems vào DB
-                await _context.SaveChangesAsync();
-                await transaction.CommitAsync(); // Commit transaction
+                //// Lưu OrderItems vào DB
+                //await _context.SaveChangesAsync();
+                //await transaction.CommitAsync(); // Commit transaction
 
                 Console.WriteLine("✅ OrderItems đã thêm thành công!");
                 return true;
@@ -83,6 +83,10 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
             }
         }
 
-
+        // Thêm phương thức mới lấy đơn hàng cuối cùng của người dùng
+        public async Task<Order> GetLatestOrderByUserIdAsync(int userId)
+        {
+            return await _orderRepository.GetLatestOrderByUserIdAsync(userId);
+        }
     }
 }
