@@ -3,6 +3,9 @@
 
 @using G5_MovieTicketBookingSystem.Models.VNPAY
 @inject IHttpContextAccessor HttpContextAccessor
+@inject IOrderService OrderService
+@inject ITransactionLogService TransactionLogService
+
 
 <h3>Chi tiết thanh toán</h3>
 
@@ -22,8 +25,11 @@ else
 
 @code {
     private PaymentInformationModel? paymentInfo;
-
-    protected override void OnInitialized()
+    private int? userId;
+    private TransactionLog? transactionLog;
+    private String paymentStatus;
+    // Chuyển OnInitialized thành OnInitializedAsync vì chúng ta đang sử dụng các phương thức bất đồng bộ.
+    protected override async Task OnInitializedAsync()
     {
         var queryCollection = HttpContextAccessor.HttpContext?.Request.Query;
         if (queryCollection != null)
@@ -32,12 +38,37 @@ else
             {
                 string orderInfo = queryCollection["vnp_OrderInfo"];
                 string name = "Khách hàng";
+                string statusOrder = queryCollection["vnp_TransactionStatus"];
+                userId = 1; // Giả sử bạn sử dụng userId = 1 cho mục đích này, thay đổi nếu cần thiết.
 
-                // Tách tên khách hàng từ `vnp_OrderInfo`
+                Order curOrder = await OrderService.GetLatestOrderByUserIdAsync(userId.Value);
+                // Gọi phương thức UpdateOrderAfterPayment để cập nhật trạng thái đơn hàng sau khi thanh toán.
+                await UpdateOrderAfterPayment(curOrder.OrderId,statusOrder);
+
                 if (!string.IsNullOrEmpty(orderInfo) && orderInfo.Contains("-"))
                 {
                     name = orderInfo.Split("-")[0].Trim();
                 }
+                if (statusOrder == "00")
+                {
+                    paymentStatus ="Success";
+                }
+                else
+                {
+                    paymentStatus = "Failed"; 
+                }
+                //add transaction log
+                TransactionLog transactionLog = new TransactionLog
+                    {
+                        OrderId = curOrder.OrderId,
+                        Order = curOrder,
+                        PaymentGateway = "VNPAY", 
+                        PaymentStatus = paymentStatus,
+                        Amount = Convert.ToDecimal(queryCollection["vnp_Amount"]) / 100, 
+                        TransactionTimestamp = DateTime.Now, 
+                        GatewayResponse = queryCollection["vnp_TransactionStatus"] 
+                    };
+                AddTransactionLog(transactionLog);
 
                 paymentInfo = new PaymentInformationModel
                     {
@@ -52,5 +83,24 @@ else
                 Console.WriteLine($"Lỗi xử lý thông tin thanh toán: {ex.Message}");
             }
         }
+    }
+
+    private async Task UpdateOrderAfterPayment(int OrderId , string statusOrder)
+    {
+     
+       
+            if (statusOrder == "00")
+            {
+                await OrderService.UpdateOrderStatusAsync(OrderId, "Success");
+            }
+            else
+            {
+                await OrderService.UpdateOrderStatusAsync(OrderId, "Failed");
+            }
+       
+    }
+
+    private async Task AddTransactionLog(TransactionLog transactionLog){
+        TransactionLogService.AddTransactionLogAsync(transactionLog);
     }
 }

@@ -12,12 +12,12 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
             _context = context;
         }
 
-        public async Task<Order> GetLatestOrderByUserIdAsync(int userId)
+        public async Task<Order> GetLatestOrderByUserIdAsync(int? userId)
         {
             return await _context.Orders
                 .Where(o => o.UserId == userId)
                 .Include(o => o.OrderItems)
-                .OrderByDescending(o => o.OrderTimestamp)  // Hoặc bạn có thể sử dụng OrderId tùy theo trường hợp
+                .OrderByDescending(o => o.OrderTimestamp)
                 .FirstOrDefaultAsync();
         }
 
@@ -42,5 +42,23 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
                 Console.WriteLine("❌ Order chưa được lưu vào DB!");
             }
         }
+        public async Task UpdateOrderStatusAsync(int orderId, string status)
+        {
+            var order = await _context.Orders
+                .FirstOrDefaultAsync(o => o.OrderId == orderId); 
+
+            if (order != null)
+            {
+                order.OrderStatus = status;
+                await _context.SaveChangesAsync();
+                Console.WriteLine($"✅ Order với Order ID: {orderId} đã được cập nhật trạng thái thành công!");
+            }
+            else
+            {
+                Console.WriteLine($"❌ Không tìm thấy Order với Order ID: {orderId}!");
+            }
+        }
+
+
     }
 }

@@ -34,12 +34,7 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
 
         public async Task UpdateOrderStatusAsync(int orderId, string status)
         {
-            var order = await _orderRepository.GetOrderByIdAsync(orderId);
-            if (order != null)
-            {
-                order.OrderStatus = status;
-                await _context.SaveChangesAsync();
-            }
+            await _orderRepository.UpdateOrderStatusAsync(orderId, status); 
         }
 
         public async Task<bool> CreateOrderWithItemsAsync(Order order, List<OrderItem> orderItems)
@@ -47,46 +42,37 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
             await using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                // Kiểm tra UserId có hợp lệ không
+           
                 var userExists = await _context.Users.AnyAsync(u => u.UserId == order.UserId);
                 if (!userExists)
                 {
                     throw new Exception("❌ User không tồn tại! Vui lòng kiểm tra lại.");
                 }
 
-                // Thêm Order vào database trước
+             
                 _context.Orders.Add(order);
-                await _context.SaveChangesAsync(); // Lưu để có OrderId
+                await _context.SaveChangesAsync(); 
 
                 Console.WriteLine($"✅ Order đã tạo! Order ID: {order.OrderId}");
-
-                // Cập nhật OrderId cho OrderItems
-                //foreach (var orderItem in orderItems)
-                //{
-                //    orderItem.OrderId = order.OrderId; // Gán lại OrderId chính xác
-                //    orderItem.Order = order;
-                //    _context.OrderItems.Add(orderItem);
-                //}
-
-                //// Lưu OrderItems vào DB
-                //await _context.SaveChangesAsync();
-                //await transaction.CommitAsync(); // Commit transaction
 
                 Console.WriteLine("✅ OrderItems đã thêm thành công!");
                 return true;
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync(); // Rollback nếu có lỗi
+                await transaction.RollbackAsync(); 
                 Console.WriteLine($"❌ Lỗi khi tạo Order: {ex.Message}");
                 return false;
             }
         }
 
-        // Thêm phương thức mới lấy đơn hàng cuối cùng của người dùng
-        public async Task<Order> GetLatestOrderByUserIdAsync(int userId)
+        public async Task<Order> GetLatestOrderByUserIdAsync(int? userId)
         {
             return await _orderRepository.GetLatestOrderByUserIdAsync(userId);
         }
+
+     
+     
+
     }
 }
