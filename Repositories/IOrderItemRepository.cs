@@ -3,6 +3,7 @@
     public interface IOrderItemRepository
     {
         Task<OrderItem> AddOrderItemAsync(OrderItem orderItem);
-      
+
+        Task<List<OrderItem>> GetOrderItemsByOrderIdAsync(int orderId);
     }
 }

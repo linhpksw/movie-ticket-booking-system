@@ -297,7 +297,7 @@
         function validatePhone() {
             let phone = document.getElementById("Phone").value;
             let errorSpan = document.getElementById("errorPhone");
-            let phonePattern = /^(09|01)[0-9]{8}$/; // Kiểm tra số điện thoại hợp lệ
+            let phonePattern = /^(09|01)[0-9]{8}$/; 
 
             if (!phone.trim()) {
                 errorSpan.textContent = "Phone number is required";
@@ -313,27 +313,23 @@
 
     <script>
          function redirectToPayment() {
-            // Lấy giá trị từ các trường input trong form
             const fullName = document.getElementById('FullName').value;
 
-            // Lấy các giá trị động từ Razor
               const amount = @(movie?.Showtimes?.FirstOrDefault()?.ScreenSeat?.SeatType?.BasePrice ?? 0);
             const movieTitle = `@movie?.Title`;
             const seatLabel = `@movie?.Showtimes?.FirstOrDefault()?.ScreenSeat?.SeatLabel`;
             const cinemaName = `@movie?.Showtimes?.FirstOrDefault()?.Cinema?.CinemaName`;
             const userId = @userId;
-            const screenSeatId = `@movie?.Showtimes?.FirstOrDefault()?.ScreenSeat?.ScreenSeatId`; // Đúng tên thuộc tính
+            const screenSeatId = `@movie?.Showtimes?.FirstOrDefault()?.ScreenSeat?.ScreenSeatId`; 
 
 
-            // Cập nhật đối tượng paymentInfo
             const paymentInfo = {
-                orderType: "movie_ticket",  // Loại đơn hàng
-                amount: amount,  // Số tiền thanh toán
-                orderDescription: `Thanh toán vé xem phim ${movieTitle} tại ${cinemaName} - Ghế: ${seatLabel}`,  // Mô tả đơn hàng
-                name: fullName,  // Tên người thanh toán
+                orderType: "movie_ticket",  
+                amount: amount,  
+                orderDescription: `Thanh toán vé xem phim ${movieTitle} tại ${cinemaName} - Ghế: ${seatLabel}`, 
+                name: fullName,  
             };
 
-            // Kiểm tra xem paymentInfo có hợp lệ không
             if (!paymentInfo || !paymentInfo.orderType || !paymentInfo.amount) {
                 console.error("Thông tin thanh toán không hợp lệ", paymentInfo);
                 return;
@@ -349,7 +345,6 @@
                 screenSeatId: screenSeatId, 
                 userId: userId
             };
-            // Tạo URL với các tham số query
              const url = new URL("/payment", window.location.origin);
               url.searchParams.append("orderType", paymentInfo.orderType);
             url.searchParams.append("amount", paymentInfo.amount);

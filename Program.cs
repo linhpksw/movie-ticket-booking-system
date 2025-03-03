@@ -42,7 +42,7 @@ public class Program
         builder.Services.AddScoped<IScreenSeatRepository, ScreenSeatRepository>();
         builder.Services.AddScoped<IOrderItemRepository, OrderItemRepository>();
         builder.Services.AddScoped<ITransactionLogRepository, TransactionLogRepository>();
-
+        builder.Services.AddScoped<ITicketRepository, TicketRepository>();
         // Đăng ký Service (Business Logic Layer)
         builder.Services.AddScoped<ICinemaService, CinemaService>();
         builder.Services.AddScoped<IMovieService, MovieService>();
@@ -52,8 +52,8 @@ public class Program
         builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddScoped<IScreenSeatService, ScreenSeatService>();
         builder.Services.AddScoped<ITransactionLogService, TransactionLogService>();
-        // Đăng ký thêm IOrderItemService và OrderItemService
         builder.Services.AddScoped<IOrderItemService, OrderItemService>();
+        builder.Services.AddScoped<ITicketService, TicketService>();
 
         var app = builder.Build();
 

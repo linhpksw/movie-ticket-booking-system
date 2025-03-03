@@ -1,8 +1,9 @@
 ﻿using G5_MovieTicketBookingSystem.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace G5_MovieTicketBookingSystem.Repositories.Impl
 {
-    public class OrderItemRepository :IOrderItemRepository
+    public class OrderItemRepository : IOrderItemRepository
     {
         private readonly AppDbContext _context;
 
@@ -18,6 +19,11 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
             return orderItem;
         }
 
-
+        public async Task<List<OrderItem>> GetOrderItemsByOrderIdAsync(int orderId)
+        {
+            return await _context.OrderItems
+                .Where(oi => oi.OrderId == orderId)
+                .ToListAsync(); 
+        }
     }
 }

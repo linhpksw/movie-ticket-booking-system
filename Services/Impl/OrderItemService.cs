@@ -2,7 +2,7 @@
 
 namespace G5_MovieTicketBookingSystem.Services.Impl
 {
-    public class OrderItemService :IOrderItemService
+    public class OrderItemService : IOrderItemService
     {
         private readonly IOrderItemRepository _orderItemRepository;
 
@@ -14,6 +14,11 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
         public async Task<OrderItem> AddOrderItemAsync(OrderItem orderItem)
         {
             return await _orderItemRepository.AddOrderItemAsync(orderItem);
+        }
+
+        public async Task<List<OrderItem>> GetOrderItemsByOrderIdAsync(int orderId)
+        {
+            return await _orderItemRepository.GetOrderItemsByOrderIdAsync(orderId);
         }
     }
 }

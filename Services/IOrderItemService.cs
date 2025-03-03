@@ -3,5 +3,7 @@
     public interface IOrderItemService
     {
         Task<OrderItem> AddOrderItemAsync(OrderItem orderItem);
+
+        Task<List<OrderItem>> GetOrderItemsByOrderIdAsync(int orderId);
     }
 }

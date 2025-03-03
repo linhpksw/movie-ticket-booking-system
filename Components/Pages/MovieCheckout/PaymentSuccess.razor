@@ -5,8 +5,8 @@
 @inject IHttpContextAccessor HttpContextAccessor
 @inject IOrderService OrderService
 @inject ITransactionLogService TransactionLogService
-
-
+@inject IOrderItemService OrderItemService
+@inject ITicketService TicketService
 <h3>Chi tiết thanh toán</h3>
 
 @if (paymentInfo != null)
@@ -27,8 +27,8 @@ else
     private PaymentInformationModel? paymentInfo;
     private int? userId;
     private TransactionLog? transactionLog;
+    private Ticket? ticket;
     private String paymentStatus;
-    // Chuyển OnInitialized thành OnInitializedAsync vì chúng ta đang sử dụng các phương thức bất đồng bộ.
     protected override async Task OnInitializedAsync()
     {
         var queryCollection = HttpContextAccessor.HttpContext?.Request.Query;
@@ -39,7 +39,7 @@ else
                 string orderInfo = queryCollection["vnp_OrderInfo"];
                 string name = "Khách hàng";
                 string statusOrder = queryCollection["vnp_TransactionStatus"];
-                userId = 1; // Giả sử bạn sử dụng userId = 1 cho mục đích này, thay đổi nếu cần thiết.
+                userId = 1; 
 
                 Order curOrder = await OrderService.GetLatestOrderByUserIdAsync(userId.Value);
                 // Gọi phương thức UpdateOrderAfterPayment để cập nhật trạng thái đơn hàng sau khi thanh toán.
@@ -51,7 +51,7 @@ else
                 }
                 if (statusOrder == "00")
                 {
-                    paymentStatus ="Success";
+                    paymentStatus ="Paid";
                 }
                 else
                 {
@@ -69,6 +69,28 @@ else
                         GatewayResponse = queryCollection["vnp_TransactionStatus"] 
                     };
                 AddTransactionLog(transactionLog);
+
+                //add ticket
+                if (statusOrder == "00")
+                {
+                List<OrderItem> orderItemList = await OrderItemService.GetOrderItemsByOrderIdAsync(curOrder.OrderId);
+                foreach (var orderItem in orderItemList) 
+                {
+                    string uniqueCode = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper();
+                    Ticket ticket = new Ticket
+                        {
+                            OrderItemId = orderItem.OrderItemId,  
+                            OrderItem = orderItem,  
+                            UniqueCode = uniqueCode,
+                            IssueTimestamp = DateTime.Now,  
+                            TicketStatus = "Active", 
+                            ScannedTimestamp = null  
+                        };
+
+                    await AddTicket(ticket);
+                }
+                }
+
 
                 paymentInfo = new PaymentInformationModel
                     {
@@ -102,5 +124,10 @@ else
 
     private async Task AddTransactionLog(TransactionLog transactionLog){
         TransactionLogService.AddTransactionLogAsync(transactionLog);
+    }
+
+    private async Task AddTicket(Ticket ticket)
+    {
+        TicketService.AddTicketAsync(ticket);
     }
 }
