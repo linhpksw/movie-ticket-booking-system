@@ -41,17 +41,28 @@ public class AppDbContext : DbContext
         // which could lead to a cycle or unintended data deletion.
 
         modelBuilder.Entity<TicketScanLog>()
-        .HasOne(t => t.User)
-        .WithMany(u => u.TicketScanLogs)
-        .HasForeignKey(t => t.ScannedBy)
-        .OnDelete(DeleteBehavior.Restrict); // Disables cascade delete
-
-        modelBuilder.Entity<TicketScanLog>()
             .HasOne(t => t.Ticket)
             .WithMany(ti => ti.TicketScanLogs)
             .HasForeignKey(t => t.TicketId)
             .OnDelete(DeleteBehavior.Cascade); // Keep cascade delete for Tickets
 
+        modelBuilder.Entity<TicketScanLog>()
+            .HasOne(t => t.User)
+            .WithMany(u => u.TicketScanLogs)
+            .HasForeignKey(t => t.ScannedBy)
+            .OnDelete(DeleteBehavior.Restrict); // Disables cascade delete
+
+        modelBuilder.Entity<Showtime>()
+            .HasOne(m => m.Movie)
+            .WithMany(s => s.Showtimes)
+            .HasForeignKey(m => m.MovieId)
+            .OnDelete(DeleteBehavior.Cascade);  // Keep cascade delete for Movies
+
+        modelBuilder.Entity<Showtime>()
+            .HasOne(sc => sc.ScreenSeat)
+            .WithMany(s => s.Showtimes)
+            .HasForeignKey(sc => sc.ScreenSeatId)
+            .OnDelete(DeleteBehavior.Restrict);  // Disables cascade delete
     }
 
     // DbSets

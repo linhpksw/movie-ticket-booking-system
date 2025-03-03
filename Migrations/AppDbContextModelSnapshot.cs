@@ -287,7 +287,7 @@ namespace G5_MovieTicketBookingSystem.Migrations
                     b.Property<int>("MovieId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ScreenId")
+                    b.Property<int?>("ScreenSeatId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("ShowDate")
@@ -300,7 +300,7 @@ namespace G5_MovieTicketBookingSystem.Migrations
 
                     b.HasIndex("MovieId");
 
-                    b.HasIndex("ScreenId");
+                    b.HasIndex("ScreenSeatId");
 
                     b.ToTable("Showtimes");
                 });
@@ -545,15 +545,14 @@ namespace G5_MovieTicketBookingSystem.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("G5_MovieTicketBookingSystem.Screen", "Screen")
+                    b.HasOne("G5_MovieTicketBookingSystem.ScreenSeat", "ScreenSeat")
                         .WithMany("Showtimes")
-                        .HasForeignKey("ScreenId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ScreenSeatId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Movie");
 
-                    b.Navigation("Screen");
+                    b.Navigation("ScreenSeat");
                 });
 
             modelBuilder.Entity("G5_MovieTicketBookingSystem.Ticket", b =>
@@ -635,8 +634,7 @@ namespace G5_MovieTicketBookingSystem.Migrations
 
             modelBuilder.Entity("G5_MovieTicketBookingSystem.OrderItem", b =>
                 {
-                    b.Navigation("Ticket")
-                        .IsRequired();
+                    b.Navigation("Ticket");
                 });
 
             modelBuilder.Entity("G5_MovieTicketBookingSystem.Role", b =>
@@ -647,8 +645,6 @@ namespace G5_MovieTicketBookingSystem.Migrations
             modelBuilder.Entity("G5_MovieTicketBookingSystem.Screen", b =>
                 {
                     b.Navigation("ScreenSeats");
-
-                    b.Navigation("Showtimes");
                 });
 
             modelBuilder.Entity("G5_MovieTicketBookingSystem.ScreenSeat", b =>
@@ -656,6 +652,8 @@ namespace G5_MovieTicketBookingSystem.Migrations
                     b.Navigation("OrderItems");
 
                     b.Navigation("SeatLocks");
+
+                    b.Navigation("Showtimes");
                 });
 
             modelBuilder.Entity("G5_MovieTicketBookingSystem.SeatType", b =>
