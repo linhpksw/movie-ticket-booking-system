@@ -27,7 +27,8 @@ namespace G5_MovieTicketBookingSystem
 
             builder.Services.AddScoped<ICinemaRepository, CinemaRepository>();
             builder.Services.AddScoped<ICinemaService, CinemaService>();
-
+            builder.Services.AddScoped<IUserServices, UserServices>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
