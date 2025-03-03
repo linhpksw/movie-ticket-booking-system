@@ -3,76 +3,23 @@
 
 @using G5_MovieTicketBookingSystem.Models.VNPAY
 @inject IHttpContextAccessor HttpContextAccessor
-<style>
-    /* Đặt chung cho toàn bộ trang */
-    .payment-success-container {
-        padding: 20px;
-        max-width: 800px;
-        margin: 0 auto;
-        background-color: #f9f9f9;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
 
-    h3 {
-        font-size: 2rem;
-        color: #333;
-        text-align: center;
-        margin-bottom: 20px;
-    }
-
-    /* Thông tin thanh toán */
-    .payment-details p {
-        font-size: 1.1rem;
-        line-height: 1.6;
-        color: #555;
-    }
-
-    .payment-details strong {
-        color: #000;
-    }
-
-    /* Định dạng cho nút quay lại trang chủ */
-    .payment-success-container .btn-primary {
-        display: inline-block;
-        background-color: #007bff;
-        color: white;
-        padding: 10px 20px;
-        font-size: 1rem;
-        border-radius: 4px;
-        text-decoration: none;
-        text-align: center;
-        margin-top: 20px;
-    }
-
-        .payment-success-container .btn-primary:hover {
-            background-color: #0056b3;
-            transition: background-color 0.3s;
-        }
-
-        .payment-success-container .btn-primary:focus {
-            outline: none;
-        }
-</style>
-<div class="payment-success-container">
 <h3>Chi tiết thanh toán</h3>
-    @if (paymentInfo != null)
-    {
-        <div class="payment-details">
-            <p><strong>Loại đơn hàng:</strong> @paymentInfo.OrderType</p>
-            <p><strong>Số tiền:</strong> @paymentInfo.Amount.ToString("N0") VND</p>
-            <p><strong>Mô tả:</strong> @paymentInfo.OrderDescription</p>
-            <p><strong>Khách hàng:</strong> @paymentInfo.Name</p>
-        </div>
 
-        <a href="/" class="btn-primary">Quay lại trang chủ</a>
-    }
-    else
-    {
-        <p>Không tìm thấy thông tin thanh toán.</p>
-    }
+@if (paymentInfo != null)
+{
+    <p><strong>Loại đơn hàng:</strong> @paymentInfo.OrderType</p>
+    <p><strong>Số tiền:</strong> @paymentInfo.Amount.ToString("N0") VND</p>
+    <p><strong>Mô tả:</strong> @paymentInfo.OrderDescription</p>
+    <p><strong>Khách hàng:</strong> @paymentInfo.Name</p>
 
-</div>
+    <a href="/" class="btn btn-primary">Quay lại trang chủ</a>
+}
+else
+{
+    <p>Không tìm thấy thông tin thanh toán.</p>
+}
+
 @code {
     private PaymentInformationModel? paymentInfo;
 
@@ -81,13 +28,29 @@
         var queryCollection = HttpContextAccessor.HttpContext?.Request.Query;
         if (queryCollection != null)
         {
-            paymentInfo = new PaymentInformationModel
+            try
+            {
+                string orderInfo = queryCollection["vnp_OrderInfo"];
+                string name = "Khách hàng";
+
+                // Tách tên khách hàng từ `vnp_OrderInfo`
+                if (!string.IsNullOrEmpty(orderInfo) && orderInfo.Contains("-"))
                 {
-                    OrderType = queryCollection["vnp_OrderType"],
-                    Amount = Convert.ToDouble(queryCollection["vnp_Amount"]) / 100, 
-                    OrderDescription = queryCollection["vnp_OrderInfo"],
-                    Name = "Khách hàng"
-                };
+                    name = orderInfo.Split("-")[0].Trim();
+                }
+
+                paymentInfo = new PaymentInformationModel
+                    {
+                        OrderType = "movie_ticket",
+                        Amount = Convert.ToDouble(queryCollection["vnp_Amount"]) / 100,
+                        OrderDescription = orderInfo,
+                        Name = name
+                    };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi xử lý thông tin thanh toán: {ex.Message}");
+            }
         }
     }
 }

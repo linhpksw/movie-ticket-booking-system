@@ -6,12 +6,18 @@
 @inject ISeatLockService SeatLockService
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 @inject IHttpContextAccessor HttpContextAccessor
-@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
-
-
+@inject IOrderService OrderService
+@inject IJSRuntime JSRuntime
+@inject IScreenSeatService ScreenSeatService
+@inject IUserService UserService
+@inject NavigationManager NavigationManager
 
 @code {
-    private int? userId ;  
+    private int? userId;
+    private User? currentUser;
+    private string remainingTime = "Loading...";
+    private bool isProcessing = false;
+    private string message = "";
 
     private MovieDto movie = new()
         {
@@ -22,7 +28,6 @@
             Showtimes = new List<ShowtimeDto>()
         };
 
-    private string remainingTime = "Loading...";
     private DateTime? lockExpiryTime;
     private DateTime? lockStartTime;
     private string antiforgeryToken = string.Empty;
@@ -31,8 +36,16 @@
     {
         try
         {
+            userId = 1; // Thay bằng ID thực tế của user đang đăng nhập
+            currentUser = await UserService.GetUserByIdAsync(userId.Value);
+
+            if (currentUser == null)
+            {
+                Console.WriteLine("❌ Không tìm thấy user!");
+                return;
+            }
             var fetchedMovie = await MovieService.GetMovieWithShowtimeAndCinemaAsync(1);
-            movie = fetchedMovie ?? new MovieDto
+            movie = fetchedMovie ?? new MovieDto()
                 {
                     Title = "Unknown Movie",
                     Genre = "Unknown Genre",
@@ -41,10 +54,8 @@
                     Showtimes = new List<ShowtimeDto>()
                 };
 
-            userId = 1;
             await CalculateRemainingTime(userId);
 
-            // Lấy Anti-Forgery Token
             var tokens = Antiforgery.GetAndStoreTokens(HttpContextAccessor.HttpContext);
             antiforgeryToken = tokens.RequestToken;
         }
@@ -87,6 +98,9 @@
         }
     }
 }
+
+
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -163,7 +177,7 @@
                         </div>
                     }
 
-                    <form class="checkout-contact-form" onsubmit="event.preventDefault(); redirectToPayment();">
+                    <form class="checkout-contact-form">
                         <div class="form-group">
                             <label for="FullName"><i class="fas fa-user"></i> Full Name</label>
                             <input type="text" id="FullName" name="FullName" placeholder="Enter your full name" class="form-control" oninput="validateFullName()">
@@ -180,13 +194,8 @@
                             <span class="text-danger" id="errorPhone"></span>
                         </div>
 
-                        <!-- Nút thanh toán -->
-                        <button class="btn btn-primary" onclick="redirectToPayment()">Pay with VNPAY</button>
                     </form>
-
-
-
-
+                    <button type="button" onclick="redirectToPayment()" class="btn btn-primary">Pay with VNPAY</button>
                 </div>
                 <div class="col-lg-4">
                     <div class="booking-summery bg-one">
@@ -302,8 +311,10 @@
             }
         }
     </script>
+
     <script>
-        function redirectToPayment() {
+        // Hàm chuyển hướng sau khi thanh toán
+         function redirectToPayment() {
             // Lấy giá trị từ các trường input trong form
             const fullName = document.getElementById('FullName').value;
 
@@ -333,18 +344,10 @@
             url.searchParams.append("amount", paymentInfo.amount);
             url.searchParams.append("orderDescription", paymentInfo.orderDescription);
             url.searchParams.append("name", paymentInfo.name);
-
             // Chuyển hướng người dùng sang trang thanh toán
             window.location.href = url.toString();
         }
     </script>
-
-
-
-
-
-
-
 
 </body>
 </html>
