@@ -1,7 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace G5_MovieTicketBookingSystem.DTOs.AuthorizationDto
+namespace G5_MovieTicketBookingSystem.DTOs.UserDto
 {
+
     public class UserResponseDto
     {
       

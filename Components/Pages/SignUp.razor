@@ -1,16 +1,8 @@
 ﻿@page "/SignUp"
-
+@using G5_MovieTicketBookingSystem.DTOs.UserDto;
 @using System.Diagnostics
 
-<h3>Sign_up</h3>
-   <div class="preloader">
-        <div class="preloader-inner">
-            <div class="preloader-icon">
-                <span></span>
-                <span></span>
-            </div>
-        </div>
-    </div>
+<!-- ==========Preloader========== -->
 <div class="preloader">
     <div class="preloader-inner">
         <div class="preloader-icon">
@@ -29,21 +21,32 @@
                     <span class="cate">welcome</span>
                     <h2 class="title">to Boleto </h2>
                 </div>
-                <form class="account-form">
+                <form method="post" @onsubmit="@Submit" class="account-form" @formname="Sign-Up">
+                    <AntiforgeryToken/>
+
                     <div class="form-group">
                         <label for="email1">Email<span>*</span></label>
-                        <input type="text" placeholder="Enter Your Email" id="email1" required>
+                        <InputText type="text" placeholder="Enter Your Email" @bind-Value="Model.Email" id="email1" required />
+
+                        @if (Error.ContainsKey("Email"))
+                        {
+                            <p>@Error["Email"] </p>
+                        }
                     </div>
                     <div class="form-group">
                         <label for="pass1">Password<span>*</span></label>
-                        <input type="password" placeholder="Password" id="pass1" required>
+                        <InputText type="password" placeholder="Password" @bind-Value="Model.Password" id="pass1" required/>
                     </div>
                     <div class="form-group">
                         <label for="pass2">Confirm Password<span>*</span></label>
-                        <input type="password" placeholder="Password" id="pass2" required>
+                        <InputText type="password" placeholder="Password" @bind-Value="Model.PasswordConfirm" id="pass2" required/>
+                        @if (Error.ContainsKey("Password"))
+                        {
+                            <p>@Error["Password"] </p>
+                        }
                     </div>
                     <div class="form-group checkgroup">
-                        <input type="checkbox" id="bal" required checked>
+                        <InputCheckbox id="bal" @bind-Value="isCheck" required />
                         <label for="bal">I agree to the <a href="#0">Terms, Privacy Policy</a> and <a href="#0">Fees</a></label>
                     </div>
                     <div class="form-group text-center">
@@ -76,5 +79,54 @@
     </div>
 </section>
 @code {
+    [SupplyParameterFromForm]
+    private UseCreateDto Model { get; set; } = new UseCreateDto();
+    private Dictionary<string, string> Error = new Dictionary<string, string>();
+    private bool isCheck = false;
 
+    protected override void OnInitialized() => Model ??= new();
+
+    private async Task Submit()
+    {
+        Error.Clear();
+
+        // Email validation
+        if (string.IsNullOrEmpty(Model.Email))
+        {
+            Error.Add("Email", "Email is required");
+        }
+        else if (!Model.Email.Contains("@"))
+        {
+            Error.Add("Email", "Email must contain @ symbol");
+        }
+
+        // Password validation
+        if (string.IsNullOrEmpty(Model.Password))
+        {
+            Error.Add("Password", "Password is required");
+        }
+        else if (Model.Password.Length < 8)
+        {
+            Error.Add("Password", "Password must be at least 8 characters");
+        }
+        else if (Model.Password != Model.PasswordConfirm)
+        {
+            Error.Add("Password", "Passwords do not match");
+        }
+
+        // Terms validation
+        if (!isCheck)
+        {
+            Error.Add(" Agree", ""); // Empty string since we show custom message
+            return;
+        }
+
+        if (Error.Count > 0)
+        {
+            return;
+        }
+
+        // Add your signup logic here
+        // Example: await someService.RegisterUser(Model);
+    }
 }
