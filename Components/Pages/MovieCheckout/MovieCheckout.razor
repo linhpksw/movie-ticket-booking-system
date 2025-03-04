@@ -155,8 +155,24 @@
                 </div>
                 <div class="item">
                     <h5 class="title">Remaining Time</h5>
-                    <p>@remainingTime</p>
+                    @if (remainingTime == "Expired")
+                    {
+                        <p class="text-danger">@remainingTime</p>
+                        <script type="text/javascript">
+                            alert('Your seat has expired.');
+                            window.location.href = '/';  // Chuyển hướng về trang chính
+                        </script>
+                    }
+                    else if (remainingTime == "No seat locks found for this user.")
+                    {
+                        <p class="text-warning">@remainingTime</p> 
+                    }
+                    else
+                    {
+                        <p>@remainingTime</p>  
+                    }
                 </div>
+
             </div>
         </div>
     </section>
@@ -262,6 +278,12 @@
     <script src="assets/js/jquery-3.3.1.min.js"></script>
     <script src="assets/js/bootstrap.min.js"></script>
     <script src="assets/js/main.js"></script>
+    <script >
+          function redirectHome() {
+        alert('@remainingTime');
+        window.location.href = '/';
+          }
+    </script>
     <script>
         function validateFullName() {
             let fullName = document.getElementById("FullName").value;
