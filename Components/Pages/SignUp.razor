@@ -1,16 +1,53 @@
 ﻿@page "/SignUp"
-
+@inject ILogger<SignUp> logger
 @using System.Diagnostics
+@inject NavigationManager NavigationManager
+@using System.Web
 
-<h3>Sign_up</h3>
-   <div class="preloader">
-        <div class="preloader-inner">
-            <div class="preloader-icon">
-                <span></span>
-                <span></span>
-            </div>
-        </div>
-    </div>
+@code {
+    private string email { get; set; } = String.Empty;
+    private string password { get; set; } = String.Empty;
+    private string confirmPassword { get; set; } = String.Empty;
+    private bool agreeToTerms { get; set; } = false;
+    private string referral { get; set; } = String.Empty;
+    private string errorMessage { get; set; } = String.Empty;
+    protected override void OnInitialized()
+    {
+        Console.WriteLine("OnInitialized called");
+        var uri = new Uri(NavigationManager.Uri);
+        var queryParams = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+
+        if (queryParams.ContainsKey("email"))
+        {
+            email = queryParams["email"].ToString();
+        }
+        if (queryParams.ContainsKey("referral"))
+        {
+            referral = queryParams["referral"].ToString();
+        }
+        Console.WriteLine($"Email: {email}, Referral: {referral}");
+    }
+    private async Task HandleSubmit(EventArgs e)
+    {
+        if (password != confirmPassword)
+        {
+            errorMessage = "Passwords do not match.";
+            logger.LogWarning("Sign-up failed: Passwords do not match.");
+            return;
+        }
+
+        if (!agreeToTerms)
+        {
+            errorMessage = "You must agree to the terms.";
+            logger.LogWarning("Sign-up failed: User did not agree to terms.");
+            return;
+        }
+
+        // Use form and query parameters (e.g., email, referral) for sign-up logic
+        Console.WriteLine($"Email: {email}, Password: {password}, Referral: {referral}");
+    }
+}
+
 <div class="preloader">
     <div class="preloader-inner">
         <div class="preloader-icon">
@@ -19,8 +56,8 @@
         </div>
     </div>
 </div>
+
 <!-- ==========Preloader========== -->
-<!-- ==========Sign-In-Section========== -->
 <section class="account-section bg_img" data-background="./assets/images/account/account-bg.jpg">
     <div class="container">
         <div class="padding-top padding-bottom">
@@ -29,25 +66,32 @@
                     <span class="cate">welcome</span>
                     <h2 class="title">to Boleto </h2>
                 </div>
-                <form class="account-form">
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="error-messages" style="color: red; margin-bottom: 10px;">
+                        @errorMessage
+                    </div>
+                }
+                <form class="account-form" @onsubmit="async (e) => await HandleSubmit(e)">
+
                     <div class="form-group">
                         <label for="email1">Email<span>*</span></label>
-                        <input type="text" placeholder="Enter Your Email" id="email1" required>
+                        <input type="text" placeholder="Enter Your Email" id="email1" @bind="email" required>
                     </div>
                     <div class="form-group">
                         <label for="pass1">Password<span>*</span></label>
-                        <input type="password" placeholder="Password" id="pass1" required>
+                        <input type="password" placeholder="Password" id="pass1" @bind="password" required>
                     </div>
                     <div class="form-group">
                         <label for="pass2">Confirm Password<span>*</span></label>
-                        <input type="password" placeholder="Password" id="pass2" required>
+                        <input type="password" placeholder="Password" id="pass2" @bind="confirmPassword" required>
                     </div>
                     <div class="form-group checkgroup">
-                        <input type="checkbox" id="bal" required checked>
+                        <input type="checkbox" id="bal" @bind="agreeToTerms" required>
                         <label for="bal">I agree to the <a href="#0">Terms, Privacy Policy</a> and <a href="#0">Fees</a></label>
                     </div>
                     <div class="form-group text-center">
-                        <input type="submit" value="Sign Up">
+                        <button type="submit">Sign Up</button>
                     </div>
                 </form>
                 <div class="option">
@@ -55,26 +99,11 @@
                 </div>
                 <div class="or"><span>Or</span></div>
                 <ul class="social-icons">
-                    <li>
-                        <a href="#0">
-                            <i class="fab fa-facebook-f"></i>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#0" class="active">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#0">
-                            <i class="fab fa-google"></i>
-                        </a>
-                    </li>
+                    <li><a href="#0"><i class="fab fa-facebook-f"></i></a></li>
+                    <li><a href="#0" class="active"><i class="fab fa-twitter"></i></a></li>
+                    <li><a href="#0"><i class="fab fa-google"></i></a></li>
                 </ul>
             </div>
         </div>
     </div>
 </section>
-@code {
-
-}

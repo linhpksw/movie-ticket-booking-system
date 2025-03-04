@@ -6,7 +6,7 @@
         Task<User> SignUpAsync(User user);
 
         // Đăng nhập người dùng
-        Task<User> LoginAsync(string emailOrUsername, string password);
+        Task<User> GetUserByEmail(string email);
 
         // Kiểm tra sự tồn tại của Username hoặc Email trước khi đăng ký
         Task<bool> UsernameExistsAsync(string username);

@@ -19,53 +19,60 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
             throw new NotImplementedException();
         }
 
-        public Task<User> LoginAsync(string emailOrUsername, string password)
+
+
+
+        public async Task<User> SignUpAsync(User user)
         {
-            User user = _dbContext.Users.FirstOrDefault(u => u.Email == emailOrUsername || u.Username == emailOrUsername);
-            return null;
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user), "User object cannot be null.");
+            }
 
+            // Validate input (e.g., check for existing user by email or username)
+            if (await _dbContext.Users.AnyAsync(u => u.Email == user.Email || u.Username == user.Username))
+            {
+                throw new InvalidOperationException("User with this email or username already exists.");
+            }
 
+            // Hash the password before saving
+            if (!string.IsNullOrEmpty(user.Password))// Assuming User has a Password property
+            {
+                user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
+               
+            }
+
+            try
+            {
+                _dbContext.Users.Add(user);
+                await _dbContext.SaveChangesAsync();
+                return user; // Return the registered user
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Failed to sign up user.", ex);
+            }
         }
 
-        public Task<User> SignUpAsync(User user)
-        {
-            throw new NotImplementedException();
-        }
 
         public Task<bool> UsernameExistsAsync(string username)
         {
             throw new NotImplementedException();
         }
-        static bool VerifyPassword(string password, string hashedPassword)
+       
+
+
+
+
+        public async Task<User> GetUserByEmail(string emailOrUsername)
         {
-            // So sánh mật khẩu nhập vào với mật khẩu đã mã hóa
-            return BCrypt.Net.BCrypt.Verify(password, hashedPassword);
+            if (string.IsNullOrEmpty(emailOrUsername))
+            {
+                return null; // Or throw an exception, depending on your design
+            }
+
+            User user = await _dbContext.Users.FirstOrDefaultAsync(ur => ur.Username == emailOrUsername);
+            return user;
         }
-
-        static string HashPassword(string password)
-        {
-            // Mã hóa mật khẩu với salt ngẫu nhiên (work factor mặc định là 12)
-            string hashed = BCrypt.Net.BCrypt.HashPassword(password);
-            return hashed;
-        }
-    
-
-    static void Main(string[] args)
-        {
-            // Giả sử đây là mật khẩu đã được hash và lưu trong database
-            string storedHashedPassword = "$2a$12$..."; // Giá trị hash từ lần đăng ký
-
-            // Kiểm tra mật khẩu nhập vào
-            string userInputPassword = "mySecurePassword";
-            bool isValid = UserRepository.VerifyPassword(userInputPassword, storedHashedPassword);
-
-            Console.WriteLine("Mật khẩu đúng: " + isValid); // True
-
-            // Thử với mật khẩu sai
-            isValid = UserRepository.VerifyPassword("wrongPassword", storedHashedPassword);
-            Console.WriteLine("Mật khẩu sai: " + isValid); // False
-        }
-
-      
     }
 }

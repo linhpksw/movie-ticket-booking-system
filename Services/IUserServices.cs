@@ -4,7 +4,7 @@ namespace G5_MovieTicketBookingSystem.Services
 {
     public interface IUserServices
     {
-        Task<UserResponseDto> RegisterAsync(UserRequestDto userRequestDto);
+        Task<UserResponseDto> RegisterAsync(UserCreateDto UserCreateDto);
         Task<UserResponseDto> LoginAsync(UserRequestDto userRequestDto);
 
     }

@@ -9,7 +9,7 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
             throw new NotImplementedException();
         }
 
-        public Task<UserResponseDto> RegisterAsync(UserRequestDto userRequestDto)
+        public Task<UserResponseDto> RegisterAsync(UserCreateDto UserCreateDto)
         {
             throw new NotImplementedException();
         }
