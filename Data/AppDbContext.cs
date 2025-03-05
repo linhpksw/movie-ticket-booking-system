@@ -63,6 +63,8 @@ public class AppDbContext : DbContext
             .WithMany(s => s.Showtimes)
             .HasForeignKey(sc => sc.ScreenSeatId)
             .OnDelete(DeleteBehavior.Restrict);  // Disables cascade delete
+
+      
     }
 
     // DbSets

@@ -1,53 +1,11 @@
 ﻿@page "/SignUp"
-@inject ILogger<SignUp> logger
 @using System.Diagnostics
+@using Microsoft.EntityFrameworkCore.Metadata.Internal
+@using G5_MovieTicketBookingSystem.Services.Impl
+@using G5_MovieTicketBookingSystem.DTOs.UserDto
 @inject NavigationManager NavigationManager
-@using System.Web
-
-@code {
-    private string email { get; set; } = String.Empty;
-    private string password { get; set; } = String.Empty;
-    private string confirmPassword { get; set; } = String.Empty;
-    private bool agreeToTerms { get; set; } = false;
-    private string referral { get; set; } = String.Empty;
-    private string errorMessage { get; set; } = String.Empty;
-    protected override void OnInitialized()
-    {
-        Console.WriteLine("OnInitialized called");
-        var uri = new Uri(NavigationManager.Uri);
-        var queryParams = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
-
-        if (queryParams.ContainsKey("email"))
-        {
-            email = queryParams["email"].ToString();
-        }
-        if (queryParams.ContainsKey("referral"))
-        {
-            referral = queryParams["referral"].ToString();
-        }
-        Console.WriteLine($"Email: {email}, Referral: {referral}");
-    }
-    private async Task HandleSubmit(EventArgs e)
-    {
-        if (password != confirmPassword)
-        {
-            errorMessage = "Passwords do not match.";
-            logger.LogWarning("Sign-up failed: Passwords do not match.");
-            return;
-        }
-
-        if (!agreeToTerms)
-        {
-            errorMessage = "You must agree to the terms.";
-            logger.LogWarning("Sign-up failed: User did not agree to terms.");
-            return;
-        }
-
-        // Use form and query parameters (e.g., email, referral) for sign-up logic
-        Console.WriteLine($"Email: {email}, Password: {password}, Referral: {referral}");
-    }
-}
-
+@inject IHttpClientFactory HttpClientFactory
+<!-- Preloader -->
 <div class="preloader">
     <div class="preloader-inner">
         <div class="preloader-icon">
@@ -56,8 +14,7 @@
         </div>
     </div>
 </div>
-
-<!-- ==========Preloader========== -->
+<!-- Sign-Up Section -->
 <section class="account-section bg_img" data-background="./assets/images/account/account-bg.jpg">
     <div class="container">
         <div class="padding-top padding-bottom">
@@ -66,32 +23,34 @@
                     <span class="cate">welcome</span>
                     <h2 class="title">to Boleto </h2>
                 </div>
-                @if (!string.IsNullOrEmpty(errorMessage))
-                {
-                    <div class="error-messages" style="color: red; margin-bottom: 10px;">
-                        @errorMessage
-                    </div>
-                }
-                <form class="account-form" @onsubmit="async (e) => await HandleSubmit(e)">
-
+                <form method="post" @onsubmit="@Submit" class="account-form" @formname="SignUp">
+                    <AntiforgeryToken />
                     <div class="form-group">
                         <label for="email1">Email<span>*</span></label>
-                        <input type="text" placeholder="Enter Your Email" id="email1" @bind="email" required>
+                        <InputText type="text" placeholder="Enter Your Email" @bind-Value="Model.Email" id="email1" required />
+                        @if (Error.ContainsKey("Email"))
+                        {
+                            <p>@Error["Email"]</p>
+                        }
                     </div>
                     <div class="form-group">
                         <label for="pass1">Password<span>*</span></label>
-                        <input type="password" placeholder="Password" id="pass1" @bind="password" required>
+                        <InputText type="password" placeholder="Password" @bind-Value="Model.Password" id="pass1" required />
                     </div>
                     <div class="form-group">
                         <label for="pass2">Confirm Password<span>*</span></label>
-                        <input type="password" placeholder="Password" id="pass2" @bind="confirmPassword" required>
+                        <InputText type="password" placeholder="Password" @bind-Value="Model.PasswordConfirm" id="pass2" required />
+                        @if (Error.ContainsKey("Password"))
+                        {
+                            <p>@Error["Password"]</p>
+                        }
                     </div>
                     <div class="form-group checkgroup">
-                        <input type="checkbox" id="bal" @bind="agreeToTerms" required>
+                        <InputCheckbox id="bal" @bind-Value="isCheck" required />
                         <label for="bal">I agree to the <a href="#0">Terms, Privacy Policy</a> and <a href="#0">Fees</a></label>
                     </div>
                     <div class="form-group text-center">
-                        <button type="submit">Sign Up</button>
+                        <input type="submit" value="Sign Up">
                     </div>
                 </form>
                 <div class="option">
@@ -107,3 +66,60 @@
         </div>
     </div>
 </section>
+@code {
+
+    [SupplyParameterFromForm]
+    private UserCreateDto Model { get; set; } = new UserCreateDto();
+    private Dictionary<string, string> Error = new Dictionary<string, string>();
+    private bool isCheck = false;
+    [Inject]
+    public IUserServices UserServices { get; set; }
+
+    private HttpClient _client;
+
+
+
+    private async Task Submit()
+    {
+        Error.Clear();
+
+        if (string.IsNullOrEmpty(Model.Email))
+        {
+            Error.Add("Email", "Email is required");
+        }
+        else if (!Model.Email.Contains("@"))
+        {
+            Error.Add("Email", "Email must contain @ symbol");
+        }
+
+        if (string.IsNullOrEmpty(Model.Password))
+        {
+            Error.Add("Password", "Password is required");
+        }
+        else if (Model.Password.Length < 8)
+        {
+            Error.Add("Password", "Password must be at least 8 characters");
+        }
+        else if (Model.Password != Model.PasswordConfirm)
+        {
+            Error.Add("Password", "Passwords do not match");
+        }
+
+        if (!isCheck)
+        {
+            Error.Add("Agree", "");
+            return;
+        }
+
+        if (Error.Count > 0)
+        {
+            return;
+        }
+
+        UserResponseDto userResponseDto = await UserServices.Register(Model, new List<int>() { 0 });
+        if (userResponseDto != null)
+        {
+            NavigationManager.NavigateTo("/Login");
+        }
+    }
+}

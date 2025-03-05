@@ -1,6 +1,7 @@
 ﻿using G5_MovieTicketBookingSystem.Data;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace G5_MovieTicketBookingSystem.Repositories.Impl
 {
@@ -14,13 +15,13 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
             _dbContext = dbContext;
         }
 
-        public Task<bool> EmailExistsAsync(string email)
+
+        public async Task<User> GetUserByEmail(string email)
         {
-            throw new NotImplementedException();
+            return await _dbContext.Users
+                .FirstOrDefaultAsync(u => u.Email == email)
+                ?? throw new Exception("User not found");
         }
-
-
-
 
         public async Task<User> SignUpAsync(User user)
         {
@@ -64,15 +65,6 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
 
 
 
-        public async Task<User> GetUserByEmail(string emailOrUsername)
-        {
-            if (string.IsNullOrEmpty(emailOrUsername))
-            {
-                return null; // Or throw an exception, depending on your design
-            }
-
-            User user = await _dbContext.Users.FirstOrDefaultAsync(ur => ur.Username == emailOrUsername);
-            return user;
-        }
+      
     }
 }

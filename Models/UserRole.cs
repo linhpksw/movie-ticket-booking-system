@@ -8,11 +8,14 @@ namespace G5_MovieTicketBookingSystem;
 /// </summary>
 public class UserRole
 {
+
+    
     [Key]
     public int UserId { get; set; }
 
     [Key]
     public int RoleId { get; set; }
+
 
     // Navigation
     [ForeignKey(nameof(UserId))]

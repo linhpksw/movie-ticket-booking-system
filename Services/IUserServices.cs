@@ -1,11 +1,11 @@
-﻿using G5_MovieTicketBookingSystem.DTOs.AuthorizationDto;
+﻿using G5_MovieTicketBookingSystem.DTOs.UserDto;
+using G5_MovieTicketBookingSystem.DTOs.UserDto;
 
 namespace G5_MovieTicketBookingSystem.Services
 {
     public interface IUserServices
     {
-        Task<UserResponseDto> RegisterAsync(UserCreateDto UserCreateDto);
-        Task<UserResponseDto> LoginAsync(UserRequestDto userRequestDto);
-
+        public Task<UserResponseDto> Login(UserRequestDto UserRequestDto);
+        public Task<UserResponseDto> Register(UserCreateDto UserCreateDto, List<int> Role);
     }
 }

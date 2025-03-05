@@ -2,7 +2,7 @@
 {
     public static class HashPassword
     {
-        static bool VerifyPassword(string password, string hashedPassword)
+       public static bool VerifyPassword(string password, string hashedPassword)
         {
             // So sánh mật khẩu nhập vào với mật khẩu đã mã hóa
             return BCrypt.Net.BCrypt.Verify(password, hashedPassword);
