@@ -1,4 +1,65 @@
 ﻿@using G5_MovieTicketBookingSystem.DTOs.MovieBookingPlan
+
+
+<style>
+    .movie-schedule .item {
+        width: 80px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 3px;
+        position: relative;
+        border-radius: 5px;
+        font-weight: bold;
+    }
+
+        .movie-schedule .item:hover {
+            background-color: #f1c40f;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s ease-in-out;
+        }
+
+        .movie-schedule .item.sold-out {
+            background: linear-gradient(to bottom, #f1f1f1, #e5e5e5);
+            color: #b4b4b4;
+            cursor: not-allowed;
+            pointer-events: none;
+            border: 1px solid #ddd;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+            opacity: 0.9;
+        }
+
+            .movie-schedule .item.sold-out::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: repeating-linear-gradient( 45deg, transparent, transparent 5px, rgba(0,0,0,0.03) 5px, rgba(0,0,0,0.03) 10px );
+                z-index: 1;
+            }
+
+            .movie-schedule .item.sold-out::after {
+                content: 'Hết vé';
+                position: absolute;
+                font-size: 12px;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                color: #e63946;
+                font-weight: bold;
+                text-transform: uppercase;
+                background: rgba(255,255,255,0.95);
+                padding: 2px 8px;
+                border-radius: 3px;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+                z-index: 2;
+                white-space: nowrap;
+            }
+</style>
 <div class="ticket-plan-section padding-bottom padding-top">
     <div class="container">
         <div class="row justify-content-center">
@@ -18,12 +79,23 @@
                                 </div>
                             </div>
                             <div class="movie-schedule">
-                                @foreach (var showtime in movieShowtimeDto.Showtime)
+
+                                @foreach (var show in movieShowtimeDto.Showtime)
                                 {
-                                    <div class="item">
-                                        @showtime
-                                    </div>
-                                }                              
+                                    @if (show.AvailableSeats>0)
+                                    {
+                                        <div class="item">
+                                            @show.Showtimehour
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="item sold-out">
+                                            @show.Showtimehour
+                                        </div>
+                                    }
+                                    
+                                }
                             </div>
                         </li>
                     }

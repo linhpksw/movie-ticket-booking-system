@@ -26,13 +26,13 @@
 
 <!-- Book Section -->
 <BookSection Cities="cities"
-    AvailableDates="availableDates"
-    Cinemas="cinemas"
-    Experiences="experiences"
-    OnFilterChanged="HandleFilterChange" />
+AvailableDates="availableDates"
+Cinemas="cinemas"
+Experiences="experiences"
+OnFilterChanged="HandleFilterChange" />
 
 <!-- Movie Section -->
-@* <MovieTable movieShowtimeDtos="movieShowtimeDtos" /> *@
+<MovieTable movieShowtimeDtos="movieShowtimeDtos" />
 
 
 @code {
@@ -68,7 +68,7 @@
     private async Task LoadMovieShowtimes()
     {
         movieShowtimeDtos = await MovieService.GetMovieShowtimeDtos(filter);
-
+        PrintMovieShowtimeDto(movieShowtimeDtos);
 
     }
     private async Task HandleFilterChange(MovieShowtimeFilterDto inputFilter)
@@ -88,16 +88,17 @@
 
     private void PrintMovieShowtimeDto(IEnumerable<MovieShowtimeDto> movieShowtimeDtos)
     {
-        foreach (var movieShowtimeDto in movieShowtimeDtos)
+        foreach (var movie in movieShowtimeDtos)
         {
-            Console.WriteLine($"Title: {movieShowtimeDto.Title}");
-            if (movieShowtimeDto.Showtime != null)
+            Console.WriteLine($"Movie: {movie.Title}");
+            if (movie.Showtime != null)
             {
-                foreach (var showtime in movieShowtimeDto.Showtime)
+                foreach (var show in movie.Showtime)
                 {
-                    Console.WriteLine($"Showtime: {showtime}");
+                    Console.WriteLine($"  Showtime: {show.Showtimehour} - Available Seats: {show.AvailableSeats}");
                 }
             }
+            Console.WriteLine(new string('-', 40));
         }
     }
 

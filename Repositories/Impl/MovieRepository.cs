@@ -1,6 +1,5 @@
 ﻿using G5_MovieTicketBookingSystem.Data;
 using G5_MovieTicketBookingSystem.DTOs.MovieBookingPlan;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace G5_MovieTicketBookingSystem.Repositories.Impl
@@ -16,50 +15,43 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
 
         public async Task<IEnumerable<MovieShowtimeDto>> GetMovieShowtimeDtos(MovieShowtimeFilterDto filter)
         {
-            var query = _dbContext.Showtimes.AsQueryable();
-
-            // Kiểm tra cả null và chuỗi rỗng để bỏ qua điều kiện lọc
-            if (!string.IsNullOrWhiteSpace(filter.City))
-            {
-                query = query.Where(s => s.ScreenSeat.Screen.Cinema.City == filter.City);
-            }
-
-            if (!string.IsNullOrWhiteSpace(filter.CinemaName))
-            {
-                query = query.Where(s => s.ScreenSeat.Screen.Cinema.CinemaName == filter.CinemaName);
-            }
-
-            if (!string.IsNullOrEmpty(filter.ExperienceType))
-            {
-                query = query.Where(s => s.ExperienceType == filter.ExperienceType);
-            }
-
-            if (filter.ShowDate != null)
-            {
-                query = query.Where(s => s.ShowDate == filter.ShowDate);
-                /*query = query.Where(s => s.ShowDate == new DateTime(2025,3,7));*/
-            }
-
-            var rawResult = await query
-                .Select(s => new
+            var query = await _dbContext.Showtimes
+                .Include(s => s.Movie)
+                .Include(s => s.ScreenSeat.Screen.Cinema)
+                .Include(s => s.ScreenSeat.Screen.ScreenSeats)
+                .Where(s =>
+                    (string.IsNullOrWhiteSpace(filter.City) || s.ScreenSeat.Screen.Cinema.City == filter.City) &&
+                    (string.IsNullOrWhiteSpace(filter.CinemaName) || s.ScreenSeat.Screen.Cinema.CinemaName == filter.CinemaName) &&
+                    (string.IsNullOrEmpty(filter.ExperienceType) || s.ExperienceType == filter.ExperienceType) &&
+                    (filter.ShowDate == null || s.ShowDate == filter.ShowDate)
+                )
+                .GroupBy(s => new { s.Movie.Title, s.ShowTime }) // Gom nhóm theo phim + suất chiếu
+                .Select(g => new
                 {
-                    Title = s.Movie.Title,
-                    Showtime = s.ShowTime
+                    Title = g.Key.Title,
+                    Showtimehour = g.Key.ShowTime,
+                    TotalSeats = g.SelectMany(s => s.ScreenSeat.Screen.ScreenSeats).Count(),
+                    BookedSeats = g.SelectMany(s => s.ScreenSeat.Screen.ScreenSeats)
+                        .Count(ss => _dbContext.OrderItems
+                            .Any(oi => oi.ScreenSeatId == ss.ScreenSeatId && oi.Order.OrderStatus == "Paid")) // Chỉ tính Order đã thanh toán
                 })
-                .ToListAsync();
+                .ToListAsync(); // Thực thi trên DB trước khi nhóm lại lần nữa
 
-            var groupedResult = rawResult
-                .GroupBy(r => r.Title)
+            var result = query
+                .GroupBy(x => x.Title)
                 .Select(g => new MovieShowtimeDto
                 {
                     Title = g.Key,
-                    Showtime = g.Select(x => x.Showtime).ToList()
+                    Showtime = g.Select(x => new ShowTimeDetailDto
+                    {
+                        Showtimehour = x.Showtimehour,
+                        AvailableSeats = x.TotalSeats - x.BookedSeats
+                    }).OrderBy(s => s.Showtimehour).ToList()
                 })
                 .ToList();
 
-            return groupedResult;
+            return result;
         }
-
 
 
     }
