@@ -28,4 +28,5 @@ public class User
     public ICollection<Order>? Orders { get; set; }
     public ICollection<SeatLock>? SeatLocks { get; set; }
     public ICollection<TicketScanLog>? TicketScanLogs { get; set; }
+    public User() { }
 }

@@ -1,0 +1,365 @@
+﻿@page "/checkout"
+
+
+@inject IMovieService MovieService
+@inject ISeatLockService SeatLockService
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@inject IHttpContextAccessor HttpContextAccessor
+@inject IOrderService OrderService
+@inject IJSRuntime JSRuntime
+@inject IScreenSeatService ScreenSeatService
+@inject IUserService UserService
+@inject NavigationManager NavigationManager
+
+@code {
+    private int? userId;
+    private User? currentUser;
+    private string remainingTime = "Loading...";
+    private bool isProcessing = false;
+    private string message = "";
+
+    private MovieDto movie = new()
+        {
+            Title = "Unknown Movie",
+            Genre = "Unknown Genre",
+            Language = "Unknown Language",
+            Description = "No description available",
+            Showtimes = new List<ShowtimeDto>()
+        };
+
+    private DateTime? lockExpiryTime;
+    private DateTime? lockStartTime;
+    private string antiforgeryToken = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            userId = 1; // Thay bằng ID thực tế của user đang đăng nhập
+            currentUser = await UserService.GetUserByIdAsync(userId.Value);
+
+            if (currentUser == null)
+            {
+                Console.WriteLine("❌ Không tìm thấy user!");
+                return;
+            }
+            var fetchedMovie = await MovieService.GetMovieWithShowtimeAndCinemaAsync(1); // thay bằng movieId 
+            movie = fetchedMovie ?? new MovieDto()
+                {
+                    Title = "Unknown Movie",
+                    Genre = "Unknown Genre",
+                    Language = "Unknown Language",
+                    Description = "No description available",
+                    Showtimes = new List<ShowtimeDto>()
+                };
+
+            await CalculateRemainingTime(userId);
+
+            var tokens = Antiforgery.GetAndStoreTokens(HttpContextAccessor.HttpContext);
+            antiforgeryToken = tokens.RequestToken;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+    }
+
+    private async Task CalculateRemainingTime(int? userId)
+    {
+        try
+        {
+            var latestSeatLock = await SeatLockService.GetLatestSeatLockByUserIdAsync(userId);
+
+            if (latestSeatLock != null)
+            {
+                lockExpiryTime = latestSeatLock.LockExpiryTime;
+                lockStartTime = latestSeatLock.LockStartTime;
+
+                if (lockExpiryTime.HasValue && lockStartTime.HasValue)
+                {
+                    var timeRemaining = lockExpiryTime.Value - DateTime.UtcNow;
+                    remainingTime = timeRemaining.TotalSeconds > 0 ? $"{timeRemaining.Minutes:D2}:{timeRemaining.Seconds:D2}" : "Expired";
+                }
+                else
+                {
+                    remainingTime = "Expired";
+                }
+            }
+            else
+            {
+                remainingTime = "No seat locks found for this user.";
+            }
+        }
+        catch (Exception ex)
+        {
+            remainingTime = $"Error: {ex.Message}";
+            Console.WriteLine($"Error calculating remaining time: {ex.Message}");
+        }
+    }
+}
+
+
+
+    <section class="details-banner hero-area bg_img seat-plan-banner" data-background="assets/images/banner/banner04.jpg">
+        <div class="container">
+            <div class="details-banner-wrapper">
+                <div class="details-banner-content style-two">
+                    <h3 class="title">@(movie?.Title ?? "Loading...")</h3>
+                    <div class="tags">
+                        <a href="#0">@(movie?.Genre ?? "N/A")</a>
+                        <a href="#0">@(movie?.Language ?? "N/A")</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="page-title bg-one">
+        <div class="container">
+            <div class="page-title-area">
+                <div class="item md-order-1">
+                    <a href="movie-ticket-plan.html" class="custom-button back-button">
+                        <i class="flaticon-double-right-arrows-angles"></i>Back
+                    </a>
+                </div>
+                <div class="item date-item">
+                    <span class="date">@movie?.Showtimes.FirstOrDefault()?.ShowDate.ToString("yyyy-MM-dd")</span>
+                    <select class="select-bar">
+                        @foreach (var showtime in movie?.Showtimes ?? new List<ShowtimeDto>())
+                        {
+                            <option value="@showtime.ShowtimeId">@showtime.ShowTime.ToString("hh\\:mm")</option>
+                        }
+                    </select>
+                </div>
+                <div class="item">
+                    <h5 class="title">Remaining Time</h5>
+                    @if (remainingTime == "Expired")
+                    {
+                        <p class="text-danger">@remainingTime</p>
+                        <script type="text/javascript">
+                            alert('Your seat has expired.');
+                            window.location.href = '/';  // Chuyển hướng về trang chính
+                        </script>
+                    }
+                    else if (remainingTime == "No seat locks found for this user.")
+                    {
+                        <p class="text-warning">@remainingTime</p> 
+                    }
+                    else
+                    {
+                        <p>@remainingTime</p>  
+                    }
+                </div>
+
+            </div>
+        </div>
+    </section>
+    <div class="movie-facility padding-bottom padding-top">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    @if (@userId == null)
+                    {
+                        <div class="checkout-widget d-flex flex-wrap align-items-center justify-cotent-between">
+                            <div class="title-area">
+                                <h5 class="title">Already a Boleto Member?</h5>
+                                <p>Sign in to earn points and make booking easier!</p>
+                            </div>
+                            <a href="#0" class="sign-in-area">
+                                <i class="fas fa-user"></i><span>Sign in</span>
+                            </a>
+                        </div>
+                    }
+
+                    <form class="checkout-contact-form">
+                        <div class="form-group">
+                            <label for="FullName"><i class="fas fa-user"></i> Full Name</label>
+                            <input type="text" id="FullName" name="FullName" placeholder="Enter your full name" class="form-control" oninput="validateFullName()">
+                            <span class="text-danger" id="errorFullName"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="Email"><i class="fas fa-envelope"></i> Email</label>
+                            <input type="email" id="Email" name="Email" placeholder="Enter your email" class="form-control" oninput="validateEmail()">
+                            <span class="text-danger" id="errorEmail"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="Phone"><i class="fas fa-phone"></i> Phone Number</label>
+                            <input type="text" id="Phone" name="Phone" placeholder="Enter your phone number" class="form-control" oninput="validatePhone()">
+                            <span class="text-danger" id="errorPhone"></span>
+                        </div>
+                    </form>
+                    <button type="button" onclick="redirectToPayment()" class="btn btn-primary">Pay with VNPAY</button>
+                </div>
+                <div class="col-lg-4">
+                    <div class="booking-summery bg-one">
+                        <h4 class="title">Booking Summary</h4>
+                        <ul>
+                            <li>
+                                <h6 class="subtitle">@movie?.Title</h6>
+                                <span class="info">@movie?.Language</span>
+                            </li>
+                            <li>
+                                <h6 class="subtitle">
+                                    <span>@movie?.Showtimes.FirstOrDefault()?.Cinema?.CinemaName</span>
+                                    @if (movie?.Showtimes?.FirstOrDefault()?.ScreenSeat?.Screen?.ScreenName != null)
+                                    {
+                                        <span>Room: @movie.Showtimes.FirstOrDefault().ScreenSeat.Screen.ScreenName</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Room: Not Available</span>
+                                    }
+
+
+                                </h6>
+                                <div class="info">
+                                    <span>@movie?.Showtimes.FirstOrDefault()?.ShowDate.ToString("yyyy-MM-dd")</span>
+                                    <span>@movie?.Showtimes.FirstOrDefault()?.ShowTime.ToString("hh\\:mm")</span>
+                                </div>
+                            </li>
+                            <li>
+                                <h6 class="subtitle">Seats:</h6>
+                                <ul>
+                                    @if (movie?.Showtimes?.FirstOrDefault()?.ScreenSeat != null)
+                                    {
+                                        var seat = movie.Showtimes.FirstOrDefault().ScreenSeat;
+                                        <li>@seat.SeatLabel (@seat.SeatType?.SeatTypeName) - $@(seat.SeatType?.BasePrice ?? 0)</li>
+                                    }
+                                </ul>
+                            </li>
+                            <li>
+                                <h6 class="subtitle mb-0">
+                                    <span>Tickets Price</span>
+                                    <span>
+                                        $@(movie?.Showtimes?.FirstOrDefault()?.ScreenSeat?.SeatType?.BasePrice ?? 0)
+                                    </span>
+                                </h6>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="proceed-area text-center">
+                        <h6 class="subtitle">
+                            <span>Amount Payable</span>
+                            <span>
+                                $@(movie?.Showtimes?.FirstOrDefault()?.ScreenSeat?.SeatType?.BasePrice ?? 0)
+
+                            </span>
+                        </h6>
+                        <a href="/" class="custom-button back-button">Change </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/jquery-3.3.1.min.js"></script>
+    <script src="assets/js/bootstrap.min.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script >
+          function redirectHome() {
+        alert('@remainingTime');
+        window.location.href = '/';
+          }
+    </script>
+    <script>
+        function validateFullName() {
+            let fullName = document.getElementById("FullName").value;
+            let errorSpan = document.getElementById("errorFullName");
+
+            if (!fullName.trim()) {
+                errorSpan.textContent = "Full Name is required";
+                errorSpan.style.color = "red";
+            } else if (fullName.length > 100) {
+                errorSpan.textContent = "Full Name cannot exceed 100 characters";
+                errorSpan.style.color = "red";
+            } else {
+                errorSpan.textContent = "";
+            }
+        }
+
+        function validateEmail() {
+            let email = document.getElementById("Email").value;
+            let errorSpan = document.getElementById("errorEmail");
+                 let emailPattern = /^[^@@\s]+@@[^@@\s]+\.[^@@\s]+$/;
+
+            if (!email.trim()) {
+                errorSpan.textContent = "Email is required";
+                errorSpan.style.color = "red";
+            } else if (!emailPattern.test(email)) {
+                errorSpan.textContent = "Invalid Email Address";
+                errorSpan.style.color = "red";
+            } else {
+                errorSpan.textContent = "";
+            }
+        }
+
+        function validatePhone() {
+            let phone = document.getElementById("Phone").value;
+            let errorSpan = document.getElementById("errorPhone");
+            let phonePattern = /^(09|01)[0-9]{8}$/; 
+
+            if (!phone.trim()) {
+                errorSpan.textContent = "Phone number is required";
+                errorSpan.style.color = "red";
+            } else if (!phonePattern.test(phone)) {
+                errorSpan.textContent = "Phone number must be 10 digits and start with 09 or 01";
+                errorSpan.style.color = "red";
+            } else {
+                errorSpan.textContent = "";
+            }
+        }
+    </script>
+
+    <script>
+         function redirectToPayment() {
+            const fullName = document.getElementById('FullName').value;
+
+              const amount = @(movie?.Showtimes?.FirstOrDefault()?.ScreenSeat?.SeatType?.BasePrice ?? 0);
+            const movieTitle = `@movie?.Title`;
+            const seatLabel = `@movie?.Showtimes?.FirstOrDefault()?.ScreenSeat?.SeatLabel`;
+            const cinemaName = `@movie?.Showtimes?.FirstOrDefault()?.Cinema?.CinemaName`;
+            const userId = @userId;
+            const screenSeatId = `@movie?.Showtimes?.FirstOrDefault()?.ScreenSeat?.ScreenSeatId`; 
+
+
+            const paymentInfo = {
+                orderType: "movie_ticket",  
+                amount: amount,  
+                orderDescription: `Thanh toán vé xem phim ${movieTitle} tại ${cinemaName} - Ghế: ${seatLabel}`, 
+                name: fullName,  
+            };
+
+            if (!paymentInfo || !paymentInfo.orderType || !paymentInfo.amount) {
+                console.error("Thông tin thanh toán không hợp lệ", paymentInfo);
+                return;
+            }
+                const orderItem = {
+                orderItemId: 123, 
+                orderId: 456, 
+                movieTitle: movieTitle,
+                seatLabel: seatLabel,
+                cinemaName: cinemaName,
+                fullName: fullName,
+                amount: amount,
+                screenSeatId: screenSeatId, 
+                userId: userId
+            };
+             const url = new URL("/payment", window.location.origin);
+              url.searchParams.append("orderType", paymentInfo.orderType);
+            url.searchParams.append("amount", paymentInfo.amount);
+            url.searchParams.append("orderDescription", paymentInfo.orderDescription);
+            url.searchParams.append("name", paymentInfo.name);
+          url.searchParams.append("orderItemId", orderItem.orderItemId);
+        url.searchParams.append("orderId", orderItem.orderId);
+        url.searchParams.append("movieTitle", orderItem.movieTitle);
+        url.searchParams.append("seatLabel", orderItem.seatLabel);
+        url.searchParams.append("cinemaName", orderItem.cinemaName);
+        url.searchParams.append("fullName", orderItem.fullName);
+        url.searchParams.append("screenSeatId", orderItem.screenSeatId);
+        url.searchParams.append("userId", orderItem.userId);
+            // Chuyển hướng người dùng sang trang thanh toán
+            window.location.href = url.toString();
+        }
+
+    </script>

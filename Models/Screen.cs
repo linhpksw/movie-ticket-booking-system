@@ -20,5 +20,4 @@ public class Screen
     public required Cinema Cinema { get; set; }
 
     public ICollection<ScreenSeat>? ScreenSeats { get; set; }
-    public ICollection<Showtime>? Showtimes { get; set; }
 }

@@ -1,52 +1,53 @@
-﻿
+﻿using G5_MovieTicketBookingSystem.Repositories;
+using G5_MovieTicketBookingSystem;
 using G5_MovieTicketBookingSystem.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace G5_MovieTicketBookingSystem.Repositories.Impl
+public class CinemaRepository : ICinemaRepository
 {
-    public class CinemaRepository : ICinemaRepository
+    private readonly AppDbContext _context;
+
+    public CinemaRepository(AppDbContext context)
     {
-        private readonly AppDbContext _dbContext;
+        _context = context;
+    }
 
-        public CinemaRepository(AppDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+    public async Task<IEnumerable<Cinema>> GetAllAsync()
+    {
+        return await _context.Cinemas.Include(c => c.Screens).ToListAsync();
+    }
 
-        public async Task<IEnumerable<Cinema>> GetAllAsync()
-        {
-            // Optionally Include(c => c.Screens)
-            return await _dbContext.Cinemas.ToListAsync();
-        }
+    public async Task<Cinema?> GetByIdAsync(int id)
+    {
+        return await _context.Cinemas.Include(c => c.Screens).FirstOrDefaultAsync(c => c.CinemaId == id);
+    }
 
-        public async Task<Cinema?> GetByIdAsync(int id)
-        {
-            return await _dbContext.Cinemas
-                .FirstOrDefaultAsync(c => c.CinemaId == id);
-        }
+    public async Task<Cinema> CreateAsync(Cinema entity)
+    {
+        _context.Cinemas.Add(entity);
+        await _context.SaveChangesAsync();
+        return entity;
+    }
 
-        public async Task<Cinema> CreateAsync(Cinema entity)
-        {
-            _dbContext.Cinemas.Add(entity);
-            await _dbContext.SaveChangesAsync();
-            return entity;
-        }
+    public async Task<Cinema> UpdateAsync(Cinema entity)
+    {
+        _context.Cinemas.Update(entity);
+        await _context.SaveChangesAsync();
+        return entity;
+    }
 
-        public async Task<Cinema> UpdateAsync(Cinema entity)
+    public async Task DeleteAsync(int id)
+    {
+        var cinema = await GetByIdAsync(id);
+        if (cinema != null)
         {
-            _dbContext.Cinemas.Update(entity);
-            await _dbContext.SaveChangesAsync();
-            return entity;
+            _context.Cinemas.Remove(cinema);
+            await _context.SaveChangesAsync();
         }
+    }
 
-        public async Task DeleteAsync(int id)
-        {
-            var cinema = await GetByIdAsync(id);
-            if (cinema != null)
-            {
-                _dbContext.Cinemas.Remove(cinema);
-                await _dbContext.SaveChangesAsync();
-            }
-        }
+    public async Task<IEnumerable<Cinema>> GetCinemasWithScreensAsync()
+    {
+        return await _context.Cinemas.Include(c => c.Screens).ToListAsync();
     }
 }
