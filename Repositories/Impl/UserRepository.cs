@@ -16,55 +16,40 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
         }
 
 
-        public async Task<User> GetUserByEmail(string email)
+        public async Task<User?> GetUserByEmail(string email)
         {
             return await _dbContext.Users
-                .FirstOrDefaultAsync(u => u.Email == email)
-                ?? throw new Exception("User not found");
+                .AsNoTracking() // Bỏ qua cache của DbContext
+                .FirstOrDefaultAsync(u => u.Email == email);
+
         }
 
         public async Task<User> SignUpAsync(User user)
         {
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user), "User object cannot be null.");
-            }
-
-            // Validate input (e.g., check for existing user by email or username)
-            if (await _dbContext.Users.AnyAsync(u => u.Email == user.Email || u.Username == user.Username))
-            {
-                throw new InvalidOperationException("User with this email or username already exists.");
-            }
-
-            // Hash the password before saving
-            if (!string.IsNullOrEmpty(user.Password))// Assuming User has a Password property
-            {
-                user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
-               
-            }
-
             try
             {
                 _dbContext.Users.Add(user);
                 await _dbContext.SaveChangesAsync();
-                return user; // Return the registered user
+                Console.WriteLine("User successfully added to database."); // Debug log
+                return user; // Trả về user sau khi lưu thành công
             }
             catch (Exception ex)
             {
-                throw new Exception("Failed to sign up user.", ex);
+                Console.WriteLine($"Error: {ex.Message}");
+                Console.WriteLine($"StackTrace: {ex.StackTrace}");
+                throw; // Giữ nguyên lỗi để debug
             }
         }
 
 
-        public Task<bool> UsernameExistsAsync(string username)
+        public async Task<bool> IsUsernameExistsAsync(string username)
         {
-            throw new NotImplementedException();
+            return await _dbContext.Users.AnyAsync(u => u.Username == username);
         }
-       
 
 
 
 
-      
+
     }
 }
