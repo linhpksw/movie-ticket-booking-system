@@ -1,4 +1,4 @@
-﻿using G5_MovieTicketBookingSystem.DTOs;
+﻿using G5_MovieTicketBookingSystem.DTOs.MovieBookingPlan;
 using G5_MovieTicketBookingSystem.Repositories;
 
 namespace G5_MovieTicketBookingSystem.Services.Impl
@@ -14,6 +14,7 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
 
         public async Task<IEnumerable<MovieShowtimeDto>> GetMovieShowtimeDtos(MovieShowtimeFilterDto filter)
         {
+        
             return await _movieRepository.GetMovieShowtimeDtos(filter);
         }
 

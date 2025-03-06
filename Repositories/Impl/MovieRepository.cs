@@ -1,5 +1,6 @@
 ﻿using G5_MovieTicketBookingSystem.Data;
-using G5_MovieTicketBookingSystem.DTOs;
+using G5_MovieTicketBookingSystem.DTOs.MovieBookingPlan;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace G5_MovieTicketBookingSystem.Repositories.Impl
@@ -15,22 +16,51 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
 
         public async Task<IEnumerable<MovieShowtimeDto>> GetMovieShowtimeDtos(MovieShowtimeFilterDto filter)
         {
-            var query = await (from s in _dbContext.Showtimes
-                               join m in _dbContext.Movies on s.MovieId equals m.MovieId
-                               join ss in _dbContext.ScreenSeats on s.ScreenSeatId equals ss.ScreenSeatId
-                               join sc in _dbContext.Screens on ss.ScreenId equals sc.ScreenId
-                               join c in _dbContext.Cinemas on sc.CinemaId equals c.CinemaId
-                               where c.City == filter.City
-                                     && c.CinemaName == filter.CinemaName
-                                     && s.ExperienceType == filter.ExperienceType
-                                     && s.ShowDate == filter.ShowDate
-                               group s by m.Title into g
-                               select new MovieShowtimeDto
-                               {
-                                   Title = g.Key,
-                                   Showtime = g.Select(x => x.ShowTime).ToList()
-                               }).ToListAsync();
-            return query;
+            var query = _dbContext.Showtimes.AsQueryable();
+
+            // Kiểm tra cả null và chuỗi rỗng để bỏ qua điều kiện lọc
+            if (!string.IsNullOrWhiteSpace(filter.City))
+            {
+                query = query.Where(s => s.ScreenSeat.Screen.Cinema.City == filter.City);
+            }
+
+            if (!string.IsNullOrWhiteSpace(filter.CinemaName))
+            {
+                query = query.Where(s => s.ScreenSeat.Screen.Cinema.CinemaName == filter.CinemaName);
+            }
+
+            if (!string.IsNullOrEmpty(filter.ExperienceType))
+            {
+                query = query.Where(s => s.ExperienceType == filter.ExperienceType);
+            }
+
+            if (filter.ShowDate != null)
+            {
+                query = query.Where(s => s.ShowDate == filter.ShowDate);
+                /*query = query.Where(s => s.ShowDate == new DateTime(2025,3,7));*/
+            }
+
+            var rawResult = await query
+                .Select(s => new
+                {
+                    Title = s.Movie.Title,
+                    Showtime = s.ShowTime
+                })
+                .ToListAsync();
+
+            var groupedResult = rawResult
+                .GroupBy(r => r.Title)
+                .Select(g => new MovieShowtimeDto
+                {
+                    Title = g.Key,
+                    Showtime = g.Select(x => x.Showtime).ToList()
+                })
+                .ToList();
+
+            return groupedResult;
         }
+
+
+
     }
 }

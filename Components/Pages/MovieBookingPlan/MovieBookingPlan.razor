@@ -2,177 +2,104 @@
 @inject ICinemaService CinemaService
 @inject IShowtimeService ShowtimeService
 @inject IMovieService MovieService
-
-<!DOCTYPE html>
-<html lang="en">
+@using G5_MovieTicketBookingSystem.DTOs.MovieBookingPlan
 
 
-<!-- Mirrored from pixner.net/boleto/demo/movie-ticket-plan.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 11 Feb 2025 16:56:03 GMT -->
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-
-    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
-    <link rel="stylesheet" href="assets/css/all.min.css">
-    <link rel="stylesheet" href="assets/css/animate.css">
-    <link rel="stylesheet" href="assets/css/flaticon.css">
-    <link rel="stylesheet" href="assets/css/magnific-popup.css">
-    <link rel="stylesheet" href="assets/css/odometer.css">
-    <link rel="stylesheet" href="assets/css/owl.carousel.min.css">
-    <link rel="stylesheet" href="assets/css/owl.theme.default.min.css">
-    <link rel="stylesheet" href="assets/css/nice-select.css">
-    <link rel="stylesheet" href="~/assets/css/main.css">
-
-    <link rel="shortcut icon" href="assets/images/favicon.png" type="image/x-icon">
-
-    <title>Boleto  - Online Ticket Booking Website HTML Template</title>
 
 
-</head>
-
-<body>
-    <!-- ==========Preloader========== -->
-    <div class="preloader">
-        <div class="preloader-inner">
-            <div class="preloader-icon">
-                <span></span>
-                <span></span>
-            </div>
-        </div>
-    </div>
-    <!-- ==========Preloader========== -->
-    <!-- ==========Overlay========== -->
-    <div class="overlay"></div>
-    <a href="#0" class="scrollToTop">
-        <i class="fas fa-angle-up"></i>
-    </a>
-    <!-- ==========Overlay========== -->
-    <!-- ==========Window-Warning-Section========== -->
-    <section class="window-warning inActive">
-        <div class="lay"></div>
-        <div class="warning-item">
-            <h6 class="subtitle">Welcome! </h6>
-            <h4 class="title">Select Your Seats</h4>
-            <div class="thumb">
-                <img src="assets/images/movie/seat-plan.png" alt="movie">
-            </div>
-            <a href="movie-seat-plan.html" class="custom-button seatPlanButton">Seat Plans<i class="fas fa-angle-right"></i></a>
-        </div>
-    </section>
-    <!-- ==========Window-Warning-Section========== -->
-    <!-- ==========Banner-Section========== -->
-    <section class="details-banner hero-area bg_img" data-background="assets/images/banner/banner03.jpg">
-        <div class="container">
-            <div class="details-banner-wrapper">
-                <div class="details-banner-content">
-                    <h3 class="title">Venus</h3>
-                    <div class="tags">
-                        <a href="#0">English</a>
-                        <a href="#0">Hindi</a>
-                        <a href="#0">Telegu</a>
-                        <a href="#0">Tamil</a>
-                    </div>
+<!-- Banner Section -->
+<section class="details-banner hero-area bg_img seat-plan-banner" data-background="assets/images/banner/banner03.jpg">
+    <div class="container">
+        <div class="details-banner-wrapper">
+            <div class="details-banner-content">
+                <h3 class="title">Venus</h3>
+                <div class="tags">
+                    <a href="#0">English</a>
+                    <a href="#0">Hindi</a>
+                    <a href="#0">Telegu</a>
+                    <a href="#0">Tamil</a>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- ==========Book-Section========== -->
-    <BookSection Cities="cities"
-                 AvailableDates="availableDates"
-                 Cinemas="cinemas"
-                 Experiences="experiences"
-                 OnCitySelected="HandleCityChange"
-                 OnDateSelected="HandleDateChange"
-                 OnCinemaSelected="HandleCinemaChange"
-                 OnExperienceSelected="HandleExperienceChange" />
+<!-- Book Section -->
+<BookSection Cities="cities"
+    AvailableDates="availableDates"
+    Cinemas="cinemas"
+    Experiences="experiences"
+    OnFilterChanged="HandleFilterChange" />
 
-    <!-- ==========Movie-Section========== -->
-    <MovieTable
-        movieShowtimeDtos ="movieShowtimeDtos"
-        />
+<!-- Movie Section -->
+@* <MovieTable movieShowtimeDtos="movieShowtimeDtos" /> *@
 
 
-    <script src="assets/js/jquery-3.3.1.min.js"></script>
-    <script src="assets/js/modernizr-3.6.0.min.js"></script>
-    <script src="assets/js/plugins.js"></script>
-    <script src="assets/js/bootstrap.min.js"></script>
-    <script src="assets/js/isotope.pkgd.min.js"></script>
-    <script src="assets/js/magnific-popup.min.js"></script>
-    <script src="assets/js/owl.carousel.min.js"></script>
-    <script src="assets/js/wow.min.js"></script>
-    <script src="assets/js/countdown.min.js"></script>
-    <script src="assets/js/odometer.min.js"></script>
-    <script src="assets/js/viewport.jquery.js"></script>
-    <script src="assets/js/nice-select.js"></script>
-    <script src="~/assets/js/main.js"></script>
-</body>
-
-
-<!-- Mirrored from pixner.net/boleto/demo/movie-ticket-plan.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 11 Feb 2025 16:56:06 GMT -->
-</html>
 @code {
-    // Khai báo các biến
+    // Danh sách dữ liệu từ API
     private IEnumerable<string> cities = Array.Empty<string>();
     private IEnumerable<DateTime> availableDates = Array.Empty<DateTime>();
     private IEnumerable<string> cinemas = Array.Empty<string>();
     private IEnumerable<string> experiences = Array.Empty<string>();
     private IEnumerable<MovieShowtimeDto> movieShowtimeDtos = Array.Empty<MovieShowtimeDto>();
 
-    // Khai báo các biến chứa giá trị được chọn
-    private string selectedCity = string.Empty;
-    private DateTime selectedDate = DateTime.Today;
-    private string selectedCinema = string.Empty;
-    private string selectedExperience = string.Empty;
+    // Các giá trị đã chọn
+    public MovieShowtimeFilterDto filter = new MovieShowtimeFilterDto();
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            cities = await CinemaService.GetCitiesAsync();  // Lấy thành phố trong cinema
-            availableDates = Enumerable.Range(0, 7)         // Show ra ngày tính từ thời điểm hiện tại
-                    .Select(x => DateTime.Today.AddDays(x))
-                    .ToList();
-            cinemas = await CinemaService.GetCinemasAsync(); // Lấy danh sách rạp chiếu phim
-            experiences = await ShowtimeService.GetExperienceTypeAsync(); // Lấy danh sách trải nghiệm
-            var filter = MovieService.InitMovieShowtimeFilter(selectedCity, selectedCinema, selectedExperience, selectedDate);
-            movieShowtimeDtos = await MovieService.GetMovieShowtimeDtos(filter); // Lấy thông tin lịch chiếu phim
-            
-            
-
-
+            // Load dữ liệu ban đầu
+            cities = await CinemaService.GetCitiesAsync();
+            availableDates = Enumerable.Range(0, 7).Select(x => DateTime.Today.AddDays(x)).ToList();
+            cinemas = await CinemaService.GetCinemasAsync();
+            experiences = await ShowtimeService.GetExperienceTypeAsync();
+            filter.ShowDate = DateTime.Today;
+            // Lấy danh sách phim ban đầu
+            await LoadMovieShowtimes();
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error loading cities: {ex.Message}");
+            Console.WriteLine($"Error loading data: {ex.Message}");
         }
     }
 
-    
-
-    private async Task HandleCityChange(string city)
+    private async Task LoadMovieShowtimes()
     {
-        selectedCity = city;
-        Console.WriteLine($"City changed: {selectedCity}");    
+        movieShowtimeDtos = await MovieService.GetMovieShowtimeDtos(filter);
+
+
+    }
+    private async Task HandleFilterChange(MovieShowtimeFilterDto inputFilter)
+    {
+        filter.City = inputFilter.City;
+        filter.ShowDate = inputFilter.ShowDate;
+        filter.CinemaName = inputFilter.CinemaName;
+        filter.ExperienceType = inputFilter.ExperienceType;
+        Console.WriteLine(filter.ShowDate);
+
+        await LoadMovieShowtimes();
+
+        PrintMovieShowtimeDto(movieShowtimeDtos);
+
+        StateHasChanged(); // Cập nhật giao diện Blazor
     }
 
-    private async Task HandleDateChange(DateTime date)
+    private void PrintMovieShowtimeDto(IEnumerable<MovieShowtimeDto> movieShowtimeDtos)
     {
-        selectedDate = date;
-        Console.WriteLine($"Date changed: {selectedDate.ToShortDateString()}");
+        foreach (var movieShowtimeDto in movieShowtimeDtos)
+        {
+            Console.WriteLine($"Title: {movieShowtimeDto.Title}");
+            if (movieShowtimeDto.Showtime != null)
+            {
+                foreach (var showtime in movieShowtimeDto.Showtime)
+                {
+                    Console.WriteLine($"Showtime: {showtime}");
+                }
+            }
+        }
     }
 
-    private async Task HandleCinemaChange(string cinema)
-    {
-        selectedCinema = cinema;
-        Console.WriteLine($"Cinema changed: {selectedCinema}");
-    }
 
-    private async Task HandleExperienceChange(string experience)
-    {
-        selectedExperience = experience;
-        Console.WriteLine($"Experience changed: {selectedExperience}");    
-    }
-    
 }

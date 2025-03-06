@@ -1,4 +1,6 @@
-﻿<div class="book-section bg-one">
+﻿@using G5_MovieTicketBookingSystem.DTOs.MovieBookingPlan
+
+<section class="book-section bg-one">
     <div class="container">
         <form class="ticket-search-form two">
             <!-- Chọn Thành Phố -->
@@ -7,7 +9,7 @@
                     <img src="assets/images/ticket/city.png" alt="ticket">
                 </div>
                 <span class="type">City</span>
-                <select class="select-bar" @bind="SelectedCity" @bind:event="onchange">
+                <select class="select-bar" @onchange="HandleCityChange">
                     <option value="">Select a city</option>
                     @foreach (var city in cities)
                     {
@@ -22,13 +24,10 @@
                     <img src="assets/images/ticket/date.png" alt="ticket">
                 </div>
                 <span class="type">Date</span>
-                <select class="select-bar" @bind="SelectedDate" @bind:event="onchange">
+                <select class="select-bar" @onchange="HandleDateChange">
                     @foreach (var date in availableDates)
                     {
-                        <option value="@date.ToString("yyyy-MM-dd")"
-                                selected="@(date.Date == DateTime.Today)">
-                            @date.ToString("dd/MM/yyyy")
-                        </option>
+                        <option value="@date.ToString("yyyy-MM-dd")">@date.ToString("dd/MM/yyyy")</option>
                     }
                 </select>
             </div>
@@ -39,7 +38,7 @@
                     <img src="assets/images/ticket/cinema.png" alt="ticket">
                 </div>
                 <span class="type">Cinema</span>
-                <select class="select-bar" @bind="SelectedCinema" @bind:event="onchange">
+                <select class="select-bar" @onchange="HandleCinemaChange">
                     <option value="">Select a cinema</option>
                     @foreach (var cinema in cinemas)
                     {
@@ -54,7 +53,7 @@
                     <img src="assets/images/ticket/exp.png" alt="ticket">
                 </div>
                 <span class="type">Experience</span>
-                <select class="select-bar" @bind="SelectedExperience" @bind:event="onchange">
+                <select class="select-bar" @onchange="HandleExperienceChange">
                     <option value="">Select an experience</option>
                     @foreach (var experience in experiences)
                     {
@@ -64,7 +63,7 @@
             </div>
         </form>
     </div>
-</div>
+</section>
 
 @code {
     // Lấy dữ liệu từ component cha
@@ -72,21 +71,40 @@
     [Parameter] public IEnumerable<DateTime> availableDates { get; set; } = Array.Empty<DateTime>();
     [Parameter] public IEnumerable<string> cinemas { get; set; } = Array.Empty<string>();
     [Parameter] public IEnumerable<string> experiences { get; set; } = Array.Empty<string>();
+    [Parameter] public EventCallback<MovieShowtimeFilterDto> OnFilterChanged { get; set; }
 
-    // Truyền dữ liệu về component cha
-    [Parameter] public EventCallback<string> OnCitySelected { get; set; }
-    [Parameter] public EventCallback<DateTime> OnDateSelected { get; set; }
-    [Parameter] public EventCallback<string> OnCinemaSelected { get; set; }
-    [Parameter] public EventCallback<string> OnExperienceSelected { get; set; }
 
-    private string SelectedCity { get; set; } = string.Empty;
-    private DateTime SelectedDate { get; set; } = DateTime.Today;
-    private string SelectedCinema { get; set; } = string.Empty;
-    private string SelectedExperience { get; set; } = string.Empty;
 
-    // Gửi dữ liệu lên component cha khi giá trị thay đổi
-    private async Task CityChanged() => await OnCitySelected.InvokeAsync(SelectedCity);
-    private async Task DateChanged() => await OnDateSelected.InvokeAsync(SelectedDate);
-    private async Task CinemaChanged() => await OnCinemaSelected.InvokeAsync(SelectedCinema);
-    private async Task ExperienceChanged() => await OnExperienceSelected.InvokeAsync(SelectedExperience);
+
+    public MovieShowtimeFilterDto movieShowtimeFilterDto = new MovieShowtimeFilterDto();
+
+    // Hàm xử lý khi chọn thành phố
+    public async Task HandleCityChange(ChangeEventArgs e)
+    {
+        movieShowtimeFilterDto.City = e.Value.ToString();
+        Console.WriteLine(e.Value.ToString());
+        await OnFilterChanged.InvokeAsync(movieShowtimeFilterDto);
+    }
+    public async Task HandleDateChange(ChangeEventArgs e)
+    {
+        movieShowtimeFilterDto.ShowDate = DateTime.Parse(e.Value.ToString());
+        await OnFilterChanged.InvokeAsync(movieShowtimeFilterDto);
+    }
+    public async Task HandleCinemaChange(ChangeEventArgs e)
+    {
+        movieShowtimeFilterDto.CinemaName = e.Value.ToString();
+        Console.WriteLine(e.Value.ToString());
+        await OnFilterChanged.InvokeAsync(movieShowtimeFilterDto);
+    }
+    public async Task HandleExperienceChange(ChangeEventArgs e)
+    {
+        movieShowtimeFilterDto.ExperienceType = e.Value.ToString();
+        Console.WriteLine(e.Value.ToString());
+        await OnFilterChanged.InvokeAsync(movieShowtimeFilterDto);
+    }
+
+
+
+
+
 }

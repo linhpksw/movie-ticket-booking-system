@@ -1,4 +1,4 @@
-﻿using G5_MovieTicketBookingSystem.DTOs;
+﻿using G5_MovieTicketBookingSystem.DTOs.MovieBookingPlan;
 
 namespace G5_MovieTicketBookingSystem.Repositories
 {
