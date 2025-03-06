@@ -1,22 +1,25 @@
 ﻿@page "/payment-success"
 @layout MainLayout
 
-@using G5_MovieTicketBookingSystem.Models.VNPAY
+@using G5_MovieTicketBookingSystem.DTOs.VNPAY
 @inject IHttpContextAccessor HttpContextAccessor
 @inject IOrderService OrderService
 @inject ITransactionLogService TransactionLogService
 @inject IOrderItemService OrderItemService
 @inject ITicketService TicketService
-<h3>Chi tiết thanh toán</h3>
 
 @if (paymentInfo != null)
 {
+    <div class="padding-bottom padding-top">
+<h3>Chi tiết thanh toán</h3>
+
     <p><strong>Loại đơn hàng:</strong> @paymentInfo.OrderType</p>
     <p><strong>Số tiền:</strong> @paymentInfo.Amount.ToString("N0") VND</p>
     <p><strong>Mô tả:</strong> @paymentInfo.OrderDescription</p>
     <p><strong>Khách hàng:</strong> @paymentInfo.Name</p>
 
     <a href="/" class="btn btn-primary">Quay lại trang chủ</a>
+    </div>
 }
 else
 {

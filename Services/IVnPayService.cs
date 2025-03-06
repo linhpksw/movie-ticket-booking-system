@@ -1,4 +1,4 @@
-﻿using G5_MovieTicketBookingSystem.Models.VNPAY;
+﻿using G5_MovieTicketBookingSystem.DTOs.VNPAY;
 
 namespace G5_MovieTicketBookingSystem.Services
 {

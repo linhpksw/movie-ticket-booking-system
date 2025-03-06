@@ -1,6 +1,5 @@
 ﻿@page "/payment"
-@using G5_MovieTicketBookingSystem.Services
-@using G5_MovieTicketBookingSystem.Models.VNPAY
+
 @inject IVnPayService VnPayService
 @inject NavigationManager Navigation
 @inject IHttpContextAccessor HttpContextAccessor
@@ -84,7 +83,7 @@
                 TransactionTimestamp = DateTime.Now,
                 GatewayResponse = "Pending"
             };
-        AddTransactionLog(transactionLog);
+        // AddTransactionLog(transactionLog);
         // Kiểm tra nếu dữ liệu đầy đủ
         if (!string.IsNullOrEmpty(paymentModel.OrderType) && paymentModel.Amount > 0)
         {
@@ -135,8 +134,8 @@
 
         await OrderItemService.AddOrderItemAsync(newOrderItem);
     }
-    private async Task AddTransactionLog(TransactionLog transactionLog)
-    {
-        TransactionLogService.AddTransactionLogAsync(transactionLog);
-    }
+    // private async Task AddTransactionLog(TransactionLog transactionLog)
+    // {
+    //     TransactionLogService.AddTransactionLogAsync(transactionLog);
+    // }
 }

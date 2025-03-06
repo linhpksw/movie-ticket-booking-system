@@ -1,4 +1,4 @@
-﻿namespace G5_MovieTicketBookingSystem.Models.VNPAY
+﻿namespace G5_MovieTicketBookingSystem.DTOs.VNPAY
 {
     public class PaymentInformationModel
     {

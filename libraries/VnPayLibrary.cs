@@ -1,9 +1,9 @@
-﻿using G5_MovieTicketBookingSystem.Models.VNPAY;
-using System.Net.Sockets;
+﻿using System.Net.Sockets;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Globalization;
+using G5_MovieTicketBookingSystem.DTOs.VNPAY;
 
 namespace G5_MovieTicketBookingSystem.libraries
 {

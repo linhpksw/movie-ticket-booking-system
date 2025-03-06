@@ -6,7 +6,6 @@ using G5_MovieTicketBookingSystem.Services;
 using G5_MovieTicketBookingSystem.Services.Impl;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.SignalR;
-using G5_MovieTicketBookingSystem.Hubs;
 
 namespace G5_MovieTicketBookingSystem;
 
@@ -76,7 +75,6 @@ public class Program
 
         app.MapRazorPages();
         app.MapBlazorHub();
-        app.MapHub<CountdownHub>("/countdownHub"); // SignalR Hub
 
         app.Run();
     }

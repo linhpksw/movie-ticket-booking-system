@@ -1,7 +1,6 @@
 ﻿@page "/checkout"
 
-@using G5_MovieTicketBookingSystem.Repositories
-@using G5_MovieTicketBookingSystem.Services.Impl
+
 @inject IMovieService MovieService
 @inject ISeatLockService SeatLockService
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
@@ -44,7 +43,7 @@
                 Console.WriteLine("❌ Không tìm thấy user!");
                 return;
             }
-            var fetchedMovie = await MovieService.GetMovieWithShowtimeAndCinemaAsync(1);
+            var fetchedMovie = await MovieService.GetMovieWithShowtimeAndCinemaAsync(1); // thay bằng movieId 
             movie = fetchedMovie ?? new MovieDto()
                 {
                     Title = "Unknown Movie",
@@ -101,27 +100,6 @@
 
 
 
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
-    <link rel="stylesheet" href="assets/css/all.min.css">
-    <link rel="stylesheet" href="assets/css/animate.css">
-    <link rel="stylesheet" href="assets/css/flaticon.css">
-    <link rel="stylesheet" href="assets/css/magnific-popup.css">
-    <link rel="stylesheet" href="assets/css/odometer.css">
-    <link rel="stylesheet" href="assets/css/owl.carousel.min.css">
-    <link rel="stylesheet" href="assets/css/owl.theme.default.min.css">
-    <link rel="stylesheet" href="assets/css/nice-select.css">
-    <link rel="stylesheet" href="assets/css/main.css">
-    <link rel="shortcut icon" href="assets/images/favicon.png" type="image/x-icon">
-    <title>Boleto - Online Ticket Booking Website</title>
-</head>
-<body>
     <section class="details-banner hero-area bg_img seat-plan-banner" data-background="assets/images/banner/banner04.jpg">
         <div class="container">
             <div class="details-banner-wrapper">
@@ -385,6 +363,3 @@
         }
 
     </script>
-
-</body>
-</html>
