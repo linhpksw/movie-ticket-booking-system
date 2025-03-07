@@ -10,5 +10,7 @@ namespace G5_MovieTicketBookingSystem.Repositories
         Task<SeatLock> CreateAsync(SeatLock seatLock);
         Task<bool> UpdateAsync(SeatLock seatLock);
         Task<bool> DeleteAsync(int seatLockId);
+
+        //Task<bool> ExtendSeatLockAsync(int seatLockId, TimeSpan extension);
     }
 }

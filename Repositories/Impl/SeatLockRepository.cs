@@ -65,5 +65,18 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
             var result = await _dbContext.SaveChangesAsync();
             return result > 0;
         }
+
+        //public async Task<bool> ExtendSeatLockAsync(int seatLockId, TimeSpan extension)
+        //{
+        //    var seatLock = await _dbContext.SeatLocks.FirstOrDefaultAsync(sl => sl.SeatLockId == seatLockId);
+        //    if (seatLock == null)
+        //    {
+        //        return false;
+        //    }
+
+        //    seatLock.LockExpiryTime = seatLock.LockExpiryTime?.Add(extension);
+        //    var result = await _dbContext.SaveChangesAsync();
+        //    return result > 0;
+        //}
     }
 }
