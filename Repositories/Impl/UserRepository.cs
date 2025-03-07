@@ -20,8 +20,11 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
         {
             return await _dbContext.Users
                 .AsNoTracking() // Bỏ qua cache của DbContext
+                .Include(u => u.UserRoles) // Load quan hệ UserRoles
+                .Include(u => u.Orders)    // Load quan hệ Orders
+                .Include(u => u.SeatLocks) // Load quan hệ SeatLocks
+                .Include(u => u.TicketScanLogs) // Load quan hệ TicketScanLogs
                 .FirstOrDefaultAsync(u => u.Email == email);
-
         }
 
         public async Task<User> SignUpAsync(User user)

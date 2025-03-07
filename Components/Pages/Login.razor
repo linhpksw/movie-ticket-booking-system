@@ -1,83 +1,66 @@
-﻿@page "/Login"
+﻿@page "/login"
 @inject NavigationManager NavigationManager
 @inject HttpClient HttpClient
 @using System.Diagnostics
 @using G5_MovieTicketBookingSystem.DTOs.UserDto
 @code {
-    private string email { get; set; } = string.Empty;
-    private string password { get; set; } = string.Empty;
-    private bool isLoading { get; set; } = false;
-    private bool rememberMe { get; set; } = true;
-    private string errorMessage { get; set; } = string.Empty;
-
+    private bool isLoading = false;
+    private bool rememberMe = false;
+    [SupplyParameterFromForm]
+    private UserRequestDto userRequestDto { get; set; } = new UserRequestDto();
+    private Dictionary<string, string> Error = new Dictionary<string, string>(); // Lưu lỗi
+    [Inject]
+    public IUserServices UserServices { get; set; }
+    private ICollection<UserRole>? UserRoles;
     private async Task HandleLogin()
     {
-        errorMessage = "An error occurred during login";
-        try
+     
+        Error.Clear();
+
+        
+        if (string.IsNullOrEmpty(userRequestDto.Email) || !IsValidEmail(userRequestDto.Email))
         {
-            isLoading = true;
-            errorMessage = string.Empty;
-
-            // Basic validation
-            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
-            {
-                errorMessage = "Please fill in all required fields";
-                return;
-
-
-            }
-            UserRequestDto loginRequestDto = new()
-                {
-                    Email = email,
-                    Password = password,
-
-                };
-  
-            Debug.WriteLine($"Login attempt - Email: {email}");
-
-           
-
-            // Example API call (uncomment and modify according to your API)
-            /*
-            var loginModel = new { Email = email, Password = password, RememberMe = rememberMe };
-            var response = await HttpClient.PostAsJsonAsync("api/auth/login", loginModel);
-
-            if (response.IsSuccessStatusCode)
-            {
-                // Successful login
-                Debug.WriteLine("Login successful");
-                NavigationManager.NavigateTo("/dashboard"); // Redirect to dashboard or home
-                }
-            else
-            {
-                errorMessage = "Invalid email or password";
-                Debug.WriteLine($"Login failed: {response.StatusCode}");
-                }
-            */
-
-                            // Temporary simulation (remove this when implementing real API)
-                            await Task.Delay(1000); // Simulate network delay
-            if (email.Contains("@") && password.Length >= 6) // Simple validation
-            {
-                Debug.WriteLine("Login successful (simulation)");
-                NavigationManager.NavigateTo("/dashboard");
-            }
-            else
-            {
-                errorMessage = "Invalid email or password";
-            }
+            Error["Email"] = "Please enter a valid email address.";
         }
-        catch (Exception ex)
+
+        if (string.IsNullOrEmpty(userRequestDto.Password))
         {
-            errorMessage = "An error occurred during login";
-            Debug.WriteLine($"Login error: {ex.Message}");
+            Error["Password"] = "Password is required.";
         }
-        finally
+
+       
+        if (Error.Count > 0)
         {
-            isLoading = false;
+            return;
         }
+
+       
+        isLoading = true;
+
+        isLoading = false;
+        UserResponseDto userResponseDto = await UserServices.Login(userRequestDto);
+        
+        if (userResponseDto != null)
+        {
+            UserRoles = userResponseDto.UserRoles;
+            NavigationManager.NavigateTo("/");
+        }
+        else { Error.Add("Account", "Account is not exist"); }
+       
     }
 
+    private bool IsValidEmail(string email)
+    {
+        try
+        {
+            var mailAddress = new System.Net.Mail.MailAddress(email);
+            return mailAddress.Address == email;
+        }
+        catch
+        {
+            return false;
+        }
+    }
 }
 
 <!-- ==========Preloader========== -->
@@ -90,31 +73,39 @@
                     <span class="cate">hello</span>
                     <h2 class="title">welcome back</h2>
                 </div>
-
-                @if (!string.IsNullOrEmpty(errorMessage))
-                {
-                    <div class="alert alert-danger">@errorMessage</div>
-                }
+                
+                
                 <form class="account-form" @onsubmit="HandleLogin">
+                    @if (Error.ContainsKey("Account"))
+                    {
+                        <span class="text-danger">@Error["Account"]</span>
+                    }
                     <div class="form-group">
                         <label for="email2">Email<span>*</span></label>
-                        <input type="text" placeholder="Enter Your Email" id="email2" @bind="email" required>
+                        <InputText type="text" placeholder="Password" @bind-Value="userRequestDto.Email" id="pass2" required />
+
+                        @if (Error.ContainsKey("Email"))
+                        {
+                            <span class="text-danger">@Error["Email"]</span>
+                        }
                     </div>
                     <div class="form-group">
                         <label for="pass3">Password<span>*</span></label>
-                        <input type="password" placeholder="Password" id="pass3" @bind="password" required>
+                        <InputText type="password" placeholder="Password" @bind-Value="userRequestDto.Password" id="pass2" required />
+                        @if (Error.ContainsKey("Password"))
+                        {
+                            <span class="text-danger">@Error["Password"]</span>
+                        }
                     </div>
                     <div class="form-group checkgroup">
                         <input type="checkbox" id="bal2" @bind="rememberMe">
                         <label for="bal2">remember password</label>
                         <a href="#0" class="forget-pass">Forget Password</a>
                     </div>
-
-                    <div class="form-group text-center">
-                        <button type="submit" disabled="@isLoading">
-                            @(isLoading ? "Logging in..." : "Log in")
-                        </button>
+                     <div class="form-group text-center">
+                        <input disabled="@isLoading" placeholder=" @(isLoading ? "Logging in..." : "Log in")" type="submit" value="Login">
                     </div>
+                
                 </form>
                 <div class="option">
                     Don't have an account? <a href="/SignUp">sign up now</a>
@@ -141,4 +132,3 @@
         </div>
     </div>
 </section>
-
