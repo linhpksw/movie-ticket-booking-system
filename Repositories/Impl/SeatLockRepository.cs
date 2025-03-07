@@ -26,7 +26,7 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
         public async Task<List<SeatLock>> GetAllByUserIdAsync(int? userId)
         {
             return await _dbContext.SeatLocks
-                .Where(sl => sl.UserId == userId)
+                .Where(sl => sl.UserId == userId && sl.LockStatus != "Expired")
                 .AsNoTracking() 
                 .ToListAsync(); 
         }
