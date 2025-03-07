@@ -6,4 +6,7 @@ public interface ISeatLockService
 
     Task UpdateExpirytimeByUserIdAsync(int? userId, DateTime expiryTime);
     Task UpdateStarttimeByUserIdAsync(int? userId, DateTime expiryTime);
+
+    Task<List<SeatLock>> GetAllByUserIdAsync(int? userId);
+
 }

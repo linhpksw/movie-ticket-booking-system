@@ -11,6 +11,17 @@ public class SeatLockService : ISeatLockService
         _seatLockRepository = seatLockRepository;
     }
 
+    public async Task<List<SeatLock>> GetAllByUserIdAsync(int? userId)
+    {
+        if (!userId.HasValue)
+        {
+            return new List<SeatLock>(); 
+        }
+
+        return await _seatLockRepository.GetAllByUserIdAsync(userId.Value);
+    }
+
+
     public async Task<SeatLock?> GetLatestSeatLockByUserIdAsync(int? userId)
     {
         var seatLock = await _seatLockRepository.GetLatestByUserIdAsync(userId);

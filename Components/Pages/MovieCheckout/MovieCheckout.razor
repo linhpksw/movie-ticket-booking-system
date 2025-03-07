@@ -9,7 +9,9 @@
 @inject IJSRuntime JSRuntime
 @inject IScreenSeatService ScreenSeatService
 @inject IUserService UserService
+@inject IScreenSeatService ScreenSeatService
 @inject NavigationManager NavigationManager
+
 
 @code {
     private int? userId;
@@ -30,12 +32,12 @@
     private DateTime? lockExpiryTime;
     private DateTime? lockStartTime;
     private string antiforgeryToken = string.Empty;
-
+    private List<ScreenSeat> screenSeats = new List<ScreenSeat>();
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            userId = 1; // Thay bằng ID thực tế của user đang đăng nhập
+            userId = 1; 
             currentUser = await UserService.GetUserByIdAsync(userId.Value);
 
             if (currentUser == null)
@@ -43,7 +45,7 @@
                 Console.WriteLine("❌ Không tìm thấy user!");
                 return;
             }
-            var fetchedMovie = await MovieService.GetMovieWithShowtimeAndCinemaAsync(1); // thay bằng movieId 
+            var fetchedMovie = await MovieService.GetMovieWithShowtimeAndCinemaAsync(1); 
             movie = fetchedMovie ?? new MovieDto()
                 {
                     Title = "Unknown Movie",
@@ -52,7 +54,12 @@
                     Description = "No description available",
                     Showtimes = new List<ShowtimeDto>()
                 };
-
+            List<SeatLock> seatLocks = await SeatLockService.GetAllByUserIdAsync(userId);
+            foreach (SeatLock seatLock in seatLocks)
+            {
+                ScreenSeat screenSeat = await ScreenSeatService.GetScreenSeatByIdAsync(seatLock.ScreenSeatId);
+                screenSeats.Add(screenSeat);
+            }
             await CalculateRemainingTime(userId);
 
             var tokens = Antiforgery.GetAndStoreTokens(HttpContextAccessor.HttpContext);
@@ -242,30 +249,35 @@
                             <li>
                                 <h6 class="subtitle">Seats:</h6>
                                 <ul>
-                                    @if (movie?.Showtimes?.FirstOrDefault()?.ScreenSeat != null)
+                                @if (screenSeats != null && screenSeats.Any())
+                                {
+                                    @foreach (var seat in screenSeats)
                                     {
-                                        var seat = movie.Showtimes.FirstOrDefault().ScreenSeat;
                                         <li>@seat.SeatLabel (@seat.SeatType?.SeatTypeName) - $@(seat.SeatType?.BasePrice ?? 0)</li>
                                     }
+                                }
+                                else
+                                {
+                                    <li>Không có ghế nào được chọn.</li>
+                                }
                                 </ul>
                             </li>
-                            <li>
-                                <h6 class="subtitle mb-0">
-                                    <span>Tickets Price</span>
-                                    <span>
-                                        $@(movie?.Showtimes?.FirstOrDefault()?.ScreenSeat?.SeatType?.BasePrice ?? 0)
-                                    </span>
-                                </h6>
-                            </li>
+                        <li>
+                            <h6 class="subtitle mb-0">
+                                <span>Tickets Price</span>
+                                <span>
+                                    $@(screenSeats.Sum(seat => seat.SeatType?.BasePrice ?? 0)) 
+                                </span>
+                            </h6>
+                        </li>
                         </ul>
                     </div>
                     <div class="proceed-area text-center">
                         <h6 class="subtitle">
                             <span>Amount Payable</span>
                             <span>
-                                $@(movie?.Showtimes?.FirstOrDefault()?.ScreenSeat?.SeatType?.BasePrice ?? 0)
-
-                            </span>
+                            $@(screenSeats.Sum(seat => seat.SeatType?.BasePrice ?? 0))
+                        </span>
                         </h6>
                         <a href="/" class="custom-button back-button">Change </a>
                     </div>

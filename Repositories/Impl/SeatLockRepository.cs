@@ -22,11 +22,21 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
                 .FirstOrDefaultAsync();
         }
 
+
+        public async Task<List<SeatLock>> GetAllByUserIdAsync(int? userId)
+        {
+            return await _dbContext.SeatLocks
+                .Where(sl => sl.UserId == userId)
+                .AsNoTracking() 
+                .ToListAsync(); 
+        }
+
+
         public async Task<SeatLock?> GetLatestByUserIdAsync(int? userId)
         {
             return await _dbContext.SeatLocks
                 .Where(sl => sl.UserId == userId)
-                .OrderByDescending(sl => sl.LockStartTime) // Sort by LockStartTime to get the latest lock
+                .OrderByDescending(sl => sl.LockStartTime) 
                 .FirstOrDefaultAsync();
         }
 
@@ -66,17 +76,5 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
             return result > 0;
         }
 
-        //public async Task<bool> ExtendSeatLockAsync(int seatLockId, TimeSpan extension)
-        //{
-        //    var seatLock = await _dbContext.SeatLocks.FirstOrDefaultAsync(sl => sl.SeatLockId == seatLockId);
-        //    if (seatLock == null)
-        //    {
-        //        return false;
-        //    }
-
-        //    seatLock.LockExpiryTime = seatLock.LockExpiryTime?.Add(extension);
-        //    var result = await _dbContext.SaveChangesAsync();
-        //    return result > 0;
-        //}
     }
 }
