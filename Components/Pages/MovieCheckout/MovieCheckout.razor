@@ -68,15 +68,35 @@
         {
             var latestSeatLock = await SeatLockService.GetLatestSeatLockByUserIdAsync(userId);
 
-            if (latestSeatLock != null)
+            if (latestSeatLock == null)
             {
-                lockExpiryTime = latestSeatLock.LockExpiryTime;
-                lockStartTime = latestSeatLock.LockStartTime;
+                remainingTime = "No seat locks found for this user.";
+                return;
+            }
 
-                if (lockExpiryTime.HasValue && lockStartTime.HasValue)
+            DateTime curLockStatTime = latestSeatLock.LockStartTime ;
+            Console.WriteLine($"Latest Seat Lock: {curLockStatTime}");
+
+            await SeatLockService.UpdateStarttimeByUserIdAsync(userId, DateTime.Now);
+            await SeatLockService.UpdateExpirytimeByUserIdAsync(userId, curLockStatTime.AddMinutes(15));
+
+            var updatedSeatLock = await SeatLockService.GetLatestSeatLockByUserIdAsync(userId);
+
+            lockExpiryTime = updatedSeatLock?.LockExpiryTime;
+            lockStartTime = updatedSeatLock?.LockStartTime;
+            Console.WriteLine($"Lock Expiry Time: {lockExpiryTime}");
+
+            if (lockExpiryTime.HasValue && lockStartTime.HasValue)
+            {
+
+                double timeDiffMinutes = (lockExpiryTime.Value - curLockStatTime).TotalMinutes;
+
+                if (timeDiffMinutes < 30)
                 {
-                    var timeRemaining = lockExpiryTime.Value - DateTime.UtcNow;
-                    remainingTime = timeRemaining.TotalSeconds > 0 ? $"{timeRemaining.Minutes:D2}:{timeRemaining.Seconds:D2}" : "Expired";
+                    var timeRemaining = lockExpiryTime.Value - DateTime.Now;
+                    remainingTime = timeRemaining.TotalSeconds > 0
+                        ? $"{timeRemaining.Minutes:D2}:{timeRemaining.Seconds:D2}"
+                        : "Expired";
                 }
                 else
                 {
@@ -85,7 +105,7 @@
             }
             else
             {
-                remainingTime = "No seat locks found for this user.";
+                remainingTime = "Expired";
             }
         }
         catch (Exception ex)
@@ -94,6 +114,8 @@
             Console.WriteLine($"Error calculating remaining time: {ex.Message}");
         }
     }
+
+
 }
 
 
@@ -136,7 +158,7 @@
                         <p class="text-danger">@remainingTime</p>
                         <script type="text/javascript">
                             alert('Your seat has expired.');
-                            window.location.href = '/';  // Chuyển hướng về trang chính
+                            window.location.href = '/'; 
                         </script>
                     }
                     else if (remainingTime == "No seat locks found for this user.")
