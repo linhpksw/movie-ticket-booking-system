@@ -1,12 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
-using System;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace G5_MovieTicketBookingSystem.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateDatabaseSchema : Migration
+    public partial class UpdateNewDatabaseSchema : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -182,6 +182,36 @@ namespace G5_MovieTicketBookingSystem.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Showtimes",
+                columns: table => new
+                {
+                    ShowtimeId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    MovieId = table.Column<int>(type: "int", nullable: false),
+                    ScreenId = table.Column<int>(type: "int", nullable: false),
+                    ScreenSeatId = table.Column<int>(type: "int", nullable: true),
+                    ShowDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ShowTime = table.Column<TimeSpan>(type: "time", nullable: false),
+                    ExperienceType = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Showtimes", x => x.ShowtimeId);
+                    table.ForeignKey(
+                        name: "FK_Showtimes_Movies_MovieId",
+                        column: x => x.MovieId,
+                        principalTable: "Movies",
+                        principalColumn: "MovieId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Showtimes_Screens_ScreenId",
+                        column: x => x.ScreenId,
+                        principalTable: "Screens",
+                        principalColumn: "ScreenId",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "TransactionLogs",
                 columns: table => new
                 {
@@ -259,35 +289,6 @@ namespace G5_MovieTicketBookingSystem.Migrations
                         principalTable: "Users",
                         principalColumn: "UserId",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Showtimes",
-                columns: table => new
-                {
-                    ShowtimeId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    MovieId = table.Column<int>(type: "int", nullable: false),
-                    ScreenSeatId = table.Column<int>(type: "int", nullable: true),
-                    ShowDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ShowTime = table.Column<TimeSpan>(type: "time", nullable: false),
-                    ExperienceType = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Showtimes", x => x.ShowtimeId);
-                    table.ForeignKey(
-                        name: "FK_Showtimes_Movies_MovieId",
-                        column: x => x.MovieId,
-                        principalTable: "Movies",
-                        principalColumn: "MovieId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Showtimes_ScreenSeats_ScreenSeatId",
-                        column: x => x.ScreenSeatId,
-                        principalTable: "ScreenSeats",
-                        principalColumn: "ScreenSeatId",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -387,9 +388,9 @@ namespace G5_MovieTicketBookingSystem.Migrations
                 column: "MovieId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Showtimes_ScreenSeatId",
+                name: "IX_Showtimes_ScreenId",
                 table: "Showtimes",
-                column: "ScreenSeatId");
+                column: "ScreenId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tickets_OrderItemId",
