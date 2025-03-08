@@ -11,6 +11,9 @@ public class Showtime
     [Required]
     public int MovieId { get; set; }
 
+    [Required]
+    public int ScreenId { get; set; }
+
     public int? ScreenSeatId { get; set; }
 
     /// <summary>
@@ -32,6 +35,6 @@ public class Showtime
     [ForeignKey(nameof(MovieId))]
     public required Movie Movie { get; set; }
 
-    [ForeignKey(nameof(ScreenSeatId))]
-    public ScreenSeat? ScreenSeat { get; set; }
+    [ForeignKey(nameof(ScreenId))]
+    public required Screen Screen { get; set; }
 }
