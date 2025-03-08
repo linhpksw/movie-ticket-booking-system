@@ -59,9 +59,9 @@ public class AppDbContext : DbContext
             .OnDelete(DeleteBehavior.Cascade);  // Keep cascade delete for Movies
 
         modelBuilder.Entity<Showtime>()
-            .HasOne(sc => sc.ScreenSeat)
+            .HasOne(sc => sc.Screen)
             .WithMany(s => s.Showtimes)
-            .HasForeignKey(sc => sc.ScreenSeatId)
+            .HasForeignKey(sc => sc.ScreenId)
             .OnDelete(DeleteBehavior.Restrict);  // Disables cascade delete
     }
 

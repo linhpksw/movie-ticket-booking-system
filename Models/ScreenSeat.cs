@@ -24,8 +24,6 @@ public class ScreenSeat
     [ForeignKey(nameof(SeatTypeId))]
     public required SeatType SeatType { get; set; }
 
-    public ICollection<Showtime>? Showtimes { get; set; }
-
     public ICollection<OrderItem>? OrderItems { get; set; }
 
     public ICollection<SeatLock>? SeatLocks { get; set; }
