@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace G5_MovieTicketBookingSystem.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateNewDatabaseSchema : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -190,8 +190,8 @@ namespace G5_MovieTicketBookingSystem.Migrations
                     MovieId = table.Column<int>(type: "int", nullable: false),
                     ScreenId = table.Column<int>(type: "int", nullable: false),
                     ScreenSeatId = table.Column<int>(type: "int", nullable: true),
-                    ShowDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ShowTime = table.Column<TimeSpan>(type: "time", nullable: false),
+                    ShowDate = table.Column<DateOnly>(type: "date", nullable: false),
+                    ShowTime = table.Column<TimeOnly>(type: "time", nullable: false),
                     ExperienceType = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false)
                 },
                 constraints: table =>

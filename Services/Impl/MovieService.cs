@@ -20,91 +20,67 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
 
         public async Task<MovieDto?> GetMovieWithShowtimeAndCinemaAsync(int id)
         {
-            return null;
-            //try
-            //{
-            //var movie = await _movieRepository.GetMovieByIdAsync(id);
-            //if (movie == null)
-            //{
-            //    _logger.LogWarning($"⚠️ Movie với ID {id} không tồn tại trong database!");
-            //    return null;
-            //}
+            try
+            {
+                var movie = await _movieRepository.GetMovieByIdAsync(id);
+                if (movie == null)
+                {
+                    _logger.LogWarning($"⚠️ Movie với ID {id} không tồn tại trong database!");
+                    return null;
+                }
 
-            // 🔥 Kiểm tra xem dữ liệu có bị null không
-            //foreach (var showtime in movie.Showtimes)
-            //{
-            //_logger.LogInformation($"🎬 Showtime: {showtime.ShowTime}");
-            //if (showtime.ScreenSeat?.Screen != null)
-            //{
-            //    _logger.LogInformation($"✅ ScreenName: {showtime.ScreenSeat.Screen.ScreenName}");
-            //}
-            //else
-            //{
-            //    _logger.LogWarning($"❌ ScreenName is NULL for showtime {showtime.ShowtimeId}");
-            //}
+                var showtimes = movie.Showtimes.Select(st => new ShowtimeDto
+                {
+                    ShowtimeId = st.ShowtimeId,
+                    MovieId = st.MovieId,
+                    ShowDate = st.ShowDate,
+                    ShowTime = st.ShowTime,
+                    ExperienceType = st.ExperienceType,
 
-            //if (showtime.ScreenSeat?.SeatType != null)
-            //{
-            //    _logger.LogInformation($"💰 BasePrice: {showtime.ScreenSeat.SeatType.BasePrice}");
-            //}
-            //else
-            //{
-            //    _logger.LogWarning($"❌ BasePrice is NULL for seat {showtime.ScreenSeatId}");
-            //}
-            //}
+                    Screen = new ScreenDto
+                    {
+                        ScreenId = st.Screen.ScreenId,
+                        ScreenName = st.Screen.ScreenName ?? "Unknown Screen",
+                        Cinema = new CinemaDto
+                        {
+                            CinemaId = st.Screen.Cinema.CinemaId,
+                            CinemaName = st.Screen.Cinema.CinemaName ?? "Unknown Cinema",
+                            Address = st.Screen.Cinema.Address ?? "No Address",
+                            City = st.Screen.Cinema.City ?? "No City"
+                        }
+                    },
 
-            //var showtimes = movie.Showtimes.Select(st => new ShowtimeDto
-            //{
-            //    ShowtimeId = st.ShowtimeId,
-            //    MovieId = st.MovieId,
-            //    ShowDate = st.ShowDate,
-            //    ShowTime = st.ShowTime,
-            //    ExperienceType = st.ExperienceType,
-            //    ScreenSeatId = st.ScreenSeatId,
+                    ScreenSeats = st.Screen.ScreenSeats.Select(ss => new ScreenSeatDto
+                    {
+                        ScreenSeatId = ss.ScreenSeatId,
+                        SeatLabel = ss.SeatLabel ?? "Unknown Seat",
+                        SeatType = new SeatTypeDto
+                        {
+                            SeatTypeId = ss.SeatType.SeatTypeId,
+                            SeatTypeName = ss.SeatType.SeatTypeName ?? "Unknown Type",
+                            BasePrice = ss.SeatType.BasePrice
+                        }
+                    }).ToList()
+                }).ToList();
 
-            //    ScreenSeat = st.ScreenSeat != null ? new ScreenSeatDto
-            //    {
-            //        ScreenSeatId = st.ScreenSeat.ScreenSeatId,
-            //        SeatLabel = st.ScreenSeat.SeatLabel ?? "Unknown Seat",
-            //        SeatType = st.ScreenSeat.SeatType != null ? new SeatTypeDto
-            //        {
-            //            SeatTypeId = st.ScreenSeat.SeatType.SeatTypeId,
-            //            SeatTypeName = st.ScreenSeat.SeatType.SeatTypeName ?? "Unknown Type",
-            //            BasePrice = st.ScreenSeat.SeatType.BasePrice
-            //        } : null,
-            //        Screen = st.ScreenSeat.Screen != null ? new ScreenDto
-            //        {
-            //            ScreenId = st.ScreenSeat.Screen.ScreenId,
-            //            ScreenName = st.ScreenSeat.Screen.ScreenName ?? "Unknown Screen",
-            //            CinemaId = st.ScreenSeat.Screen.CinemaId
-            //        } : null
-            //    } : null,
-
-            //    Cinema = st.ScreenSeat?.Screen?.Cinema != null ? new CinemaDto
-            //    {
-            //        CinemaId = st.ScreenSeat.Screen.Cinema.CinemaId,
-            //        CinemaName = st.ScreenSeat.Screen.Cinema.CinemaName ?? "Unknown Cinema",
-            //        Address = st.ScreenSeat.Screen.Cinema.Address ?? "No Address",
-            //        City = st.ScreenSeat.Screen.Cinema.City ?? "No City"
-            //    } : null
-            //}).ToList();
-
-            //return new MovieDto
-            //{
-            //    Title = movie.Title ?? "Unknown Movie",
-            //    Genre = movie.Genre ?? "Unknown Genre",
-            //    Language = movie.Language ?? "Unknown Language",
-            //    Rating = movie.Rating,
-            //    Description = movie.Description ?? "No description available",
-            //    Showtimes = showtimes
-            //};
-            //}
-            //catch (Exception ex)
-            //{
-            //    _logger.LogError($"❌ Lỗi trong GetMovieWithShowtimeAndCinemaAsync: {ex.Message}");
-            //    return null;
-            //}
+                return new MovieDto
+                {
+                    MovieId = movie.MovieId,
+                    Title = movie.Title ?? "Unknown Movie",
+                    Genre = movie.Genre ?? "Unknown Genre",
+                    Language = movie.Language ?? "Unknown Language",
+                    Rating = movie.Rating,
+                    Description = movie.Description ?? "No description available",
+                    Showtimes = showtimes
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"❌ Lỗi trong GetMovieWithShowtimeAndCinemaAsync: {ex.Message}");
+                return null;
+            }
         }
+
 
         public async Task<MovieDto?> GetByIdAsync(int id)
         {

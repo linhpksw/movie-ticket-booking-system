@@ -5,5 +5,6 @@
         public int ScreenId { get; set; }
         public string ScreenName { get; set; }
         public int CinemaId { get; set; }
+        public CinemaDto? Cinema { get; set; }
     }
 }

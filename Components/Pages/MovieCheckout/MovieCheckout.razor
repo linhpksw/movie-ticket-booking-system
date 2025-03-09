@@ -229,15 +229,17 @@
                             </li>
                             <li>
                                 <h6 class="subtitle">
-                                    @* <span>@movie?.Showtimes.FirstOrDefault()?.Cinema?.CinemaName</span> *@
-                                    @* @if (movie?.Showtimes?.FirstOrDefault()?.ScreenSeat?.Screen?.ScreenName != null) *@
-                                    @* { *@
-                                    @*     <span>Room: @movie.Showtimes.FirstOrDefault().ScreenSeat.Screen.ScreenName</span> *@
-                                    @* } *@
-                                    @* else *@
-                                    @* { *@
-                                    @*     <span>Room: Not Available</span> *@
-                                    @* } *@
+                                <span>@movie?.Showtimes.FirstOrDefault()?.Screen.Cinema.CinemaName</span>
+
+                                @if (movie?.Showtimes?.FirstOrDefault()?.Screen?.ScreenName != null)
+                                {
+                                    <span>Room: @movie.Showtimes.FirstOrDefault().Screen.ScreenName</span>
+                                }
+                                else
+                                {
+                                    <span>Room: Not Available</span>
+                                }
+
 
 
                                 </h6>
@@ -345,50 +347,56 @@
         }
     </script>
 
-    <script>
-        //  function redirectToPayment() {
-        //     const fullName = document.getElementById('FullName').value;
+   @using System.Text.Json
 
-        
+<script>
+    function redirectToPayment() {
+        const userId = @userId;
+        const fullName = document.getElementById('FullName').value;
+        const movieTitle = "@(movie?.Title ?? "Unknown Movie")";
+        const cinemaName = "@(movie?.Showtimes.FirstOrDefault()?.Screen?.Cinema?.CinemaName ?? "Unknown Cinema")";
+        const amount = @screenSeats.Sum(seat => seat.SeatType?.BasePrice ?? 0);
+          const screenSeatIds = JSON.parse('@JsonSerializer.Serialize(screenSeats.Select(s => s.ScreenSeatId))');
+        const seatLabels = JSON.parse('@JsonSerializer.Serialize(screenSeats.Select(s => s.SeatLabel))');
 
+         const screenSeatId = screenSeatIds.join(", ");
+        const seatLabel = seatLabels.join(", ");
+        const paymentInfo = {
+        orderType: "movie_ticket",
+        amount: amount,
+        orderDescription: `Thanh toán vé xem phim ${movieTitle} tại ${cinemaName} - Ghế: ${seatLabels.join(", ")}`,
+        name: fullName
+    };
 
-        //     const paymentInfo = {
-        //         orderType: "movie_ticket",  
-        //         amount: amount,  
-        //         orderDescription: `Thanh toán vé xem phim ${movieTitle} tại ${cinemaName} - Ghế: ${seatLabel}`, 
-        //         name: fullName,  
-        //     };
-
-        //     if (!paymentInfo || !paymentInfo.orderType || !paymentInfo.amount) {
-        //         console.error("Thông tin thanh toán không hợp lệ", paymentInfo);
-        //         return;
-        //     }
-        //         const orderItem = {
-        //         orderItemId: 123, 
-        //         orderId: 456, 
-        //         movieTitle: movieTitle,
-        //         seatLabel: seatLabel,
-        //         cinemaName: cinemaName,
-        //         fullName: fullName,
-        //         amount: amount,
-        //         screenSeatId: screenSeatId, 
-        //         userId: userId
-        //     };
-        //      const url = new URL("/payment", window.location.origin);
-        //       url.searchParams.append("orderType", paymentInfo.orderType);
-        //     url.searchParams.append("amount", paymentInfo.amount);
-        //     url.searchParams.append("orderDescription", paymentInfo.orderDescription);
-        //     url.searchParams.append("name", paymentInfo.name);
-        //   url.searchParams.append("orderItemId", orderItem.orderItemId);
-        // url.searchParams.append("orderId", orderItem.orderId);
-        // url.searchParams.append("movieTitle", orderItem.movieTitle);
-        // url.searchParams.append("seatLabel", orderItem.seatLabel);
-        // url.searchParams.append("cinemaName", orderItem.cinemaName);
-        // url.searchParams.append("fullName", orderItem.fullName);
-        // url.searchParams.append("screenSeatId", orderItem.screenSeatId);
-        // url.searchParams.append("userId", orderItem.userId);
-        //     Chuyển hướng người dùng sang trang thanh toán
-        //     window.location.href = url.toString();
-        // }
+            if (!paymentInfo || !paymentInfo.orderType || !paymentInfo.amount) {
+                console.error("Thông tin thanh toán không hợp lệ", paymentInfo);
+                return;
+            }
+                const orderItem = {
+                orderItemId: 123, 
+                orderId: 456, 
+                movieTitle: movieTitle,
+                seatLabel: seatLabel,
+                cinemaName: cinemaName,
+                fullName: fullName,
+                amount: amount,
+                screenSeatId: screenSeatId, 
+                userId: userId
+            };
+             const url = new URL("/payment", window.location.origin);
+              url.searchParams.append("orderType", paymentInfo.orderType);
+            url.searchParams.append("amount", paymentInfo.amount);
+            url.searchParams.append("orderDescription", paymentInfo.orderDescription);
+            url.searchParams.append("name", paymentInfo.name);
+          url.searchParams.append("orderItemId", orderItem.orderItemId);
+        url.searchParams.append("orderId", orderItem.orderId);
+        url.searchParams.append("movieTitle", orderItem.movieTitle);
+        url.searchParams.append("seatLabel", orderItem.seatLabel);
+        url.searchParams.append("cinemaName", orderItem.cinemaName);
+        url.searchParams.append("fullName", orderItem.fullName);
+        url.searchParams.append("screenSeatId", orderItem.screenSeatId);
+        url.searchParams.append("userId", orderItem.userId);
+            window.location.href = url.toString();
+        }
 
     </script>

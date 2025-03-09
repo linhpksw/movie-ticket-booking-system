@@ -12,5 +12,7 @@
         public DateOnly ShowDate { get; set; }
         public TimeOnly ShowTime { get; set; }
         public required string ExperienceType { get; set; }
+
+        public List<ScreenSeatDto>? ScreenSeats { get; set; } = new();
     }
 }
