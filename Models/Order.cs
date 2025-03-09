@@ -29,4 +29,6 @@ public class Order
 
     public ICollection<OrderItem>? OrderItems { get; set; }
     public ICollection<TransactionLog>? TransactionLogs { get; set; }
+
+    public Order() {}
 }

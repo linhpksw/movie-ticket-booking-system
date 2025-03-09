@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using G5_MovieTicketBookingSystem.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace G5_MovieTicketBookingSystem;
 

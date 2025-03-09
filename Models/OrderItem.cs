@@ -27,4 +27,6 @@ public class OrderItem
     public required ScreenSeat ScreenSeat { get; set; }
 
     public Ticket? Ticket { get; set; }
+
+    public OrderItem() { }
 }

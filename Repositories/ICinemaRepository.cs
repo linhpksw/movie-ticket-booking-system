@@ -1,4 +1,6 @@
-﻿namespace G5_MovieTicketBookingSystem.Repositories
+﻿using G5_MovieTicketBookingSystem.Models;
+
+namespace G5_MovieTicketBookingSystem.Repositories
 {
     public interface ICinemaRepository
     {
@@ -7,5 +9,6 @@
         Task<Cinema> CreateAsync(Cinema entity);
         Task<Cinema> UpdateAsync(Cinema entity);
         Task DeleteAsync(int id);
+        Task<IEnumerable<Cinema>> GetCinemasWithScreensAsync();
     }
 }

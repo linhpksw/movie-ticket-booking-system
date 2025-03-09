@@ -1,0 +1,136 @@
+﻿@page "/payment-success"
+@layout MainLayout
+
+@using G5_MovieTicketBookingSystem.DTOs.VNPAY
+@inject IHttpContextAccessor HttpContextAccessor
+@inject IOrderService OrderService
+@inject ITransactionLogService TransactionLogService
+@inject IOrderItemService OrderItemService
+@inject ITicketService TicketService
+
+@if (paymentInfo != null)
+{
+    <div class="padding-bottom padding-top">
+<h3>Chi tiết thanh toán</h3>
+
+    <p><strong>Loại đơn hàng:</strong> @paymentInfo.OrderType</p>
+    <p><strong>Số tiền:</strong> @paymentInfo.Amount.ToString("N0") VND</p>
+    <p><strong>Mô tả:</strong> @paymentInfo.OrderDescription</p>
+    <p><strong>Khách hàng:</strong> @paymentInfo.Name</p>
+
+    <a href="/" class="btn btn-primary">Quay lại trang chủ</a>
+    </div>
+}
+else
+{
+    <p>Không tìm thấy thông tin thanh toán.</p>
+}
+
+@code {
+    private PaymentInformationModel? paymentInfo;
+    private int? userId;
+    private TransactionLog? transactionLog;
+    private Ticket? ticket;
+    private String paymentStatus;
+    protected override async Task OnInitializedAsync()
+    {
+        var queryCollection = HttpContextAccessor.HttpContext?.Request.Query;
+        if (queryCollection != null)
+        {
+            try
+            {
+                string orderInfo = queryCollection["vnp_OrderInfo"];
+                string name = "Khách hàng";
+                string statusOrder = queryCollection["vnp_TransactionStatus"];
+                userId = 1; 
+
+                Order curOrder = await OrderService.GetLatestOrderByUserIdAsync(userId.Value);
+                // Gọi phương thức UpdateOrderAfterPayment để cập nhật trạng thái đơn hàng sau khi thanh toán.
+                await UpdateOrderAfterPayment(curOrder.OrderId,statusOrder);
+
+                if (!string.IsNullOrEmpty(orderInfo) && orderInfo.Contains("-"))
+                {
+                    name = orderInfo.Split("-")[0].Trim();
+                }
+                if (statusOrder == "00")
+                {
+                    paymentStatus ="Success";
+                }
+                else
+                {
+                    paymentStatus = "Failed"; 
+                }
+                //add transaction log
+                TransactionLog transactionLog = new TransactionLog
+                    {
+                        OrderId = curOrder.OrderId,
+                        Order = curOrder,
+                        PaymentGateway = "VNPAY", 
+                        PaymentStatus = paymentStatus,
+                        Amount = Convert.ToDecimal(queryCollection["vnp_Amount"]) / 100, 
+                        TransactionTimestamp = DateTime.Now, 
+                        GatewayResponse = queryCollection["vnp_TransactionStatus"] 
+                    };
+                AddTransactionLog(transactionLog);
+
+                //add ticket
+                if (statusOrder == "00")
+                {
+                List<OrderItem> orderItemList = await OrderItemService.GetOrderItemsByOrderIdAsync(curOrder.OrderId);
+                foreach (var orderItem in orderItemList) 
+                {
+                    string uniqueCode = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper();
+                    Ticket ticket = new Ticket
+                        {
+                            OrderItemId = orderItem.OrderItemId,  
+                            OrderItem = orderItem,  
+                            UniqueCode = uniqueCode,
+                            IssueTimestamp = DateTime.Now,  
+                            TicketStatus = "Active", 
+                            ScannedTimestamp = null  
+                        };
+
+                    await AddTicket(ticket);
+                }
+                }
+
+
+                paymentInfo = new PaymentInformationModel
+                    {
+                        OrderType = "movie_ticket",
+                        Amount = Convert.ToDouble(queryCollection["vnp_Amount"]) / 100,
+                        OrderDescription = orderInfo,
+                        Name = name
+                    };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi xử lý thông tin thanh toán: {ex.Message}");
+            }
+        }
+    }
+
+    private async Task UpdateOrderAfterPayment(int OrderId , string statusOrder)
+    {
+     
+       
+            if (statusOrder == "00")
+            {
+                await OrderService.UpdateOrderStatusAsync(OrderId, "Success");
+            }
+            else
+            {
+                await OrderService.UpdateOrderStatusAsync(OrderId, "Failed");
+            }
+       
+    }
+
+    private async Task AddTransactionLog(TransactionLog transactionLog){
+        TransactionLogService.AddTransactionLogAsync(transactionLog);
+    }
+
+    private async Task AddTicket(Ticket ticket)
+    {
+        TicketService.AddTicketAsync(ticket);
+    }
+}

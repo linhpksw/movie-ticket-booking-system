@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using G5_MovieTicketBookingSystem.Models;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace G5_MovieTicketBookingSystem;
@@ -23,8 +24,6 @@ public class ScreenSeat
 
     [ForeignKey(nameof(SeatTypeId))]
     public required SeatType SeatType { get; set; }
-
-    public ICollection<Showtime>? Showtimes { get; set; }
 
     public ICollection<OrderItem>? OrderItems { get; set; }
 

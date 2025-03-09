@@ -1,0 +1,141 @@
+﻿@page "/payment"
+
+@inject IVnPayService VnPayService
+@inject NavigationManager Navigation
+@inject IHttpContextAccessor HttpContextAccessor
+@inject Microsoft.AspNetCore.Components.NavigationManager UriHelper
+@inject IUserService UserService
+@inject IOrderService OrderService
+@inject IOrderItemService OrderItemService
+@inject IScreenSeatService ScreenSeatService
+@inject ITransactionLogService TransactionLogService
+@layout MainLayout
+
+
+@code {
+    private PaymentInformationModel paymentModel = new();
+    private int? userId;
+    private User? currentUser;
+    private Order NewOrder { get; set; } = new()
+        {
+            OrderTimestamp = DateTime.UtcNow,
+            OrderStatus = "Pending",
+            TotalAmount = 0m,
+            UserId = 1,
+            User = new User()
+            {
+                Username = "GuestUser",
+                Email = "guest@example.com",
+                Password = "DefaultPass123!",
+                Fullname = "Guest User"
+            }
+        };
+
+    private OrderItemDto NewOrderItemDto { get; set; } = new()
+        {
+            OrderItemId = 1,
+            OrderId = 1,
+            ScreenSeatId = 1,
+            PriceCharged = 45000m
+        };
+    protected override async Task OnInitializedAsync()
+    {
+        var uri = UriHelper.ToAbsoluteUri(UriHelper.Uri.ToString());
+        var queryParams = System.Web.HttpUtility.ParseQueryString(uri.Query);
+
+        // Cập nhật paymentModel từ query parameters
+        paymentModel.OrderType = queryParams["orderType"];
+        paymentModel.Amount = double.TryParse(queryParams["amount"], out double amount) ? amount : 0;
+        paymentModel.OrderDescription = queryParams["orderDescription"];
+        paymentModel.Name = queryParams["name"];
+
+        // Parse các giá trị
+        userId = Int32.Parse(queryParams["userId"]);
+        int orderItemId = Int32.Parse(queryParams["orderItemId"]);
+        string movieTitle = queryParams["movieTitle"];
+        string seatLabel = queryParams["seatLabel"];
+        string cinemaName = queryParams["cinemaName"];
+        string fullName = queryParams["fullName"];
+        int screenSeatId = Int32.Parse(queryParams["screenSeatId"]);
+
+        // Xử lý các thông tin trong order
+        currentUser = await UserService.GetUserByIdAsync(userId.Value);
+        NewOrder.UserId = currentUser.UserId;
+        NewOrder.User = currentUser;
+        NewOrder.TotalAmount = (decimal)paymentModel.Amount;
+
+        // await AddOrder();
+        await AddOrder();
+
+        Order OrderLasted = await OrderService.GetLatestOrderByUserIdAsync(userId.Value);
+        NewOrderItemDto.OrderId = OrderLasted.OrderId;
+        NewOrderItemDto.ScreenSeatId = screenSeatId;
+        NewOrderItemDto.PriceCharged = decimal.Parse(queryParams["amount"]);
+        await AddOrderItem(NewOrderItemDto);
+        //add transaction log
+        TransactionLog transactionLog = new TransactionLog
+            {
+                OrderId = OrderLasted.OrderId,
+                Order = OrderLasted,
+                PaymentGateway = "VNPAY",
+                PaymentStatus = "Pending",
+                Amount = OrderLasted.TotalAmount,
+                TransactionTimestamp = DateTime.Now,
+                GatewayResponse = "Pending"
+            };
+        // AddTransactionLog(transactionLog);
+        // Kiểm tra nếu dữ liệu đầy đủ
+        if (!string.IsNullOrEmpty(paymentModel.OrderType) && paymentModel.Amount > 0)
+        {
+            var httpContext = HttpContextAccessor.HttpContext;
+            if (httpContext != null)
+            {
+                var paymentUrl = VnPayService.CreatePaymentUrl(paymentModel, httpContext);
+                if (!string.IsNullOrEmpty(paymentUrl))
+                {
+                    Navigation.NavigateTo(paymentUrl, true);
+                }
+                else
+                {
+                    Console.WriteLine("❌ Lỗi: Không thể tạo URL thanh toán VNPAY.");
+                }
+            }
+        }
+        else
+        {
+            Console.WriteLine("❌ Lỗi: Dữ liệu thanh toán không hợp lệ.");
+        }
+    }
+
+
+    private async Task AddOrder()
+    {
+        if (currentUser != null)
+        {
+            NewOrder.User = currentUser;
+        }
+
+        await OrderService.CreateOrderAsync(NewOrder);
+    }
+
+    private async Task AddOrderItem(OrderItemDto newOrderItemDto)
+    {
+        var order = await OrderService.GetOrderByIdAsync(newOrderItemDto.OrderId);
+        var screenSeat = await ScreenSeatService.GetScreenSeatByIdAsync(NewOrderItemDto.ScreenSeatId);
+
+        var newOrderItem = new OrderItem
+            {
+                OrderId = newOrderItemDto.OrderId,
+                ScreenSeatId = newOrderItemDto.ScreenSeatId,
+                PriceCharged = newOrderItemDto.PriceCharged,
+                Order = order,
+                ScreenSeat = screenSeat
+            };
+
+        await OrderItemService.AddOrderItemAsync(newOrderItem);
+    }
+    // private async Task AddTransactionLog(TransactionLog transactionLog)
+    // {
+    //     TransactionLogService.AddTransactionLogAsync(transactionLog);
+    // }
+}
