@@ -1,4 +1,4 @@
-﻿using G5_MovieTicketBookingSystem.Data;
+using G5_MovieTicketBookingSystem.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -56,6 +56,26 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
                 _context.ScreenSeats.Remove(screenSeat);
                 await _context.SaveChangesAsync();
             }
+        }
+
+        public async Task<List<ScreenSeat>> GetScreenSeatsByShowtime(int movieId, int cinemaId, DateOnly showDate, TimeOnly showTime)
+        {
+            string query = @"
+                SELECT SS.* 
+                FROM ScreenSeats SS
+                JOIN Showtimes ST ON ST.ScreenSeatId = SS.ScreenSeatId
+                JOIN Movies M ON M.MovieId = ST.MovieId
+                JOIN Screens S ON S.ScreenId = SS.ScreenId
+                JOIN Cinemas C ON C.CinemaId = S.CinemaId
+                WHERE ST.ShowDate = {0} 
+                AND ST.ShowTime = {1} 
+                AND M.MovieId = {2} 
+                AND C.CinemaId = {3}
+                ORDER BY SS.SeatLabel";
+
+            return await _context.ScreenSeats
+                .FromSqlRaw(query, showDate, showTime, movieId, cinemaId)
+                .ToListAsync();
         }
     }
 }

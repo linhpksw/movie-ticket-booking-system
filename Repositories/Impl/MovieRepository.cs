@@ -1,4 +1,4 @@
-﻿using G5_MovieTicketBookingSystem.Data;
+using G5_MovieTicketBookingSystem.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace G5_MovieTicketBookingSystem.Repositories.Impl
@@ -14,19 +14,22 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
 
         public async Task<Movie?> GetMovieByIdAsync(int id)
         {
-            return await _dbContext.Movies
-                .Include(m => m.Showtimes)
-                    .ThenInclude(st => st.ScreenSeat)
-                        .ThenInclude(ss => ss.Screen)
-                            .ThenInclude(s => s.Cinema) // Đảm bảo lấy cả Cinema
-                .Include(m => m.Showtimes)
-                    .ThenInclude(st => st.ScreenSeat)
-                        .ThenInclude(ss => ss.SeatType) // Đảm bảo lấy SeatType
-                .FirstOrDefaultAsync(m => m.MovieId == id);
+            //return await _dbContext.Movies
+            //    .Include(m => m.Showtimes)
+            //        .ThenInclude(st => st.ScreenSeat)
+            //            .ThenInclude(ss => ss.Screen)
+            //                .ThenInclude(s => s.Cinema) // Đảm bảo lấy cả Cinema
+            //    .Include(m => m.Showtimes)
+            //        .ThenInclude(st => st.ScreenSeat)
+            //            .ThenInclude(ss => ss.SeatType) // Đảm bảo lấy SeatType
+            //    .FirstOrDefaultAsync(m => m.MovieId == id);
+            return null;
         }
 
-
-
-
+        public async Task<Movie?> GetByIdAsync(int id)
+        {
+            return await _dbContext.Movies
+                .FirstOrDefaultAsync(c => c.MovieId == id);
+        }
     }
 }

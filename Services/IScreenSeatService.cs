@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using G5_MovieTicketBookingSystem.DTOs;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace G5_MovieTicketBookingSystem.Services
@@ -10,5 +11,6 @@ namespace G5_MovieTicketBookingSystem.Services
         Task<ScreenSeat> AddScreenSeatAsync(ScreenSeat screenSeat);
         Task UpdateScreenSeatAsync(ScreenSeat screenSeat);
         Task DeleteScreenSeatAsync(int screenSeatId);
+        Task<List<ScreenSeatDto>> GetScreenSeatsByShowtime(int movieId, int cinemaId, DateOnly showDate, TimeOnly showTime);
     }
 }
