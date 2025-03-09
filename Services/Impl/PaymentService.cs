@@ -1,10 +1,9 @@
 ﻿using G5_MovieTicketBookingSystem.Data;
-//using G5_MovieTicketBookingSystem.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 
-namespace G5_MovieTicketBookingSystem.Services
+namespace G5_MovieTicketBookingSystem.Services.Impl
 {
     public class PaymentService
     {

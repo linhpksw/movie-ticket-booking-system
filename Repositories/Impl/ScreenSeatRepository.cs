@@ -61,11 +61,11 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
         public async Task<List<ScreenSeat>> GetScreenSeatsByShowtime(int movieId, int cinemaId, DateOnly showDate, TimeOnly showTime)
         {
             string query = @"
-                SELECT SS.* 
+                SELECT SS.*
                 FROM ScreenSeats SS
-                JOIN Showtimes ST ON ST.ScreenSeatId = SS.ScreenSeatId
-                JOIN Movies M ON M.MovieId = ST.MovieId
                 JOIN Screens S ON S.ScreenId = SS.ScreenId
+                JOIN Showtimes ST ON ST.ScreenId = S.ScreenId
+                JOIN Movies M ON M.MovieId = ST.MovieId
                 JOIN Cinemas C ON C.CinemaId = S.CinemaId
                 WHERE ST.ShowDate = {0} 
                 AND ST.ShowTime = {1} 

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace G5_MovieTicketBookingSystem.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250308074228_UpdateDateDatabaseSchema")]
-    partial class UpdateDateDatabaseSchema
+    [Migration("20250309113711_UpdateDatabaseSchemaV1")]
+    partial class UpdateDatabaseSchemaV1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,7 @@ namespace G5_MovieTicketBookingSystem.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("G5_MovieTicketBookingSystem.Cinema", b =>
+            modelBuilder.Entity("G5_MovieTicketBookingSystem.Models.Cinema", b =>
                 {
                     b.Property<int>("CinemaId")
                         .ValueGeneratedOnAdd()
@@ -53,6 +53,29 @@ namespace G5_MovieTicketBookingSystem.Migrations
                     b.ToTable("Cinemas");
                 });
 
+            modelBuilder.Entity("G5_MovieTicketBookingSystem.Models.Screen", b =>
+                {
+                    b.Property<int>("ScreenId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ScreenId"));
+
+                    b.Property<int>("CinemaId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ScreenName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("ScreenId");
+
+                    b.HasIndex("CinemaId");
+
+                    b.ToTable("Screens");
+                });
+
             modelBuilder.Entity("G5_MovieTicketBookingSystem.Models.Showtime", b =>
                 {
                     b.Property<int>("ShowtimeId")
@@ -69,7 +92,7 @@ namespace G5_MovieTicketBookingSystem.Migrations
                     b.Property<int>("MovieId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ScreenSeatId")
+                    b.Property<int>("ScreenId")
                         .HasColumnType("int");
 
                     b.Property<DateOnly>("ShowDate")
@@ -82,7 +105,7 @@ namespace G5_MovieTicketBookingSystem.Migrations
 
                     b.HasIndex("MovieId");
 
-                    b.HasIndex("ScreenSeatId");
+                    b.HasIndex("ScreenId");
 
                     b.ToTable("Showtimes");
                 });
@@ -200,29 +223,6 @@ namespace G5_MovieTicketBookingSystem.Migrations
                     b.HasKey("RoleId");
 
                     b.ToTable("Roles");
-                });
-
-            modelBuilder.Entity("G5_MovieTicketBookingSystem.Screen", b =>
-                {
-                    b.Property<int>("ScreenId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ScreenId"));
-
-                    b.Property<int>("CinemaId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ScreenName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("ScreenId");
-
-                    b.HasIndex("CinemaId");
-
-                    b.ToTable("Screens");
                 });
 
             modelBuilder.Entity("G5_MovieTicketBookingSystem.ScreenSeat", b =>
@@ -461,6 +461,17 @@ namespace G5_MovieTicketBookingSystem.Migrations
                     b.ToTable("UserRoles");
                 });
 
+            modelBuilder.Entity("G5_MovieTicketBookingSystem.Models.Screen", b =>
+                {
+                    b.HasOne("G5_MovieTicketBookingSystem.Models.Cinema", "Cinema")
+                        .WithMany("Screens")
+                        .HasForeignKey("CinemaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Cinema");
+                });
+
             modelBuilder.Entity("G5_MovieTicketBookingSystem.Models.Showtime", b =>
                 {
                     b.HasOne("G5_MovieTicketBookingSystem.Movie", "Movie")
@@ -469,14 +480,15 @@ namespace G5_MovieTicketBookingSystem.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("G5_MovieTicketBookingSystem.ScreenSeat", "ScreenSeat")
+                    b.HasOne("G5_MovieTicketBookingSystem.Models.Screen", "Screen")
                         .WithMany("Showtimes")
-                        .HasForeignKey("ScreenSeatId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("ScreenId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Movie");
 
-                    b.Navigation("ScreenSeat");
+                    b.Navigation("Screen");
                 });
 
             modelBuilder.Entity("G5_MovieTicketBookingSystem.Order", b =>
@@ -509,20 +521,9 @@ namespace G5_MovieTicketBookingSystem.Migrations
                     b.Navigation("ScreenSeat");
                 });
 
-            modelBuilder.Entity("G5_MovieTicketBookingSystem.Screen", b =>
-                {
-                    b.HasOne("G5_MovieTicketBookingSystem.Cinema", "Cinema")
-                        .WithMany("Screens")
-                        .HasForeignKey("CinemaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Cinema");
-                });
-
             modelBuilder.Entity("G5_MovieTicketBookingSystem.ScreenSeat", b =>
                 {
-                    b.HasOne("G5_MovieTicketBookingSystem.Screen", "Screen")
+                    b.HasOne("G5_MovieTicketBookingSystem.Models.Screen", "Screen")
                         .WithMany("ScreenSeats")
                         .HasForeignKey("ScreenId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -618,9 +619,16 @@ namespace G5_MovieTicketBookingSystem.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("G5_MovieTicketBookingSystem.Cinema", b =>
+            modelBuilder.Entity("G5_MovieTicketBookingSystem.Models.Cinema", b =>
                 {
                     b.Navigation("Screens");
+                });
+
+            modelBuilder.Entity("G5_MovieTicketBookingSystem.Models.Screen", b =>
+                {
+                    b.Navigation("ScreenSeats");
+
+                    b.Navigation("Showtimes");
                 });
 
             modelBuilder.Entity("G5_MovieTicketBookingSystem.Movie", b =>
@@ -645,18 +653,11 @@ namespace G5_MovieTicketBookingSystem.Migrations
                     b.Navigation("UserRoles");
                 });
 
-            modelBuilder.Entity("G5_MovieTicketBookingSystem.Screen", b =>
-                {
-                    b.Navigation("ScreenSeats");
-                });
-
             modelBuilder.Entity("G5_MovieTicketBookingSystem.ScreenSeat", b =>
                 {
                     b.Navigation("OrderItems");
 
                     b.Navigation("SeatLocks");
-
-                    b.Navigation("Showtimes");
                 });
 
             modelBuilder.Entity("G5_MovieTicketBookingSystem.SeatType", b =>

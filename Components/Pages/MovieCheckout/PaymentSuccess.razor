@@ -1,7 +1,4 @@
 ﻿@page "/payment-success"
-@layout MainLayout
-
-@using G5_MovieTicketBookingSystem.DTOs.VNPAY
 @inject IHttpContextAccessor HttpContextAccessor
 @inject IOrderService OrderService
 @inject ITransactionLogService TransactionLogService
@@ -71,7 +68,7 @@ else
                         TransactionTimestamp = DateTime.Now, 
                         GatewayResponse = queryCollection["vnp_TransactionStatus"] 
                     };
-                AddTransactionLog(transactionLog);
+                await AddTransactionLog(transactionLog);
 
                 //add ticket
                 if (statusOrder == "00")
@@ -126,11 +123,11 @@ else
     }
 
     private async Task AddTransactionLog(TransactionLog transactionLog){
-        TransactionLogService.AddTransactionLogAsync(transactionLog);
+        await TransactionLogService.AddTransactionLogAsync(transactionLog);
     }
 
     private async Task AddTicket(Ticket ticket)
     {
-        TicketService.AddTicketAsync(ticket);
+        await TicketService.AddTicketAsync(ticket);
     }
 }

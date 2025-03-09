@@ -14,8 +14,6 @@ public class Showtime
     [Required]
     public int ScreenId { get; set; }
 
-    public int? ScreenSeatId { get; set; }
-
     /// <summary>
     /// Store the date portion (e.g., 2025-05-01).
     /// </summary>
