@@ -1,4 +1,4 @@
-﻿@page "/seat-plan/{showtimeId:int}"
+@page "/seat-plan/{showtimeId:int}"
 @inject IShowtimeService ShowtimeService
 @inject IMovieService MovieService
 @inject IScreenSeatService ScreenSeatService
@@ -37,12 +37,12 @@
             if (showtime != null && movie != null && cinema != null && showtimes != null)
             {
                 CurrentState = LoadState.Success;
-            }
+            } 
             else
             {
                 Navigation.NavigateTo("/error", forceLoad: true);
             }
-        }
+        } 
         catch (Exception ex)
         {
             ErrorMessage = ex.Message;
@@ -102,24 +102,6 @@
         }
         return 0; // fallback if not found
     }
-
-    // Split seats into 4-6-4 (for Thường & VIP) or 2-3-2 (for Sweetbox)
-    private List<List<ScreenSeatDto>> SplitSeatsIntoGroups(List<ScreenSeatDto> seats, int seatTypeId)
-    {
-        List<List<ScreenSeatDto>> groupedSeats = new();
-        int[] pattern = seatTypeId == 3 ? new int[] { 2, 3, 2 } : new int[] { 4, 6, 4 };
-
-        int index = 0;
-        foreach (int groupSize in pattern)
-        {
-            if (index < seats.Count)
-            {
-                groupedSeats.Add(seats.Skip(index).Take(groupSize).ToList());
-                index += groupSize;
-            }
-        }
-        return groupedSeats;
-    }
 }
 
 
@@ -144,6 +126,7 @@ else
         </div>
     </section>
     <!-- ==========Banner-Section========== -->
+
     <!-- ==========Page-Title========== -->
     <section class="page-title bg-one">
         <div class="container">
@@ -177,6 +160,7 @@ else
         </div>
     </section>
     <!-- ==========Page-Title========== -->
+
     <!-- ==========Movie-Section========== -->
     <div class="seat-plan-section padding-bottom padding-top">
         <div class="container">
@@ -202,26 +186,23 @@ else
                         <div class="screen-wrapper">
                             <ul class="seat-area">
                                 <!-- Group each seat type by the row letter (e.g. 'A', 'B', 'C'...) -->
-                                @foreach (var rowGroup in seatTypeGroup.GroupBy(s => GetRowLetter(s.SeatLabel)).OrderBy(g => g.Key))
+                                @foreach (var rowGroup in seatTypeGroup.GroupBy(s => GetRowLetter(s.SeatLabel)).OrderBy(g => g.Key))  
                                 {
                                     <li class="seat-line">
                                         <span>@rowGroup.Key</span>
                                         <ul class="seat--area">
-                                            @foreach (var seatChunk in SplitSeatsIntoGroups(rowGroup.OrderBy(s => ParseSeatNumber(s.SeatLabel)).ToList(), seatTypeGroup.Key))
-                                            {
-                                                <li class="front-seat">
-                                                    <ul>
-                                                        @foreach (var seat in seatChunk)
-                                                        {
-                                                            <li class="single-seat seat-free">
-                                                                <img src="@GetSeatImage(seat.SeatTypeId)" alt="seat" />
-                                                                <span class="sit-num">@seat.SeatLabel</span>
-
-                                                            </li>
-                                                        }
-                                                    </ul>
-                                                </li>
-                                            }
+                                            <li class="front-seat">
+                                                <ul>
+                                                    @foreach (var seat in rowGroup.OrderBy(s => ParseSeatNumber(s.SeatLabel)))
+                                                    {
+                                                        <!-- Example: "seat-free" class if seat is not booked -->
+                                                        <li class="single-seat seat-free">
+                                                            <img src="@GetSeatImage(seat.SeatTypeId)" alt="seat" />
+                                                            <span class="sit-num">@seat.SeatLabel</span>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            </li>
                                         </ul>
                                         <span>@rowGroup.Key</span>
                                     </li>
@@ -230,6 +211,142 @@ else
                         </div>
                     }
                 }
+
+                <h5 class="subtitle">Thường</h5>
+                <div class="screen-wrapper">
+                    <ul class="seat-area">
+                        <li class="seat-line">
+                            <span>f</span>
+                            <ul class="seat--area">
+                                <li class="front-seat">
+                                    <ul>
+                                        @for (int i = 1; i <= 4; i++)
+                                        {
+                                            <li class="single-seat seat-free">
+                                                <img src="assets/images/movie/normal-free.png" alt="seat">
+                                                <span class="sit-num">f7</span>
+                                            </li>
+                                        }
+                                    </ul>
+                                </li>
+                                <li class="front-seat">
+                                    <ul>
+                                        @for (int i = 1; i <= 6; i++)
+                                        {
+                                            <li class="single-seat seat-free">
+                                                <img src="assets/images/movie/normal-free.png" alt="seat">
+                                                <span class="sit-num">f7</span>
+                                            </li>
+                                        }
+                                    </ul>
+                                </li>
+                                <li class="front-seat">
+                                    <ul>
+                                        @for (int i = 1; i <= 4; i++)
+                                        {
+                                            <li class="single-seat seat-free">
+                                                <img src="assets/images/movie/normal-free.png" alt="seat">
+                                                <span class="sit-num">f7</span>
+                                            </li>
+                                        }
+                                    </ul>
+                                </li>
+                            </ul>
+                            <span>f</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <h5 class="subtitle brown">VIP</h5>
+                <div class="screen-wrapper">
+                    <ul class="seat-area">
+                        <li class="seat-line">
+                            <span>f</span>
+                            <ul class="seat--area">
+                                <li class="front-seat">
+                                    <ul>
+                                        @for (int i = 1; i <= 4; i++)
+                                        {
+                                            <li class="single-seat">
+                                                <img src="assets/images/movie/vip-free.png" alt="seat">
+                                                <span class="sit-num">f7</span>
+                                            </li>
+                                        }
+                                    </ul>
+                                </li>
+                                <li class="front-seat">
+                                    <ul>
+                                        @for (int i = 1; i <= 6; i++)
+                                        {
+                                            <li class="single-seat">
+                                                <img src="assets/images/movie/vip-free.png" alt="seat">
+                                                <span class="sit-num">f7</span>
+                                            </li>
+                                        }
+                                    </ul>
+                                </li>
+                                <li class="front-seat">
+                                    <ul>
+                                        @for (int i = 1; i <= 4; i++)
+                                        {
+                                            <li class="single-seat">
+                                                <img src="assets/images/movie/vip-free.png" alt="seat">
+                                                <span class="sit-num">f7</span>
+                                            </li>
+                                        }
+                                    </ul>
+                                </li>
+                            </ul>
+                            <span>f</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <h5 class="subtitle pink">Sweetbox</h5>
+                <div class="screen-wrapper">
+                    <ul class="seat-area couple">
+                        <li class="seat-line">
+                            <span>a</span>
+                            <ul class="seat--area">
+                                <li class="front-seat">
+                                    <ul>
+                                        @for (int i = 1; i <= 2; i++)
+                                        {
+                                            <li class="single-seat">
+                                                <img src="assets/images/movie/sweetbox-free.png" alt="seat">
+                                                <span class="sit-num">a1 a2</span>
+                                            </li>
+                                        }
+                                    </ul>
+                                </li>
+                                <li class="front-seat">
+                                    <ul>
+                                        @for (int i = 1; i <= 3; i++)
+                                        {
+                                            <li class="single-seat">
+                                                <img src="assets/images/movie/sweetbox-free.png" alt="seat">
+                                                <span class="sit-num">a1 a2</span>
+                                            </li>
+                                        }
+                                    </ul>
+                                </li>
+                                <li class="front-seat">
+                                    <ul>
+                                        @for (int i = 1; i <= 2; i++)
+                                        {
+                                            <li class="single-seat">
+                                                <img src="assets/images/movie/sweetbox-free.png" alt="seat">
+                                                <span class="sit-num">a1 a2</span>
+                                            </li>
+                                        }
+                                    </ul>
+                                </li>
+                            </ul>
+                            <span>a</span>
+                        </li>
+                    </ul>
+                </div>
+
             </div>
 
             <div class="proceed-book bg_img" data-background="assets/images/movie/movie-bg-proceed.jpg">

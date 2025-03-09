@@ -64,9 +64,9 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
             string query = @"
                 SELECT SS.* 
                 FROM ScreenSeats SS
-                JOIN Screens S ON S.ScreenId = SS.ScreenId
-                JOIN Showtimes ST ON ST.ScreenId = S.ScreenId
+                JOIN Showtimes ST ON ST.ScreenSeatId = SS.ScreenSeatId
                 JOIN Movies M ON M.MovieId = ST.MovieId
+                JOIN Screens S ON S.ScreenId = SS.ScreenId
                 JOIN Cinemas C ON C.CinemaId = S.CinemaId
                 WHERE ST.ShowDate = {0} 
                 AND ST.ShowTime = {1} 
