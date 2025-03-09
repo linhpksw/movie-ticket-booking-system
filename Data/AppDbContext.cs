@@ -1,4 +1,5 @@
-﻿using Humanizer;
+﻿using G5_MovieTicketBookingSystem.Models;
+using Humanizer;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 

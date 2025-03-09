@@ -1,4 +1,4 @@
-﻿@page "/checkout"
+@page "/checkout"
 
 
 @inject IMovieService MovieService
@@ -229,15 +229,15 @@
                             </li>
                             <li>
                                 <h6 class="subtitle">
-                                    <span>@movie?.Showtimes.FirstOrDefault()?.Cinema?.CinemaName</span>
-                                    @if (movie?.Showtimes?.FirstOrDefault()?.ScreenSeat?.Screen?.ScreenName != null)
-                                    {
-                                        <span>Room: @movie.Showtimes.FirstOrDefault().ScreenSeat.Screen.ScreenName</span>
-                                    }
-                                    else
-                                    {
-                                        <span>Room: Not Available</span>
-                                    }
+                                    @* <span>@movie?.Showtimes.FirstOrDefault()?.Cinema?.CinemaName</span> *@
+                                    @* @if (movie?.Showtimes?.FirstOrDefault()?.ScreenSeat?.Screen?.ScreenName != null) *@
+                                    @* { *@
+                                    @*     <span>Room: @movie.Showtimes.FirstOrDefault().ScreenSeat.Screen.ScreenName</span> *@
+                                    @* } *@
+                                    @* else *@
+                                    @* { *@
+                                    @*     <span>Room: Not Available</span> *@
+                                    @* } *@
 
 
                                 </h6>
@@ -346,54 +346,49 @@
     </script>
 
     <script>
-         function redirectToPayment() {
-            const fullName = document.getElementById('FullName').value;
+        //  function redirectToPayment() {
+        //     const fullName = document.getElementById('FullName').value;
 
-              const amount = @(movie?.Showtimes?.FirstOrDefault()?.ScreenSeat?.SeatType?.BasePrice ?? 0);
-            const movieTitle = `@movie?.Title`;
-            const seatLabel = `@movie?.Showtimes?.FirstOrDefault()?.ScreenSeat?.SeatLabel`;
-            const cinemaName = `@movie?.Showtimes?.FirstOrDefault()?.Cinema?.CinemaName`;
-            const userId = @userId;
-            const screenSeatId = `@movie?.Showtimes?.FirstOrDefault()?.ScreenSeat?.ScreenSeatId`; 
+        
 
 
-            const paymentInfo = {
-                orderType: "movie_ticket",  
-                amount: amount,  
-                orderDescription: `Thanh toán vé xem phim ${movieTitle} tại ${cinemaName} - Ghế: ${seatLabel}`, 
-                name: fullName,  
-            };
+        //     const paymentInfo = {
+        //         orderType: "movie_ticket",  
+        //         amount: amount,  
+        //         orderDescription: `Thanh toán vé xem phim ${movieTitle} tại ${cinemaName} - Ghế: ${seatLabel}`, 
+        //         name: fullName,  
+        //     };
 
-            if (!paymentInfo || !paymentInfo.orderType || !paymentInfo.amount) {
-                console.error("Thông tin thanh toán không hợp lệ", paymentInfo);
-                return;
-            }
-                const orderItem = {
-                orderItemId: 123, 
-                orderId: 456, 
-                movieTitle: movieTitle,
-                seatLabel: seatLabel,
-                cinemaName: cinemaName,
-                fullName: fullName,
-                amount: amount,
-                screenSeatId: screenSeatId, 
-                userId: userId
-            };
-             const url = new URL("/payment", window.location.origin);
-              url.searchParams.append("orderType", paymentInfo.orderType);
-            url.searchParams.append("amount", paymentInfo.amount);
-            url.searchParams.append("orderDescription", paymentInfo.orderDescription);
-            url.searchParams.append("name", paymentInfo.name);
-          url.searchParams.append("orderItemId", orderItem.orderItemId);
-        url.searchParams.append("orderId", orderItem.orderId);
-        url.searchParams.append("movieTitle", orderItem.movieTitle);
-        url.searchParams.append("seatLabel", orderItem.seatLabel);
-        url.searchParams.append("cinemaName", orderItem.cinemaName);
-        url.searchParams.append("fullName", orderItem.fullName);
-        url.searchParams.append("screenSeatId", orderItem.screenSeatId);
-        url.searchParams.append("userId", orderItem.userId);
-            // Chuyển hướng người dùng sang trang thanh toán
-            window.location.href = url.toString();
-        }
+        //     if (!paymentInfo || !paymentInfo.orderType || !paymentInfo.amount) {
+        //         console.error("Thông tin thanh toán không hợp lệ", paymentInfo);
+        //         return;
+        //     }
+        //         const orderItem = {
+        //         orderItemId: 123, 
+        //         orderId: 456, 
+        //         movieTitle: movieTitle,
+        //         seatLabel: seatLabel,
+        //         cinemaName: cinemaName,
+        //         fullName: fullName,
+        //         amount: amount,
+        //         screenSeatId: screenSeatId, 
+        //         userId: userId
+        //     };
+        //      const url = new URL("/payment", window.location.origin);
+        //       url.searchParams.append("orderType", paymentInfo.orderType);
+        //     url.searchParams.append("amount", paymentInfo.amount);
+        //     url.searchParams.append("orderDescription", paymentInfo.orderDescription);
+        //     url.searchParams.append("name", paymentInfo.name);
+        //   url.searchParams.append("orderItemId", orderItem.orderItemId);
+        // url.searchParams.append("orderId", orderItem.orderId);
+        // url.searchParams.append("movieTitle", orderItem.movieTitle);
+        // url.searchParams.append("seatLabel", orderItem.seatLabel);
+        // url.searchParams.append("cinemaName", orderItem.cinemaName);
+        // url.searchParams.append("fullName", orderItem.fullName);
+        // url.searchParams.append("screenSeatId", orderItem.screenSeatId);
+        // url.searchParams.append("userId", orderItem.userId);
+        //     Chuyển hướng người dùng sang trang thanh toán
+        //     window.location.href = url.toString();
+        // }
 
     </script>

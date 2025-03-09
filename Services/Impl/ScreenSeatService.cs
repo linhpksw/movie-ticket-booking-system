@@ -1,6 +1,10 @@
-﻿using G5_MovieTicketBookingSystem.Repositories;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using G5_MovieTicketBookingSystem.DTOs;
+using G5_MovieTicketBookingSystem.Mappers;
+using G5_MovieTicketBookingSystem.Models;
+using G5_MovieTicketBookingSystem.Repositories;
+using G5_MovieTicketBookingSystem.Repositories.Impl;
 
 namespace G5_MovieTicketBookingSystem.Services.Impl
 {
@@ -36,6 +40,16 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
         public async Task DeleteScreenSeatAsync(int screenSeatId)
         {
             await _screenSeatRepository.DeleteScreenSeatAsync(screenSeatId);
+        }
+
+        public async Task<List<ScreenSeatDto>> GetScreenSeatsByShowtime(int movieId, int cinemaId, DateOnly showDate, TimeOnly showTime)
+        {
+            List<ScreenSeat> screenSeats = await _screenSeatRepository.GetScreenSeatsByShowtime(movieId, cinemaId, showDate, showTime);
+
+            if (screenSeats == null || !screenSeats.Any()) return new List<ScreenSeatDto>();
+
+
+            return screenSeats.Select(ScreenSeatMapper.ToDto).ToList();
         }
     }
 }

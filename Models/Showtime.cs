@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace G5_MovieTicketBookingSystem;
+namespace G5_MovieTicketBookingSystem.Models;
 
 public class Showtime
 {
@@ -20,13 +20,13 @@ public class Showtime
     /// Store the date portion (e.g., 2025-05-01).
     /// </summary>
     [Required]
-    public DateTime ShowDate { get; set; }
+    public DateOnly ShowDate { get; set; }
 
     /// <summary>
     /// Store the time portion (e.g., 18:30:00).
     /// </summary>
     [Required]
-    public TimeSpan ShowTime { get; set; }
+    public TimeOnly ShowTime { get; set; }
 
     [Required]
     [MaxLength(20)]

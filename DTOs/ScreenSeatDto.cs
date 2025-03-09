@@ -6,5 +6,7 @@
         public string SeatLabel { get; set; }
         public SeatTypeDto? SeatType { get; set; }
         public ScreenDto? Screen { get; set; }
+        public required int ScreenId { get; set; }
+        public required int SeatTypeId { get; set; }
     }
 }
