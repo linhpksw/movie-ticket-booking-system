@@ -11,8 +11,8 @@ namespace G5_MovieTicketBookingSystem.Repositories
         Task<User?> GetUserByEmail(string email);
         Task<bool> IsUsernameExistsAsync(string username);
 
-       // Kiểm tra sự tồn tại của Username hoặc Email trước khi đăng ký
-       //Task<bool> UsernameExistsAsync(string username);
-       //Task<bool> EmailExistsAsync(string email);
+        // Kiểm tra sự tồn tại của Username hoặc Email trước khi đăng ký
+        //Task<bool> UsernameExistsAsync(string username);
+        //Task<bool> EmailExistsAsync(string email);
     }
 }
