@@ -12,8 +12,13 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace G5_MovieTicketBookingSystem.Migrations
 {
     [DbContext(typeof(AppDbContext))]
+<<<<<<<< HEAD:Migrations/20250311154116_DBSchema_V110325.Designer.cs
     [Migration("20250311154116_DBSchema_V110325")]
     partial class DBSchema_V110325
+========
+    [Migration("20250309035631_InitialCreate")]
+    partial class InitialCreate
+>>>>>>>> 4d4e768 (fix: fix query):Migrations/20250309035631_InitialCreate.Designer.cs
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -53,7 +58,71 @@ namespace G5_MovieTicketBookingSystem.Migrations
                     b.ToTable("Cinemas");
                 });
 
+<<<<<<<< HEAD:Migrations/20250311154116_DBSchema_V110325.Designer.cs
             modelBuilder.Entity("G5_MovieTicketBookingSystem.Models.Movie", b =>
+========
+            modelBuilder.Entity("G5_MovieTicketBookingSystem.Models.Screen", b =>
+                {
+                    b.Property<int>("ScreenId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ScreenId"));
+
+                    b.Property<int>("CinemaId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ScreenName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("ScreenId");
+
+                    b.HasIndex("CinemaId");
+
+                    b.ToTable("Screens");
+                });
+
+            modelBuilder.Entity("G5_MovieTicketBookingSystem.Models.Showtime", b =>
+                {
+                    b.Property<int>("ShowtimeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ShowtimeId"));
+
+                    b.Property<string>("ExperienceType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("MovieId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ScreenId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ScreenSeatId")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly>("ShowDate")
+                        .HasColumnType("date");
+
+                    b.Property<TimeOnly>("ShowTime")
+                        .HasColumnType("time");
+
+                    b.HasKey("ShowtimeId");
+
+                    b.HasIndex("MovieId");
+
+                    b.HasIndex("ScreenId");
+
+                    b.ToTable("Showtimes");
+                });
+
+            modelBuilder.Entity("G5_MovieTicketBookingSystem.Movie", b =>
+>>>>>>>> 4d4e768 (fix: fix query):Migrations/20250309035631_InitialCreate.Designer.cs
                 {
                     b.Property<int>("MovieId")
                         .ValueGeneratedOnAdd()
@@ -173,6 +242,7 @@ namespace G5_MovieTicketBookingSystem.Migrations
                     b.ToTable("Roles");
                 });
 
+<<<<<<<< HEAD:Migrations/20250311154116_DBSchema_V110325.Designer.cs
             modelBuilder.Entity("G5_MovieTicketBookingSystem.Models.Screen", b =>
                 {
                     b.Property<int>("ScreenId")
@@ -197,6 +267,9 @@ namespace G5_MovieTicketBookingSystem.Migrations
                 });
 
             modelBuilder.Entity("G5_MovieTicketBookingSystem.Models.ScreenSeat", b =>
+========
+            modelBuilder.Entity("G5_MovieTicketBookingSystem.ScreenSeat", b =>
+>>>>>>>> 4d4e768 (fix: fix query):Migrations/20250309035631_InitialCreate.Designer.cs
                 {
                     b.Property<int>("ScreenSeatId")
                         .ValueGeneratedOnAdd()
@@ -279,6 +352,7 @@ namespace G5_MovieTicketBookingSystem.Migrations
                     b.ToTable("SeatTypes");
                 });
 
+<<<<<<<< HEAD:Migrations/20250311154116_DBSchema_V110325.Designer.cs
             modelBuilder.Entity("G5_MovieTicketBookingSystem.Models.Showtime", b =>
                 {
                     b.Property<int>("ShowtimeId")
@@ -317,6 +391,9 @@ namespace G5_MovieTicketBookingSystem.Migrations
                 });
 
             modelBuilder.Entity("G5_MovieTicketBookingSystem.Models.Ticket", b =>
+========
+            modelBuilder.Entity("G5_MovieTicketBookingSystem.Ticket", b =>
+>>>>>>>> 4d4e768 (fix: fix query):Migrations/20250309035631_InitialCreate.Designer.cs
                 {
                     b.Property<int>("TicketId")
                         .ValueGeneratedOnAdd()
@@ -469,7 +546,41 @@ namespace G5_MovieTicketBookingSystem.Migrations
                     b.ToTable("UserRoles");
                 });
 
+<<<<<<<< HEAD:Migrations/20250311154116_DBSchema_V110325.Designer.cs
             modelBuilder.Entity("G5_MovieTicketBookingSystem.Models.Order", b =>
+========
+            modelBuilder.Entity("G5_MovieTicketBookingSystem.Models.Screen", b =>
+                {
+                    b.HasOne("G5_MovieTicketBookingSystem.Models.Cinema", "Cinema")
+                        .WithMany("Screens")
+                        .HasForeignKey("CinemaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Cinema");
+                });
+
+            modelBuilder.Entity("G5_MovieTicketBookingSystem.Models.Showtime", b =>
+                {
+                    b.HasOne("G5_MovieTicketBookingSystem.Movie", "Movie")
+                        .WithMany("Showtimes")
+                        .HasForeignKey("MovieId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("G5_MovieTicketBookingSystem.Models.Screen", "Screen")
+                        .WithMany("Showtimes")
+                        .HasForeignKey("ScreenId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Movie");
+
+                    b.Navigation("Screen");
+                });
+
+            modelBuilder.Entity("G5_MovieTicketBookingSystem.Order", b =>
+>>>>>>>> 4d4e768 (fix: fix query):Migrations/20250309035631_InitialCreate.Designer.cs
                 {
                     b.HasOne("G5_MovieTicketBookingSystem.Models.User", "User")
                         .WithMany("Orders")
@@ -507,6 +618,7 @@ namespace G5_MovieTicketBookingSystem.Migrations
                     b.Navigation("Showtime");
                 });
 
+<<<<<<<< HEAD:Migrations/20250311154116_DBSchema_V110325.Designer.cs
             modelBuilder.Entity("G5_MovieTicketBookingSystem.Models.Screen", b =>
                 {
                     b.HasOne("G5_MovieTicketBookingSystem.Models.Cinema", "Cinema")
@@ -519,6 +631,9 @@ namespace G5_MovieTicketBookingSystem.Migrations
                 });
 
             modelBuilder.Entity("G5_MovieTicketBookingSystem.Models.ScreenSeat", b =>
+========
+            modelBuilder.Entity("G5_MovieTicketBookingSystem.ScreenSeat", b =>
+>>>>>>>> 4d4e768 (fix: fix query):Migrations/20250309035631_InitialCreate.Designer.cs
                 {
                     b.HasOne("G5_MovieTicketBookingSystem.Models.Screen", "Screen")
                         .WithMany("ScreenSeats")
@@ -564,6 +679,7 @@ namespace G5_MovieTicketBookingSystem.Migrations
                     b.Navigation("User");
                 });
 
+<<<<<<<< HEAD:Migrations/20250311154116_DBSchema_V110325.Designer.cs
             modelBuilder.Entity("G5_MovieTicketBookingSystem.Models.Showtime", b =>
                 {
                     b.HasOne("G5_MovieTicketBookingSystem.Models.Movie", "Movie")
@@ -584,6 +700,9 @@ namespace G5_MovieTicketBookingSystem.Migrations
                 });
 
             modelBuilder.Entity("G5_MovieTicketBookingSystem.Models.Ticket", b =>
+========
+            modelBuilder.Entity("G5_MovieTicketBookingSystem.Ticket", b =>
+>>>>>>>> 4d4e768 (fix: fix query):Migrations/20250309035631_InitialCreate.Designer.cs
                 {
                     b.HasOne("G5_MovieTicketBookingSystem.Models.OrderItem", "OrderItem")
                         .WithOne("Ticket")
@@ -648,7 +767,18 @@ namespace G5_MovieTicketBookingSystem.Migrations
                     b.Navigation("Screens");
                 });
 
+<<<<<<<< HEAD:Migrations/20250311154116_DBSchema_V110325.Designer.cs
             modelBuilder.Entity("G5_MovieTicketBookingSystem.Models.Movie", b =>
+========
+            modelBuilder.Entity("G5_MovieTicketBookingSystem.Models.Screen", b =>
+                {
+                    b.Navigation("ScreenSeats");
+
+                    b.Navigation("Showtimes");
+                });
+
+            modelBuilder.Entity("G5_MovieTicketBookingSystem.Movie", b =>
+>>>>>>>> 4d4e768 (fix: fix query):Migrations/20250309035631_InitialCreate.Designer.cs
                 {
                     b.Navigation("Showtimes");
                 });
@@ -670,6 +800,7 @@ namespace G5_MovieTicketBookingSystem.Migrations
                     b.Navigation("UserRoles");
                 });
 
+<<<<<<<< HEAD:Migrations/20250311154116_DBSchema_V110325.Designer.cs
             modelBuilder.Entity("G5_MovieTicketBookingSystem.Models.Screen", b =>
                 {
                     b.Navigation("ScreenSeats");
@@ -678,6 +809,9 @@ namespace G5_MovieTicketBookingSystem.Migrations
                 });
 
             modelBuilder.Entity("G5_MovieTicketBookingSystem.Models.ScreenSeat", b =>
+========
+            modelBuilder.Entity("G5_MovieTicketBookingSystem.ScreenSeat", b =>
+>>>>>>>> 4d4e768 (fix: fix query):Migrations/20250309035631_InitialCreate.Designer.cs
                 {
                     b.Navigation("OrderItems");
 

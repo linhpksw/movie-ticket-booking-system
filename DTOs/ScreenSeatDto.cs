@@ -3,10 +3,14 @@
     public class ScreenSeatDto
     {
         public int ScreenSeatId { get; set; }
-        public string SeatLabel { get; set; }
+        public string SeatLabel { get; set; } = "Unknown Seat"; 
+
         public SeatTypeDto? SeatType { get; set; }
         public ScreenDto? Screen { get; set; }
-        public required int ScreenId { get; set; }
-        public required int SeatTypeId { get; set; }
+
+        public int ScreenId { get; set; } = 0;
+        public int SeatTypeId { get; set; } = 0;
+
+        public ScreenSeatDto() { }
     }
 }

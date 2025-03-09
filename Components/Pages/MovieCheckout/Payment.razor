@@ -31,82 +31,121 @@
             }
         };
 
-    private OrderItemDto NewOrderItemDto { get; set; } = new()
-        {
-            OrderItemId = 1,
-            OrderId = 1,
-            ScreenSeatId = 1,
-            PriceCharged = 45000m
-        };
+    private List<int> screenSeatIds = new();
+    private List<OrderItemDto> orderItems = new();
+
     protected override async Task OnInitializedAsync()
     {
-        var uri = UriHelper.ToAbsoluteUri(UriHelper.Uri.ToString());
-        var queryParams = System.Web.HttpUtility.ParseQueryString(uri.Query);
-
-        // Cập nhật paymentModel từ query parameters
-        paymentModel.OrderType = queryParams["orderType"];
-        paymentModel.Amount = double.TryParse(queryParams["amount"], out double amount) ? amount : 0;
-        paymentModel.OrderDescription = queryParams["orderDescription"];
-        paymentModel.Name = queryParams["name"];
-
-        // Parse các giá trị
-        userId = Int32.Parse(queryParams["userId"]);
-        int orderItemId = Int32.Parse(queryParams["orderItemId"]);
-        string movieTitle = queryParams["movieTitle"];
-        string seatLabel = queryParams["seatLabel"];
-        string cinemaName = queryParams["cinemaName"];
-        string fullName = queryParams["fullName"];
-        int screenSeatId = Int32.Parse(queryParams["screenSeatId"]);
-
-        // Xử lý các thông tin trong order
-        currentUser = await UserService.GetUserByIdAsync(userId.Value);
-        NewOrder.UserId = currentUser.UserId;
-        NewOrder.User = currentUser;
-        NewOrder.TotalAmount = (decimal)paymentModel.Amount;
-
-        // await AddOrder();
-        await AddOrder();
-
-        Order OrderLasted = await OrderService.GetLatestOrderByUserIdAsync(userId.Value);
-        NewOrderItemDto.OrderId = OrderLasted.OrderId;
-        NewOrderItemDto.ScreenSeatId = screenSeatId;
-        NewOrderItemDto.PriceCharged = decimal.Parse(queryParams["amount"]);
-        await AddOrderItem(NewOrderItemDto);
-        //add transaction log
-        TransactionLog transactionLog = new TransactionLog
-            {
-                OrderId = OrderLasted.OrderId,
-                Order = OrderLasted,
-                PaymentGateway = "VNPAY",
-                PaymentStatus = "Pending",
-                Amount = OrderLasted.TotalAmount,
-                TransactionTimestamp = DateTime.Now,
-                GatewayResponse = "Pending"
-            };
-        // AddTransactionLog(transactionLog);
-        // Kiểm tra nếu dữ liệu đầy đủ
-        if (!string.IsNullOrEmpty(paymentModel.OrderType) && paymentModel.Amount > 0)
+        try
         {
-            var httpContext = HttpContextAccessor.HttpContext;
-            if (httpContext != null)
+            var uri = UriHelper.ToAbsoluteUri(UriHelper.Uri.ToString());
+            var queryParams = System.Web.HttpUtility.ParseQueryString(uri.Query);
+            // ✅ Lấy thông tin thanh toán từ query string
+            paymentModel.OrderType = queryParams["orderType"];
+            paymentModel.Amount = double.TryParse(queryParams["amount"], out double amount) ? amount : 0;
+            paymentModel.OrderDescription = queryParams["orderDescription"];
+            paymentModel.Name = queryParams["name"];
+
+            // ✅ Parse các giá trị từ query params
+            if (!int.TryParse(queryParams["userId"], out int parsedUserId))
             {
-                var paymentUrl = VnPayService.CreatePaymentUrl(paymentModel, httpContext);
-                if (!string.IsNullOrEmpty(paymentUrl))
+                Console.WriteLine("❌ Lỗi: userId không hợp lệ.");
+                return;
+            }
+            userId = parsedUserId;
+
+            if (!string.IsNullOrEmpty(queryParams["screenSeatId"]))
+            {
+                screenSeatIds = queryParams["screenSeatId"]
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(id => int.TryParse(id.Trim(), out int seatId) ? seatId : -1)
+                    .Where(seatId => seatId != -1)
+                    .ToList();
+            }
+
+            if (screenSeatIds.Count == 0)
+            {
+                Console.WriteLine("❌ Lỗi: Không có screenSeatId hợp lệ.");
+                return;
+            }
+
+            int orderItemId = int.TryParse(queryParams["orderItemId"], out int oi) ? oi : 1;
+            string movieTitle = queryParams["movieTitle"] ?? "Unknown Movie";
+            string seatLabel = queryParams["seatLabel"] ?? "Unknown Seat";
+            string cinemaName = queryParams["cinemaName"] ?? "Unknown Cinema";
+            string fullName = queryParams["fullName"] ?? "Unknown User";
+
+            // ✅ Lấy user hiện tại
+            currentUser = await UserService.GetUserByIdAsync(userId.Value);
+            if (currentUser == null)
+            {
+                Console.WriteLine("❌ Lỗi: Không tìm thấy user.");
+                return;
+            }
+
+            NewOrder.UserId = currentUser.UserId;
+            NewOrder.User = currentUser;
+            NewOrder.TotalAmount = (decimal)paymentModel.Amount;
+
+            // ✅ Thêm Order mới
+            await AddOrder();
+
+            // ✅ Lấy Order vừa tạo
+            Order latestOrder = await OrderService.GetLatestOrderByUserIdAsync(userId.Value);
+
+            // ✅ Tạo OrderItem cho từng ghế
+            foreach (var seatId in screenSeatIds)
+            {
+                var orderItem = new OrderItemDto
+                    {
+                        OrderItemId = orderItemId,
+                        OrderId = latestOrder.OrderId,
+                        ScreenSeatId = seatId,
+                        PriceCharged = (decimal)paymentModel.Amount / screenSeatIds.Count
+                    };
+                await AddOrderItem(orderItem);
+            }
+
+            // ✅ Thêm Transaction Log
+            TransactionLog transactionLog = new TransactionLog
                 {
-                    Navigation.NavigateTo(paymentUrl, true);
-                }
-                else
+                    OrderId = latestOrder.OrderId,
+                    Order = latestOrder,
+                    PaymentGateway = "VNPAY",
+                    PaymentStatus = "Pending",
+                    Amount = latestOrder.TotalAmount,
+                    TransactionTimestamp = DateTime.Now,
+                    GatewayResponse = "Pending"
+                };
+            await TransactionLogService.AddTransactionLogAsync(transactionLog);
+
+            if (!string.IsNullOrEmpty(paymentModel.OrderType) && paymentModel.Amount > 0)
+            {
+                var httpContext = HttpContextAccessor.HttpContext;
+                if (httpContext != null)
                 {
-                    Console.WriteLine("❌ Lỗi: Không thể tạo URL thanh toán VNPAY.");
+                    var paymentUrl = VnPayService.CreatePaymentUrl(paymentModel, httpContext);
+                    if (!string.IsNullOrEmpty(paymentUrl))
+                    {
+                        Navigation.NavigateTo(paymentUrl, true);
+                    }
+                    else
+                    {
+                        Console.WriteLine("❌ Lỗi: Không thể tạo URL thanh toán VNPAY.");
+                    }
                 }
             }
+            else
+            {
+                Console.WriteLine("❌ Lỗi: Dữ liệu thanh toán không hợp lệ.");
+            }
+
         }
-        else
+        catch (Exception ex)
         {
-            Console.WriteLine("❌ Lỗi: Dữ liệu thanh toán không hợp lệ.");
+            Console.WriteLine($"❌ Lỗi trong OnInitializedAsync: {ex.Message}");
         }
     }
-
 
     private async Task AddOrder()
     {
@@ -121,7 +160,7 @@
     private async Task AddOrderItem(OrderItemDto newOrderItemDto)
     {
         var order = await OrderService.GetOrderByIdAsync(newOrderItemDto.OrderId);
-        var screenSeat = await ScreenSeatService.GetScreenSeatByIdAsync(NewOrderItemDto.ScreenSeatId);
+        var screenSeat = await ScreenSeatService.GetScreenSeatByIdAsync(newOrderItemDto.ScreenSeatId);
 
         var newOrderItem = new OrderItem
             {
@@ -135,8 +174,4 @@
 
         await OrderItemService.AddOrderItemAsync(newOrderItem);
     }
-    // private async Task AddTransactionLog(TransactionLog transactionLog)
-    // {
-    //     TransactionLogService.AddTransactionLogAsync(transactionLog);
-    // }
 }

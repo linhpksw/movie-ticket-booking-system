@@ -41,6 +41,8 @@ public class Program
         builder.Services.AddScoped<ITransactionLogService, TransactionLogService>();
         builder.Services.AddScoped<IOrderItemService, OrderItemService>();
         builder.Services.AddScoped<ITicketService, TicketService>();
+        builder.Services.AddScoped<IOrderService, OrderService>();
+
 
         builder.Services.AddScoped<ISeatLockRepository, SeatLockRepository>();
         builder.Services.AddScoped<IOrderRepository, OrderRepository>();
