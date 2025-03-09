@@ -37,7 +37,7 @@ namespace G5_MovieTicketBookingSystem
        options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
        options.SaveTokens = true;  // 🔥 Cần thiết để lưu token!
-       options.CallbackPath = new PathString("/api/auth/login-google-info");  // Đảm bảo rằng URL này chính xác
+       options.CallbackPath = new PathString("/api/auth/login-google-info   ");  // Đảm bảo rằng URL này chính xác
    });
 
             // Add distributed memory cache for session storage
