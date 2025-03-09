@@ -6,6 +6,8 @@ using G5_MovieTicketBookingSystem.Services;
 using G5_MovieTicketBookingSystem.Services.Impl;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 
 namespace G5_MovieTicketBookingSystem
 {
@@ -22,6 +24,22 @@ namespace G5_MovieTicketBookingSystem
             builder.Services.AddServerSideBlazor();
             builder.Services.AddHttpClient();
             builder.Services.AddSession();
+
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+            })
+   .AddCookie()
+   .AddGoogle(options =>
+   {
+       options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
+       options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+       options.SaveTokens = true;  // 🔥 Cần thiết để lưu token!
+       options.CallbackPath = new PathString("/api/auth/login-google-info");  // Đảm bảo rằng URL này chính xác
+   });
+
             // Add distributed memory cache for session storage
             builder.Services.AddDistributedMemoryCache();
 
@@ -55,16 +73,17 @@ namespace G5_MovieTicketBookingSystem
                 app.UseExceptionHandler("/Error");
                 app.UseHsts();
             }
-
+            app.UseAuthentication();  //
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting(); // Required for session and endpoint mapping
             app.UseAntiforgery();
             app.UseSession(); // Enable session middleware
+
             app.UseSession();
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
-
+            app.MapControllers();
             app.Run();
         }
     }

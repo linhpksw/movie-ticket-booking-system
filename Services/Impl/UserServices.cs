@@ -54,7 +54,41 @@ public class UserServices : IUserServices
             throw;
         }
     }
+    public async Task<UserResponseDto> RegisterGoogle(UserCreateDto userCreateDto, List<int> roleIds)
+    {
+        var existingUser = await _userRepository.GetUserByEmail(userCreateDto.Email);
+        if (existingUser != null)
+        {
 
+            return UserMapper.MapToUserResponseDto(existingUser);
+        }
+
+        if (!string.IsNullOrEmpty(userCreateDto.Password))
+        {
+            userCreateDto.Password = BCrypt.Net.BCrypt.HashPassword(userCreateDto.Password);
+        }
+
+        string uniqueUsername = await GenerateUniqueUsernameAsync(userCreateDto.Email);
+        userCreateDto.username = uniqueUsername;
+        User user = UserMapper.CreateToUser(userCreateDto);
+
+        User userInsert;
+        try
+        {
+            userInsert = await _userRepository.SignUpAsync(user);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("Đăng ký thất bại: " + ex.Message);
+        }
+
+        foreach (var roleId in roleIds)
+        {
+            await _userRoleRepository.AssignRoleToUserAsync(user.UserId, roleId);
+        }
+
+        return UserMapper.MapToUserResponseDto(userInsert);
+    }
     public async Task<UserResponseDto> Register(UserCreateDto userCreateDto, List<int> roleIds)
     {
         var existingUser = await _userRepository.GetUserByEmail(userCreateDto.Email);
