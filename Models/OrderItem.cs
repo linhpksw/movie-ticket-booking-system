@@ -1,32 +1,40 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using G5_MovieTicketBookingSystem.Models;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace G5_MovieTicketBookingSystem;
-
-public class OrderItem
+namespace G5_MovieTicketBookingSystem.Models
 {
-    [Key]
-    public int OrderItemId { get; set; }
+    public class OrderItem
+    {
+        [Key]
+        public int OrderItemId { get; set; }
 
-    [Required]
-    public int OrderId { get; set; }
+        [Required]
+        public int OrderId { get; set; }
 
-    [Required]
-    public int ScreenSeatId { get; set; }
+        [Required]
+        public int ShowtimeId { get; set; }
 
-    [Required]
-    [Column(TypeName = "decimal(10,2)")]
-    [Range(0, double.MaxValue)]
-    public decimal PriceCharged { get; set; }
+        [Required]
+        public int ScreenSeatId { get; set; }
 
-    // Navigation
-    [ForeignKey(nameof(OrderId))]
-    public required Order Order { get; set; }
+        [Required]
+        [Column(TypeName = "decimal(10,2)")]
+        [Range(0, double.MaxValue)]
+        public decimal PriceCharged { get; set; }
 
-    [ForeignKey(nameof(ScreenSeatId))]
-    public required ScreenSeat ScreenSeat { get; set; }
+        // Navigation
+        [ForeignKey(nameof(OrderId))]
+        public required Order Order { get; set; }
 
-    public Ticket? Ticket { get; set; }
+        [ForeignKey(nameof(ScreenSeatId))]
+        public required ScreenSeat ScreenSeat { get; set; }
 
-    public OrderItem() { }
+        public Ticket? Ticket { get; set; }
+
+        [ForeignKey(nameof(ShowtimeId))]
+        public required Showtime Showtime { get; set; }
+
+        public OrderItem() { }
+    }
 }

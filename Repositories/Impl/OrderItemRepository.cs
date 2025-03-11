@@ -1,4 +1,5 @@
 ﻿using G5_MovieTicketBookingSystem.Data;
+using G5_MovieTicketBookingSystem.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace G5_MovieTicketBookingSystem.Repositories.Impl
@@ -23,7 +24,7 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
         {
             return await _context.OrderItems
                 .Where(oi => oi.OrderId == orderId)
-                .ToListAsync(); 
+                .ToListAsync();
         }
     }
 }

@@ -1,9 +1,7 @@
-﻿using G5_MovieTicketBookingSystem.Models;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace G5_MovieTicketBookingSystem.Models
 {
-
     public class Cinema
     {
         [Key]
@@ -25,3 +23,5 @@ namespace G5_MovieTicketBookingSystem.Models
         public ICollection<Screen>? Screens { get; set; }
     }
 }
+
+

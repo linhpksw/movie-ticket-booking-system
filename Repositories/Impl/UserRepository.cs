@@ -1,9 +1,10 @@
 ﻿using G5_MovieTicketBookingSystem.Data;
+using G5_MovieTicketBookingSystem.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace G5_MovieTicketBookingSystem.Repositories.Impl
 {
-    public class UserRepository :IUserRepository
+    public class UserRepository : IUserRepository
     {
         private readonly AppDbContext _context;
 

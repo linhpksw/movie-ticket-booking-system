@@ -1,31 +1,31 @@
-﻿using G5_MovieTicketBookingSystem.Models;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace G5_MovieTicketBookingSystem;
-
-public class ScreenSeat
+namespace G5_MovieTicketBookingSystem.Models
 {
-    [Key]
-    public int ScreenSeatId { get; set; }
+    public class ScreenSeat
+    {
+        [Key]
+        public int ScreenSeatId { get; set; }
 
-    [Required]
-    public required int ScreenId { get; set; }
+        [Required]
+        public required int ScreenId { get; set; }
 
-    [ForeignKey(nameof(ScreenId))]
-    public required Screen Screen { get; set; }
+        [ForeignKey(nameof(ScreenId))]
+        public required Screen Screen { get; set; }
 
-    [Required]
-    [MaxLength(10)]
-    public required string SeatLabel { get; set; }
+        [Required]
+        [MaxLength(10)]
+        public required string SeatLabel { get; set; }
 
-    [Required]
-    public required int SeatTypeId { get; set; }
+        [Required]
+        public required int SeatTypeId { get; set; }
 
-    [ForeignKey(nameof(SeatTypeId))]
-    public required SeatType SeatType { get; set; }
+        [ForeignKey(nameof(SeatTypeId))]
+        public required SeatType SeatType { get; set; }
 
-    public ICollection<OrderItem>? OrderItems { get; set; }
+        public ICollection<OrderItem>? OrderItems { get; set; }
 
-    public ICollection<SeatLock>? SeatLocks { get; set; }
+        public ICollection<SeatLock>? SeatLocks { get; set; }
+    }
 }

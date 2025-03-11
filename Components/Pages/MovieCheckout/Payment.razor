@@ -129,7 +129,8 @@
                 ScreenSeatId = newOrderItemDto.ScreenSeatId,
                 PriceCharged = newOrderItemDto.PriceCharged,
                 Order = order,
-                ScreenSeat = screenSeat
+                ScreenSeat = screenSeat,
+                Showtime = null
             };
 
         await OrderItemService.AddOrderItemAsync(newOrderItem);

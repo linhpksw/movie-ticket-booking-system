@@ -1,4 +1,5 @@
 ﻿using G5_MovieTicketBookingSystem.Data;
+using G5_MovieTicketBookingSystem.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace G5_MovieTicketBookingSystem.Repositories.Impl
@@ -45,7 +46,7 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
         public async Task UpdateOrderStatusAsync(int orderId, string status)
         {
             var order = await _context.Orders
-                .FirstOrDefaultAsync(o => o.OrderId == orderId); 
+                .FirstOrDefaultAsync(o => o.OrderId == orderId);
 
             if (order != null)
             {

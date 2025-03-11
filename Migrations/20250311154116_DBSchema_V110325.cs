@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace G5_MovieTicketBookingSystem.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateNewDatabaseSchema : Migration
+    public partial class DBSchema_V110325 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -189,10 +189,10 @@ namespace G5_MovieTicketBookingSystem.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     MovieId = table.Column<int>(type: "int", nullable: false),
                     ScreenId = table.Column<int>(type: "int", nullable: false),
-                    ScreenSeatId = table.Column<int>(type: "int", nullable: true),
-                    ShowDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ShowTime = table.Column<TimeSpan>(type: "time", nullable: false),
-                    ExperienceType = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false)
+                    ShowDate = table.Column<DateOnly>(type: "date", nullable: false),
+                    ShowTime = table.Column<TimeOnly>(type: "time", nullable: false),
+                    ExperienceType = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    IsSoldOut = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -242,6 +242,7 @@ namespace G5_MovieTicketBookingSystem.Migrations
                     OrderItemId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     OrderId = table.Column<int>(type: "int", nullable: false),
+                    ShowtimeId = table.Column<int>(type: "int", nullable: false),
                     ScreenSeatId = table.Column<int>(type: "int", nullable: false),
                     PriceCharged = table.Column<decimal>(type: "decimal(10,2)", nullable: false)
                 },
@@ -260,6 +261,12 @@ namespace G5_MovieTicketBookingSystem.Migrations
                         principalTable: "ScreenSeats",
                         principalColumn: "ScreenSeatId",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_OrderItems_Showtimes_ShowtimeId",
+                        column: x => x.ShowtimeId,
+                        principalTable: "Showtimes",
+                        principalColumn: "ShowtimeId",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -271,8 +278,8 @@ namespace G5_MovieTicketBookingSystem.Migrations
                     UserId = table.Column<int>(type: "int", nullable: false),
                     ScreenSeatId = table.Column<int>(type: "int", nullable: false),
                     LockStartTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LockExpiryTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LockStatus = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false)
+                    ShowtimeId = table.Column<int>(type: "int", nullable: false),
+                    LockExpiryTime = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -282,6 +289,12 @@ namespace G5_MovieTicketBookingSystem.Migrations
                         column: x => x.ScreenSeatId,
                         principalTable: "ScreenSeats",
                         principalColumn: "ScreenSeatId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_SeatLocks_Showtimes_ShowtimeId",
+                        column: x => x.ShowtimeId,
+                        principalTable: "Showtimes",
+                        principalColumn: "ShowtimeId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_SeatLocks_Users_UserId",
@@ -353,6 +366,11 @@ namespace G5_MovieTicketBookingSystem.Migrations
                 column: "ScreenSeatId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_OrderItems_ShowtimeId",
+                table: "OrderItems",
+                column: "ShowtimeId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Orders_UserId",
                 table: "Orders",
                 column: "UserId");
@@ -376,6 +394,11 @@ namespace G5_MovieTicketBookingSystem.Migrations
                 name: "IX_SeatLocks_ScreenSeatId",
                 table: "SeatLocks",
                 column: "ScreenSeatId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SeatLocks_ShowtimeId",
+                table: "SeatLocks",
+                column: "ShowtimeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SeatLocks_UserId",
@@ -426,9 +449,6 @@ namespace G5_MovieTicketBookingSystem.Migrations
                 name: "SeatLocks");
 
             migrationBuilder.DropTable(
-                name: "Showtimes");
-
-            migrationBuilder.DropTable(
                 name: "TicketScanLogs");
 
             migrationBuilder.DropTable(
@@ -436,9 +456,6 @@ namespace G5_MovieTicketBookingSystem.Migrations
 
             migrationBuilder.DropTable(
                 name: "UserRoles");
-
-            migrationBuilder.DropTable(
-                name: "Movies");
 
             migrationBuilder.DropTable(
                 name: "Tickets");
@@ -456,13 +473,19 @@ namespace G5_MovieTicketBookingSystem.Migrations
                 name: "ScreenSeats");
 
             migrationBuilder.DropTable(
+                name: "Showtimes");
+
+            migrationBuilder.DropTable(
                 name: "Users");
 
             migrationBuilder.DropTable(
-                name: "Screens");
+                name: "SeatTypes");
 
             migrationBuilder.DropTable(
-                name: "SeatTypes");
+                name: "Movies");
+
+            migrationBuilder.DropTable(
+                name: "Screens");
 
             migrationBuilder.DropTable(
                 name: "Cinemas");

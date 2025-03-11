@@ -1,4 +1,5 @@
 ﻿using G5_MovieTicketBookingSystem.Data;
+using G5_MovieTicketBookingSystem.Models;
 
 namespace G5_MovieTicketBookingSystem.Repositories.Impl
 {

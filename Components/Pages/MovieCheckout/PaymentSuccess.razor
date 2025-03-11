@@ -1,7 +1,6 @@
 ﻿@page "/payment-success"
 @layout MainLayout
 
-@using G5_MovieTicketBookingSystem.DTOs.VNPAY
 @inject IHttpContextAccessor HttpContextAccessor
 @inject IOrderService OrderService
 @inject ITransactionLogService TransactionLogService
@@ -126,11 +125,11 @@ else
     }
 
     private async Task AddTransactionLog(TransactionLog transactionLog){
-        TransactionLogService.AddTransactionLogAsync(transactionLog);
+        await TransactionLogService.AddTransactionLogAsync(transactionLog);
     }
 
     private async Task AddTicket(Ticket ticket)
     {
-        TicketService.AddTicketAsync(ticket);
+        await TicketService.AddTicketAsync(ticket);
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using G5_MovieTicketBookingSystem.Models;
+using System.Threading.Tasks;
 
 namespace G5_MovieTicketBookingSystem.Repositories
 {

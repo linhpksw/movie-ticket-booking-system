@@ -1,9 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using G5_MovieTicketBookingSystem.Data;
+using G5_MovieTicketBookingSystem.Models;
+using G5_MovieTicketBookingSystem.Repositories;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using G5_MovieTicketBookingSystem.Data;
-using G5_MovieTicketBookingSystem.Repositories;
 
 namespace G5_MovieTicketBookingSystem.Services.Impl
 {
@@ -34,7 +35,7 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
 
         public async Task UpdateOrderStatusAsync(int orderId, string status)
         {
-            await _orderRepository.UpdateOrderStatusAsync(orderId, status); 
+            await _orderRepository.UpdateOrderStatusAsync(orderId, status);
         }
 
         public async Task<bool> CreateOrderWithItemsAsync(Order order, List<OrderItem> orderItems)
@@ -42,16 +43,16 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
             await using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-           
+
                 var userExists = await _context.Users.AnyAsync(u => u.UserId == order.UserId);
                 if (!userExists)
                 {
                     throw new Exception("❌ User không tồn tại! Vui lòng kiểm tra lại.");
                 }
 
-             
+
                 _context.Orders.Add(order);
-                await _context.SaveChangesAsync(); 
+                await _context.SaveChangesAsync();
 
                 Console.WriteLine($"✅ Order đã tạo! Order ID: {order.OrderId}");
 
@@ -60,7 +61,7 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync(); 
+                await transaction.RollbackAsync();
                 Console.WriteLine($"❌ Lỗi khi tạo Order: {ex.Message}");
                 return false;
             }
@@ -71,8 +72,8 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
             return await _orderRepository.GetLatestOrderByUserIdAsync(userId);
         }
 
-     
-     
+
+
 
     }
 }
