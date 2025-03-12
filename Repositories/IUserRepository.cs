@@ -1,5 +1,4 @@
-﻿using G5_MovieTicketBookingSystem.DTOs.UserDto;
-
+﻿
 namespace G5_MovieTicketBookingSystem.Repositories
 {
     public interface IUserRepository

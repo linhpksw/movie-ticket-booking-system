@@ -36,6 +36,7 @@
     }
   },
   "environmentVariables": {
-    "DOTNET_WATCH_RESTART_ON_RUDE_EDIT": "true"
+    "DOTNET_WATCH_RESTART_ON_RUDE_EDIT": "true",
+    "ASPNETCORE_ENVIRONMENT": "Development"
   }
 }

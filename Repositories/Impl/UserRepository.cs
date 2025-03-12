@@ -37,7 +37,7 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
                 return user; // Trả về user sau khi lưu thành công
             }
             catch (Exception ex)
-            {
+        {
                 Console.WriteLine($"Error: {ex.Message}");
                 Console.WriteLine($"StackTrace: {ex.StackTrace}");
                 throw; // Giữ nguyên lỗi để debug
