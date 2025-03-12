@@ -1,4 +1,5 @@
 ﻿using G5_MovieTicketBookingSystem.Data;
+using G5_MovieTicketBookingSystem.Models;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
@@ -15,6 +16,9 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
             _dbContext = dbContext;
         }
 
+        public UserRepository()
+        {
+        }
 
         public async Task<User?> GetUserByEmail(string email)
         {
@@ -50,9 +54,12 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
             return await _dbContext.Users.AnyAsync(u => u.Username == username);
         }
 
-
-
-
-
+        public async Task<User?> GetUserByIdAsync(int? userId)
+        {
+            return await _dbContext.Users
+                .Include(u => u.UserRoles)  // Load các vai trò của user
+                .Include(u => u.Orders)     // Load các đơn hàng của user
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+        }
     }
 }

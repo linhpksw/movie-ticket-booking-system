@@ -1,7 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using G5_MovieTicketBookingSystem.Models;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace G5_MovieTicketBookingSystem;
+namespace G5_MovieTicketBookingSystem.Models;
 
 /// <summary>
 /// Many-to-many join table for Users & Roles.
@@ -23,4 +24,3 @@ public class UserRole
         [ForeignKey(nameof(RoleId))]
         public required Role Role { get; set; }
     }
-}

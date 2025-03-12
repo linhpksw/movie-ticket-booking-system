@@ -1,4 +1,5 @@
 ﻿using G5_MovieTicketBookingSystem.DTOs.UserDto;
+using G5_MovieTicketBookingSystem.Models;
 using System.Text.RegularExpressions;
 
 namespace G5_MovieTicketBookingSystem.Util

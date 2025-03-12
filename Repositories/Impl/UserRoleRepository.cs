@@ -1,5 +1,6 @@
 ﻿
 using G5_MovieTicketBookingSystem.Data;
+using G5_MovieTicketBookingSystem.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace G5_MovieTicketBookingSystem.Repositories.Impl
@@ -9,6 +10,9 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
     {
         private readonly AppDbContext _dbContext;
 
+        public UserRoleRepository()
+        {
+        }
 
         public UserRoleRepository(AppDbContext dbContext)
         {

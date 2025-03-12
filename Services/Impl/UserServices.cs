@@ -1,5 +1,6 @@
 ﻿using G5_MovieTicketBookingSystem;
 using G5_MovieTicketBookingSystem.DTOs.UserDto;
+using G5_MovieTicketBookingSystem.Models;
 using G5_MovieTicketBookingSystem.Repositories;
 using G5_MovieTicketBookingSystem.Services;
 using G5_MovieTicketBookingSystem.Util;
@@ -138,5 +139,11 @@ public class UserServices : IUserServices
         }
 
         return username;
+    }
+
+
+    public async Task<User?> GetUserByIdAsync(int? userId)
+    {
+        return await _userRepository.GetUserByIdAsync(userId);
     }
 }

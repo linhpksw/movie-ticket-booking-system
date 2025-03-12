@@ -1,4 +1,6 @@
 ﻿
+using G5_MovieTicketBookingSystem.Models;
+
 namespace G5_MovieTicketBookingSystem.Repositories
 {
     public interface IUserRepository
@@ -9,9 +11,10 @@ namespace G5_MovieTicketBookingSystem.Repositories
         // Đăng nhập người dùng
         Task<User?> GetUserByEmail(string email);
         Task<bool> IsUsernameExistsAsync(string username);
+        Task<User?> GetUserByIdAsync(int? userId);
 
-       // Kiểm tra sự tồn tại của Username hoặc Email trước khi đăng ký
-       //Task<bool> UsernameExistsAsync(string username);
-       //Task<bool> EmailExistsAsync(string email);
+        // Kiểm tra sự tồn tại của Username hoặc Email trước khi đăng ký
+        //Task<bool> UsernameExistsAsync(string username);
+        //Task<bool> EmailExistsAsync(string email);
     }
 }
