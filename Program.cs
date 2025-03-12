@@ -85,7 +85,7 @@ namespace G5_MovieTicketBookingSystem
             builder.Services.AddScoped<IMovieService, MovieService>();
             builder.Services.AddScoped<ISeatLockService, SeatLockService>();
             builder.Services.AddScoped<IVnPayService, VnPayService>();
-            builder.Services.AddScoped<IUserServices, UserServices>();
+            builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IScreenSeatService, ScreenSeatService>();
             builder.Services.AddScoped<ITransactionLogService, TransactionLogService>();
             builder.Services.AddScoped<IOrderItemService, OrderItemService>();

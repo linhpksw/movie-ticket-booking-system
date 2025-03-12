@@ -10,7 +10,7 @@ public class UserServices : IUserServices
     private readonly IUserRepository _userRepository;
     private readonly IUserRoleRepository _userRoleRepository;
     private readonly ILogger<UserServices> _logger;
-    
+
     public UserServices(IUserRepository userRepository, ILogger<UserServices> logger, IUserRoleRepository userRoleRepository)
     {
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
@@ -44,7 +44,7 @@ public class UserServices : IUserServices
 
             var userResponse = UserMapper.MapToUserResponseDto(existingUser);
 
-            
+
             _logger.LogInformation("User {Email} logged in successfully with UserId {UserId}.", userResponse.Email, userResponse.UserId);
 
             return userResponse;

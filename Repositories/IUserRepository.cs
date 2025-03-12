@@ -1,5 +1,9 @@
+<<<<<<< HEAD
 ﻿
 using G5_MovieTicketBookingSystem.Models;
+=======
+using G5_MovieTicketBookingSystem.DTOs.UserDto;
+>>>>>>> df1b590d3df0ffd82f7cada888caf4284a5e6349
 
 namespace G5_MovieTicketBookingSystem.Repositories
 {
