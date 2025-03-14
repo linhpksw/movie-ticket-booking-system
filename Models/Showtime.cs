@@ -1,13 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-<<<<<<< HEAD
 namespace G5_MovieTicketBookingSystem.Models
-=======
-namespace G5_MovieTicketBookingSystem.Models;
-
-public class Showtime
->>>>>>> a0b8858 (fix: conflict with dev base)
 {
     public class Showtime
     {
@@ -20,35 +14,17 @@ public class Showtime
         [Required]
         public int ScreenId { get; set; }
 
-        /// <summary>
-        /// Store the date portion (e.g., 2025-05-01).
-        /// </summary>
+        
         [Required]
         public DateOnly ShowDate { get; set; }
 
-<<<<<<< HEAD
-        /// <summary>
-        /// Store the time portion (e.g., 18:30:00).
-        /// </summary>
+   
         [Required]
         public TimeOnly ShowTime { get; set; }
 
         [Required]
         [MaxLength(20)]
         public required string ExperienceType { get; set; }
-=======
-    /// <summary>
-    /// Store the date portion (e.g., 2025-05-01).
-    /// </summary>
-    [Required]
-    public DateOnly ShowDate { get; set; }
-
-    /// <summary>
-    /// Store the time portion (e.g., 18:30:00).
-    /// </summary>
-    [Required]
-    public TimeOnly ShowTime { get; set; }
->>>>>>> a0b8858 (fix: conflict with dev base)
 
         [Required]
         public required bool IsSoldOut { get; set; }

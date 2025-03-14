@@ -20,6 +20,7 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
         {
             return await _dbContext.SeatLocks
                 .Where(sl => sl.UserId == userId)
+                 .AsNoTracking()
                 .FirstOrDefaultAsync();
         }
 
@@ -27,7 +28,7 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
         public async Task<List<SeatLock>> GetAllByUserIdAsync(int? userId)
         {
             return await _dbContext.SeatLocks
-                .Where(sl => sl.UserId == userId && sl.LockStatus != "Expired")
+                .Where(sl => sl.UserId == userId )
                 .AsNoTracking() 
                 .ToListAsync(); 
         }
@@ -37,7 +38,8 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
         {
             return await _dbContext.SeatLocks
                 .Where(sl => sl.UserId == userId)
-                .OrderByDescending(sl => sl.LockStartTime) 
+                .OrderByDescending(sl => sl.LockStartTime)
+                 .AsNoTracking()
                 .FirstOrDefaultAsync();
         }
 

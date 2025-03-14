@@ -1,4 +1,6 @@
 ﻿@page "/payment"
+@using G5_MovieTicketBookingSystem.Data
+@using Microsoft.EntityFrameworkCore
 
 @inject IVnPayService VnPayService
 @inject NavigationManager Navigation
@@ -9,6 +11,9 @@
 @inject IOrderItemService OrderItemService
 @inject IScreenSeatService ScreenSeatService
 @inject ITransactionLogService TransactionLogService
+@inject IShowtimeService ShowtimeService
+@inject AppDbContext _context  // Inject DbContext trực tiếp
+
 @layout MainLayout
 
 
@@ -16,6 +21,7 @@
     private PaymentInformationModel paymentModel = new();
     private int? userId;
     private User? currentUser;
+
     private Order NewOrder { get; set; } = new()
         {
             OrderTimestamp = DateTime.UtcNow,
@@ -62,7 +68,6 @@
                     .Where(seatId => seatId != -1)
                     .ToList();
             }
-
             if (screenSeatIds.Count == 0)
             {
                 Console.WriteLine("❌ Lỗi: Không có screenSeatId hợp lệ.");
@@ -161,6 +166,7 @@
     {
         var order = await OrderService.GetOrderByIdAsync(newOrderItemDto.OrderId);
         var screenSeat = await ScreenSeatService.GetScreenSeatByIdAsync(newOrderItemDto.ScreenSeatId);
+        var showtime = await ShowtimeService.GetShowtimeByScreenSeatId(screenSeat.ScreenSeatId);
 
         var newOrderItem = new OrderItem
             {
@@ -168,9 +174,15 @@
                 ScreenSeatId = newOrderItemDto.ScreenSeatId,
                 PriceCharged = newOrderItemDto.PriceCharged,
                 Order = order,
+                ShowtimeId = showtime.ShowtimeId,
                 ScreenSeat = screenSeat,
-                Showtime = null
+                Showtime = showtime
             };
+
+        if (_context.Entry(newOrderItem.ScreenSeat.Screen).State == EntityState.Detached)
+        {
+            _context.Attach(newOrderItem.ScreenSeat.Screen);
+        }
 
         await OrderItemService.AddOrderItemAsync(newOrderItem);
     }

@@ -19,19 +19,22 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
         public async Task<List<ScreenSeat>> GetAllScreenSeatsAsync()
         {
             return await _context.ScreenSeats
+                .AsNoTracking() 
                 .Include(s => s.Screen)
                 .Include(s => s.SeatType)
                 .ToListAsync();
         }
 
-        // 🔹 Lấy ScreenSeat theo ID
-        public async Task<ScreenSeat?> GetScreenSeatByIdAsync(int screenSeatId)
+
+        public async Task<ScreenSeat> GetScreenSeatByIdAsync(int screenSeatId)
         {
             return await _context.ScreenSeats
+                 .AsNoTracking()
                 .Include(s => s.Screen)
                 .Include(s => s.SeatType)
-                .FirstOrDefaultAsync(s => s.ScreenSeatId == screenSeatId);
+                .FirstOrDefaultAsync(ss => ss.ScreenSeatId == screenSeatId);
         }
+
 
         // 🔹 Thêm mới một ScreenSeat
         public async Task<ScreenSeat> AddScreenSeatAsync(ScreenSeat screenSeat)
@@ -56,6 +59,7 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
             {
                 _context.ScreenSeats.Remove(screenSeat);
                 await _context.SaveChangesAsync();
+
             }
         }
 
@@ -76,6 +80,7 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
 
             return await _context.ScreenSeats
                 .FromSqlRaw(query, showDate, showTime, movieId, cinemaId)
+                 .AsNoTracking()
                 .ToListAsync();
         }
     }

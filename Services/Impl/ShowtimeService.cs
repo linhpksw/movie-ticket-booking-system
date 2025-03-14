@@ -28,6 +28,11 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
             return CinemaMapper.ToDto(cinema);
         }
 
+        public Task<Showtime>? GetShowtimeById(int showtimeId)
+        {
+            return _showtimeRepository.GetShowtimeById(showtimeId);
+        }
+
         public async Task<List<ShowtimeDto>> GetShowTimeByMovieAndCinemaWithinDay(int movieId, int cinemaId, DateOnly showDate)
         {
             List<Showtime> showtimes = await _showtimeRepository.GetShowTimeByMovieAndCinemaWithinDay(movieId, cinemaId, showDate);
@@ -36,6 +41,11 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
 
 
             return showtimes.Select(ShowtimeMapper.ToDto).ToList();
+        }
+
+        public async Task<Showtime> GetShowtimeByScreenSeatId(int ScreenSeatId)
+        {
+            return await _showtimeRepository.GetShowtimeByScreenSeatId(ScreenSeatId);
         }
     }
 }

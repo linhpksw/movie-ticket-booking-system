@@ -6,11 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace G5_MovieTicketBookingSystem.Migrations
 {
     /// <inheritdoc />
-<<<<<<<< HEAD:Migrations/20250311154116_DBSchema_V110325.cs
-    public partial class DBSchema_V110325 : Migration
-========
     public partial class InitialCreate : Migration
->>>>>>>> 4d4e768 (fix: fix query):Migrations/20250309035631_InitialCreate.cs
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -193,17 +189,10 @@ namespace G5_MovieTicketBookingSystem.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     MovieId = table.Column<int>(type: "int", nullable: false),
                     ScreenId = table.Column<int>(type: "int", nullable: false),
-<<<<<<<< HEAD:Migrations/20250311154116_DBSchema_V110325.cs
                     ShowDate = table.Column<DateOnly>(type: "date", nullable: false),
                     ShowTime = table.Column<TimeOnly>(type: "time", nullable: false),
                     ExperienceType = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     IsSoldOut = table.Column<bool>(type: "bit", nullable: false)
-========
-                    ScreenSeatId = table.Column<int>(type: "int", nullable: true),
-                    ShowDate = table.Column<DateOnly>(type: "date", nullable: false),
-                    ShowTime = table.Column<TimeOnly>(type: "time", nullable: false),
-                    ExperienceType = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false)
->>>>>>>> 4d4e768 (fix: fix query):Migrations/20250309035631_InitialCreate.cs
                 },
                 constraints: table =>
                 {
