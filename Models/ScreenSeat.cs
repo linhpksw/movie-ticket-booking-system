@@ -1,4 +1,4 @@
-﻿using G5_MovieTicketBookingSystem.Models;
+using G5_MovieTicketBookingSystem.Models;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 

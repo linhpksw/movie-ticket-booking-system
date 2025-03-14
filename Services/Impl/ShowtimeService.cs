@@ -1,4 +1,4 @@
-﻿using G5_MovieTicketBookingSystem.DTOs;
+using G5_MovieTicketBookingSystem.DTOs;
 using G5_MovieTicketBookingSystem.Mappers;
 using G5_MovieTicketBookingSystem.Models;
 using G5_MovieTicketBookingSystem.Repositories;
