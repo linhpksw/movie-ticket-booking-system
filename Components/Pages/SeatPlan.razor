@@ -3,6 +3,7 @@
 @inject IMovieService MovieService
 @inject IScreenSeatService ScreenSeatService
 @inject NavigationManager Navigation
+@layout MainLayout
 
 @code {
     [Parameter]
@@ -130,7 +131,7 @@
 else
 {
     <!-- ==========Banner-Section========== -->
-    <section class="details-banner hero-area bg_img seat-plan-banner" data-background="assets/images/banner/banner04.jpg">
+    <section class="details-banner hero-area bg_img seat-plan-banner" style="background-image: url('/assets/images/banner/banner04.jpg');">
         <div class="container">
             <div class="details-banner-wrapper">
                 <div class="details-banner-content style-two">
@@ -232,7 +233,7 @@ else
                 }
             </div>
 
-            <div class="proceed-book bg_img" data-background="assets/images/movie/movie-bg-proceed.jpg">
+            <div class="proceed-book bg_img" style="background-image: url('/assets/images/movie/movie-bg-proceed.jpg');">
                 <div class="proceed-to-book">
                     <div class="book-item">
                         <span>You have Choosed Seat</span>

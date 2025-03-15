@@ -3,11 +3,6 @@
   // Preloader Js
   $(window).on('load', function () {
       $('.preloader').fadeOut(1000);
-      var img = $('.bg_img');
-      img.css('background-image', function () {
-        var bg = ('url(' + $(this).data('background') + ')');
-        return bg;
-      });
       // filter functions
       var $grid = $(".grid-area");
       var filterFns = {};

@@ -18,8 +18,7 @@ public class Program
         // Add services to the container.
         builder.Services.AddRazorComponents()
             .AddInteractiveServerComponents();
-        builder.Services.AddRazorPages();
-        builder.Services.AddServerSideBlazor();
+
         builder.Services.AddSignalR(); // SignalR hỗ trợ real-time
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddAntiforgery();
@@ -71,9 +70,6 @@ public class Program
             .AddInteractiveServerRenderMode();
 
         app.MapFallbackToFile("pages/404.html");
-
-        app.MapRazorPages();
-        app.MapBlazorHub();
 
         app.Run();
     }
