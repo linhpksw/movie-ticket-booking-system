@@ -57,13 +57,10 @@ namespace G5_MovieTicketBookingSystem
             })
             .AddGoogle(options =>
             {
-                var clientId = builder.Configuration["Authentication:Google:ClientId"];
-                var clientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
-                if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret))
-                {
-                    throw new InvalidOperationException("Google ClientId or ClientSecret is missing in configuration.");
-                }
-
+           
+                var clientId = builder.Configuration["Authentication:Google:client_id"];
+                var clientSecret = builder.Configuration["Authentication:Google:client_secret"];
+            
                 options.ClientId = clientId;
                 options.ClientSecret = clientSecret;
                 options.SaveTokens = true; // Lưu token!
@@ -90,7 +87,7 @@ namespace G5_MovieTicketBookingSystem
             builder.Services.AddScoped<ITransactionLogService, TransactionLogService>();
             builder.Services.AddScoped<IOrderItemService, OrderItemService>();
             builder.Services.AddScoped<ITicketService, TicketService>();
-
+            builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
             // Register repositories
             builder.Services.AddScoped<ISeatLockRepository, SeatLockRepository>();
             builder.Services.AddScoped<IOrderRepository, OrderRepository>();
@@ -116,10 +113,10 @@ namespace G5_MovieTicketBookingSystem
             app.UseStaticFiles();
             app.UseRouting();
             app.UseSession(); // Gọi một lần duy nhất
-            app.UseAntiforgery();
+        
             app.UseAuthentication();
             app.UseAuthorization();
-
+            app.UseAntiforgery();
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
             app.MapBlazorHub();

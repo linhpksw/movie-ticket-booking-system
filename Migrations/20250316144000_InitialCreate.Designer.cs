@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace G5_MovieTicketBookingSystem.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250311154116_DBSchema_V110325")]
-    partial class DBSchema_V110325
+    [Migration("20250316144000_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

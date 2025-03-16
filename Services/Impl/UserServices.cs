@@ -5,145 +5,156 @@ using G5_MovieTicketBookingSystem.Repositories;
 using G5_MovieTicketBookingSystem.Services;
 using G5_MovieTicketBookingSystem.Util;
 using Microsoft.AspNetCore.Components;
-public class UserServices : IUserServices
+namespace G5_MovieTicketBookingSystem.Services.Impl
 {
-    private readonly IUserRepository _userRepository;
-    private readonly IUserRoleRepository _userRoleRepository;
-    private readonly ILogger<UserServices> _logger;
-
-    public UserServices(IUserRepository userRepository, ILogger<UserServices> logger, IUserRoleRepository userRoleRepository)
+    public class UserServices : IUserServices
     {
-        _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _userRoleRepository = userRoleRepository ?? throw new ArgumentNullException(nameof(userRoleRepository));
-    }
+        private readonly IUserRepository _userRepository;
+        private readonly IUserRoleRepository _userRoleRepository;
+        private readonly ILogger<UserServices> _logger;
 
-    public async Task<UserResponseDto> Login(UserRequestDto userRequestDto)
-    {
-        try
+        public UserServices(IUserRepository userRepository, ILogger<UserServices> logger, IUserRoleRepository userRoleRepository)
         {
-            if (userRequestDto == null)
+            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _userRoleRepository = userRoleRepository ?? throw new ArgumentNullException(nameof(userRoleRepository));
+        }
+
+        public async Task<UserResponseDto> Login(UserRequestDto userRequestDto)
+        {
+            try
             {
-                _logger.LogWarning("Login attempt with null user request.");
-                return null;
+                if (userRequestDto == null)
+                {
+                    _logger.LogWarning("Login attempt with null user request.");
+                    return null;
+                }
+
+                var existingUser = await _userRepository.GetUserByEmail(userRequestDto.Email);
+                if (existingUser == null)
+                {
+                    _logger.LogWarning("Login failed: User with email {Email} not found.", userRequestDto.Email);
+                    return null;
+                }
+
+                // Kiểm tra mật khẩu bằng BCrypt.Verify
+                if (string.IsNullOrEmpty(userRequestDto.Password) || !BCrypt.Net.BCrypt.Verify(userRequestDto.Password, existingUser.Password))
+                {
+                    _logger.LogWarning("Login failed: Invalid password for user {Email}.", userRequestDto.Email);
+                    return null;
+                }
+
+                var userResponse = UserMapper.MapToUserResponseDto(existingUser);
+
+
+                _logger.LogInformation("User {Email} logged in successfully with UserId {UserId}.", userResponse.Email, userResponse.UserId);
+
+                return userResponse;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred during login for email {Email}.", userRequestDto?.Email);
+                throw;
+            }
+        }
+        public async Task<UserResponseDto> RegisterGoogle(UserCreateDto userCreateDto, List<int> roleIds)
+        {
+            var existingUser = await _userRepository.GetUserByEmail(userCreateDto.Email);
+            if (existingUser != null)
+            {
+
+                return UserMapper.MapToUserResponseDto(existingUser);
             }
 
-            var existingUser = await _userRepository.GetUserByEmail(userRequestDto.Email);
-            if (existingUser == null)
+            if (!string.IsNullOrEmpty(userCreateDto.Password))
             {
-                _logger.LogWarning("Login failed: User with email {Email} not found.", userRequestDto.Email);
-                return null;
+                userCreateDto.Password = BCrypt.Net.BCrypt.HashPassword(userCreateDto.Password);
             }
 
-            // Kiểm tra mật khẩu bằng BCrypt.Verify
-            if (string.IsNullOrEmpty(userRequestDto.Password) || !BCrypt.Net.BCrypt.Verify(userRequestDto.Password, existingUser.Password))
+            string uniqueUsername = await GenerateUniqueUsernameAsync(userCreateDto.Email);
+            userCreateDto.username = uniqueUsername;
+            User user = UserMapper.CreateToUser(userCreateDto);
+
+            User userInsert;
+            try
             {
-                _logger.LogWarning("Login failed: Invalid password for user {Email}.", userRequestDto.Email);
-                return null;
+                userInsert = await _userRepository.SignUpAsync(user);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Đăng ký thất bại: " + ex.Message);
             }
 
-            var userResponse = UserMapper.MapToUserResponseDto(existingUser);
+            foreach (var roleId in roleIds)
+            {
+                await _userRoleRepository.AssignRoleToUserAsync(user.UserId, roleId);
+            }
 
-
-            _logger.LogInformation("User {Email} logged in successfully with UserId {UserId}.", userResponse.Email, userResponse.UserId);
-
-            return userResponse;
+            return UserMapper.MapToUserResponseDto(userInsert);
         }
-        catch (Exception ex)
+        public async Task<UserResponseDto?> Register(UserCreateDto userCreateDto, List<int> roleIds)
         {
-            _logger.LogError(ex, "An error occurred during login for email {Email}.", userRequestDto?.Email);
-            throw;
+            // Kiểm tra xem email đã tồn tại chưa
+            var existingUser = await _userRepository.GetUserByEmail(userCreateDto.Email);
+            if (existingUser != null)
+            {
+                throw new Exception("Email đã được sử dụng.");
+            }
+
+            // Mã hóa mật khẩu nếu có nhập
+            if (!string.IsNullOrEmpty(userCreateDto.Password))
+            {
+                userCreateDto.Password = BCrypt.Net.BCrypt.HashPassword(userCreateDto.Password);
+            }
+
+            // Tạo tên người dùng duy nhất dựa trên email
+            string uniqueUsername = await GenerateUniqueUsernameAsync(userCreateDto.Email);
+            userCreateDto.username = uniqueUsername;
+
+            // Chuyển đổi DTO thành Entity
+            User user = UserMapper.CreateToUser(userCreateDto);
+
+            // Thêm user vào database
+            User userInsert;
+            try
+            {
+                userInsert = await _userRepository.SignUpAsync(user);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Đăng ký thất bại: " + ex.Message);
+            }
+
+            // Gán các role cho user (chạy đồng thời để tối ưu hiệu suất)
+            var roleAssignments = roleIds.Select(roleId =>
+                _userRoleRepository.AssignRoleToUserAsync(userInsert.UserId, roleId));
+            await Task.WhenAll(roleAssignments);
+
+            // Trả về thông tin user đã đăng ký
+            return UserMapper.MapToUserResponseDto(userInsert);
         }
-    }
-    public async Task<UserResponseDto> RegisterGoogle(UserCreateDto userCreateDto, List<int> roleIds)
-    {
-        var existingUser = await _userRepository.GetUserByEmail(userCreateDto.Email);
-        if (existingUser != null)
+
+
+        public async Task<string> GenerateUniqueUsernameAsync(string email)
         {
+            string baseUsername = UserMapper.GenerateBaseUsername(email);
+            string username = baseUsername;
+            int attempt = 1;
 
-            return UserMapper.MapToUserResponseDto(existingUser);
+            while (await _userRepository.IsUsernameExistsAsync(username))
+            {
+                username = $"{baseUsername}{new Random().Next(1000, 9999)}";
+                attempt++;
+                if (attempt > 10) throw new Exception("Failed to generate a unique username.");
+            }
+
+            return username;
         }
 
-        if (!string.IsNullOrEmpty(userCreateDto.Password))
+
+        public async Task<User?> GetUserByIdAsync(int? userId)
         {
-            userCreateDto.Password = BCrypt.Net.BCrypt.HashPassword(userCreateDto.Password);
+            return await _userRepository.GetUserByIdAsync(userId);
         }
-
-        string uniqueUsername = await GenerateUniqueUsernameAsync(userCreateDto.Email);
-        userCreateDto.username = uniqueUsername;
-        User user = UserMapper.CreateToUser(userCreateDto);
-
-        User userInsert;
-        try
-        {
-            userInsert = await _userRepository.SignUpAsync(user);
-        }
-        catch (Exception ex)
-        {
-            throw new Exception("Đăng ký thất bại: " + ex.Message);
-        }
-
-        foreach (var roleId in roleIds)
-        {
-            await _userRoleRepository.AssignRoleToUserAsync(user.UserId, roleId);
-        }
-
-        return UserMapper.MapToUserResponseDto(userInsert);
-    }
-    public async Task<UserResponseDto> Register(UserCreateDto userCreateDto, List<int> roleIds)
-    {
-        var existingUser = await _userRepository.GetUserByEmail(userCreateDto.Email);
-        if (existingUser != null)
-        {
-            return null;
-        }
-
-        if (!string.IsNullOrEmpty(userCreateDto.Password))
-        {
-            userCreateDto.Password = BCrypt.Net.BCrypt.HashPassword(userCreateDto.Password);
-        }
-
-        string uniqueUsername = await GenerateUniqueUsernameAsync(userCreateDto.Email);
-        userCreateDto.username = uniqueUsername;
-        User user = UserMapper.CreateToUser(userCreateDto);
-
-        User userInsert;
-        try
-        {
-            userInsert = await _userRepository.SignUpAsync(user);
-        }
-        catch (Exception ex)
-        {
-            throw new Exception("Đăng ký thất bại: " + ex.Message);
-        }
-
-        foreach (var roleId in roleIds)
-        {
-            await _userRoleRepository.AssignRoleToUserAsync(user.UserId, roleId);
-        }
-
-        return UserMapper.MapToUserResponseDto(userInsert);
-    }
-
-    public async Task<string> GenerateUniqueUsernameAsync(string email)
-    {
-        string baseUsername = UserMapper.GenerateBaseUsername(email);
-        string username = baseUsername;
-        int attempt = 1;
-
-        while (await _userRepository.IsUsernameExistsAsync(username))
-        {
-            username = $"{baseUsername}{new Random().Next(1000, 9999)}";
-            attempt++;
-            if (attempt > 10) throw new Exception("Failed to generate a unique username.");
-        }
-
-        return username;
-    }
-
-
-    public async Task<User?> GetUserByIdAsync(int? userId)
-    {
-        return await _userRepository.GetUserByIdAsync(userId);
     }
 }

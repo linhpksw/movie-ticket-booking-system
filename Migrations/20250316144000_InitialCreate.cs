@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace G5_MovieTicketBookingSystem.Migrations
 {
     /// <inheritdoc />
-    public partial class DBSchema_V110325 : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

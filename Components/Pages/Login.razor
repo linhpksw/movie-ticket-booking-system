@@ -75,7 +75,8 @@
                 </div>
                 
                 
-                <form class="account-form" @onsubmit="HandleLogin">
+                <form method="post"  class="account-form" @onsubmit="@HandleLogin" @formname="login">
+                    <AntiforgeryToken />
                     @if (Error.ContainsKey("Account"))
                     {
                         <span class="text-danger">@Error["Account"]</span>

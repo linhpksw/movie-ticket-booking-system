@@ -1,9 +1,8 @@
-<<<<<<< HEAD
+
 ﻿using G5_MovieTicketBookingSystem.Data;
 using G5_MovieTicketBookingSystem.Models;
-=======
-using G5_MovieTicketBookingSystem.Data;
->>>>>>> df1b590d3df0ffd82f7cada888caf4284a5e6349
+
+
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
@@ -20,9 +19,6 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
             _dbContext = dbContext;
         }
 
-        public UserRepository()
-        {
-        }
 
         public async Task<User?> GetUserByEmail(string email)
         {
@@ -34,6 +30,7 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
                 .Include(u => u.TicketScanLogs) // Load quan hệ TicketScanLogs
                 .FirstOrDefaultAsync(u => u.Email == email);
         }
+
 
         public async Task<User> SignUpAsync(User user)
         {
@@ -58,7 +55,7 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
             return await _dbContext.Users.AnyAsync(u => u.Username == username);
         }
 
-<<<<<<< HEAD
+
         public async Task<User?> GetUserByIdAsync(int? userId)
         {
             return await _dbContext.Users
@@ -66,11 +63,11 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
                 .Include(u => u.Orders)     // Load các đơn hàng của user
                 .FirstOrDefaultAsync(u => u.UserId == userId);
         }
-=======
 
 
 
 
->>>>>>> df1b590d3df0ffd82f7cada888caf4284a5e6349
+
+
     }
 }

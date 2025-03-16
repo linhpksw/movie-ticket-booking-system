@@ -1,4 +1,4 @@
-﻿namespace G5_MovieTicketBookingSystem.DTOs.UserDto
+﻿    namespace G5_MovieTicketBookingSystem.DTOs.UserDto
 {
     public class GoogleLoginUserDto
     {

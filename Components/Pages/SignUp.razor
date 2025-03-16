@@ -16,10 +16,7 @@
                 </div>
                 <form method="post" @onsubmit="@Submit" class="account-form" @formname="SignUp">
                     <AntiforgeryToken />
-                    @if (Error.ContainsKey("Agree"))
-                    {
-                        <p>@Error["Agree"]</p>
-                    }
+                 
                     @if (Error.ContainsKey("Account"))
                     {
                         <p>@Error["Account"]</p>
@@ -55,7 +52,7 @@
                         }
                     </div>
                     <div class="form-group checkgroup">
-                        <InputCheckbox id="bal" @bind-Value="isCheck" required />
+                        <input type="checkbox" id="bal"  />
                         <label for="bal">I agree to the <a href="#0">Terms, Privacy Policy</a> and <a href="#0">Fees</a></label>
                     </div>
                     <div class="form-group text-center">
@@ -89,7 +86,7 @@
     [SupplyParameterFromForm]
     private UserCreateDto Model { get; set; } = new UserCreateDto();
     private Dictionary<string, string> Error = new Dictionary<string, string>();
-    private bool isCheck = false;
+    // private bool isCheck = false;
     [Inject]
     public IUserServices UserServices { get; set; }
 
@@ -128,11 +125,11 @@
             Console.WriteLine("Passwords do not match");
         }
 
-        if (!isCheck)
-        {
-            Error.Add("Agree", "You have to agree with policy");
-            return;
-        }
+        // if (!isCheck)
+        // {
+        //     Error.Add("Agree", "You have to agree with policy");
+        //     return;
+        // }
 
         if (Error.Count > 0)
         {
