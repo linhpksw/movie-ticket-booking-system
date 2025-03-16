@@ -1,5 +1,5 @@
 using G5_MovieTicketBookingSystem.Models;
-﻿using G5_MovieTicketBookingSystem.Commons;
+using G5_MovieTicketBookingSystem.Commons;
 using G5_MovieTicketBookingSystem.Data;
 using Microsoft.EntityFrameworkCore;
 
