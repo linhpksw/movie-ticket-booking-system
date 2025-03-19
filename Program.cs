@@ -4,11 +4,10 @@ using G5_MovieTicketBookingSystem.Repositories;
 using G5_MovieTicketBookingSystem.Repositories.Impl;
 using G5_MovieTicketBookingSystem.Services;
 using G5_MovieTicketBookingSystem.Services.Impl;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Http;
+using G5_MovieTicketBookingSystem.Util;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.EntityFrameworkCore;
 
 namespace G5_MovieTicketBookingSystem
 {
@@ -26,10 +25,18 @@ namespace G5_MovieTicketBookingSystem
             builder.Services.AddSignalR(); // Support for real-time features
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddAntiforgery();
-            builder.Services.AddHttpClient();
-
+            builder.Services.AddHttpClient("EmailClient", client =>
+            {
+                client.BaseAddress = new Uri("https://localhost:7000");
+            });
+            builder.Services.AddControllersWithViews();
+            builder.Services.AddControllers();
+            builder.Services.AddSingleton<EmailSender>();
             // Add distributed memory cache for session storage
             builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7000") });
+
+
 
             // Register session service
             builder.Services.AddSession(options =>
@@ -57,10 +64,10 @@ namespace G5_MovieTicketBookingSystem
             })
             .AddGoogle(options =>
             {
-           
+
                 var clientId = builder.Configuration["Authentication:Google:client_id"];
                 var clientSecret = builder.Configuration["Authentication:Google:client_secret"];
-            
+
                 options.ClientId = clientId;
                 options.ClientSecret = clientSecret;
                 options.SaveTokens = true; // Lưu token!
@@ -113,7 +120,8 @@ namespace G5_MovieTicketBookingSystem
             app.UseStaticFiles();
             app.UseRouting();
             app.UseSession(); // Gọi một lần duy nhất
-        
+            app.UseCors("AllowSpecificOrigin");
+
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseAntiforgery();

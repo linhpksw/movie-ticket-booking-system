@@ -1,7 +1,5 @@
 ﻿using G5_MovieTicketBookingSystem.DTOs;
 using G5_MovieTicketBookingSystem.Models;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace G5_MovieTicketBookingSystem.Services
 {

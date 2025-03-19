@@ -1,18 +1,17 @@
 ﻿using G5_MovieTicketBookingSystem.Models;
-using System.ComponentModel.DataAnnotations;
 
 namespace G5_MovieTicketBookingSystem.DTOs.UserDto
 {
 
     public class UserResponseDto
     {
-      
+
         public int UserId { get; set; }
 
-       
+
         public required string Username { get; set; }
 
-    
+
         public required string Email { get; set; }
         public required string Fullname { get; set; }
 

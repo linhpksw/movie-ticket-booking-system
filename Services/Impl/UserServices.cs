@@ -1,10 +1,7 @@
-﻿using G5_MovieTicketBookingSystem;
-using G5_MovieTicketBookingSystem.DTOs.UserDto;
+﻿using G5_MovieTicketBookingSystem.DTOs.UserDto;
 using G5_MovieTicketBookingSystem.Models;
 using G5_MovieTicketBookingSystem.Repositories;
-using G5_MovieTicketBookingSystem.Services;
 using G5_MovieTicketBookingSystem.Util;
-using Microsoft.AspNetCore.Components;
 namespace G5_MovieTicketBookingSystem.Services.Impl
 {
     public class UserServices : IUserServices
@@ -155,6 +152,29 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
         public async Task<User?> GetUserByIdAsync(int? userId)
         {
             return await _userRepository.GetUserByIdAsync(userId);
+        }
+
+        public async Task<UserResponseDto> ChangePasswordAsync(string email, string newPassword)
+        {
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(newPassword))
+            {
+                throw new ArgumentException("Email or password cannot be empty.");
+            }
+
+            // Tìm người dùng qua email
+            var user = await _userRepository.GetUserByEmail(email);
+
+            if (user == null)
+            {
+                throw new KeyNotFoundException("User not found.");
+            }
+
+            // Cập nhật mật khẩu mới
+            user.Password = newPassword;  // Lưu ý: Mã hóa mật khẩu trong thực tế
+            await _userRepository.UpdateUserAsync(user);
+
+            // Chuyển đổi User thành UserResponseDto
+            return UserMapper.MapToUserResponseDto(user);
         }
     }
 }

@@ -1,6 +1,4 @@
 ﻿using G5_MovieTicketBookingSystem.Models;
-using Humanizer;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace G5_MovieTicketBookingSystem.Data;
@@ -65,7 +63,7 @@ public class AppDbContext : DbContext
             .HasForeignKey(sc => sc.ScreenId)
             .OnDelete(DeleteBehavior.Restrict);  // Disables cascade delete
 
-      
+
     }
 
     // DbSets

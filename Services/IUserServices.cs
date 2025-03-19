@@ -1,5 +1,4 @@
 ﻿using G5_MovieTicketBookingSystem.DTOs.UserDto;
-using G5_MovieTicketBookingSystem.DTOs.UserDto;
 using G5_MovieTicketBookingSystem.Models;
 
 namespace G5_MovieTicketBookingSystem.Services
@@ -12,6 +11,8 @@ namespace G5_MovieTicketBookingSystem.Services
         public Task<UserResponseDto> RegisterGoogle(UserCreateDto UserCreateDto, List<int> Role);
 
         Task<User?> GetUserByIdAsync(int? userId);
+
+        Task<UserResponseDto> ChangePasswordAsync(string email, string newPassword);
 
     }
 }

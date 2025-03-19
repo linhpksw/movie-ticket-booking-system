@@ -1,11 +1,7 @@
 
-﻿using G5_MovieTicketBookingSystem.Data;
+using G5_MovieTicketBookingSystem.Data;
 using G5_MovieTicketBookingSystem.Models;
-
-
-using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 
 namespace G5_MovieTicketBookingSystem.Repositories.Impl
 {
@@ -42,7 +38,7 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
                 return user; // Trả về user sau khi lưu thành công
             }
             catch (Exception ex)
-        {
+            {
                 Console.WriteLine($"Error: {ex.Message}");
                 Console.WriteLine($"StackTrace: {ex.StackTrace}");
                 throw; // Giữ nguyên lỗi để debug
@@ -64,10 +60,11 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
                 .FirstOrDefaultAsync(u => u.UserId == userId);
         }
 
-
-
-
-
-
+        public async Task<User?> UpdateUserAsync(User user)
+        {
+            _dbContext.Users.Update(user);  // Cập nhật người dùng
+            await _dbContext.SaveChangesAsync();  // Lưu thay đổi vào cơ sở dữ liệu
+            return user;  // Trả về người dùng đã được cập nhật
+        }
     }
 }

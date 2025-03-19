@@ -1,5 +1,4 @@
-﻿using G5_MovieTicketBookingSystem;
-using G5_MovieTicketBookingSystem.Models;
+﻿using G5_MovieTicketBookingSystem.Models;
 
 public interface ISeatLockService
 {

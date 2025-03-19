@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-
-namespace G5_MovieTicketBookingSystem.DTOs.UserDto
+﻿namespace G5_MovieTicketBookingSystem.DTOs.UserDto
 
 {
     public class UserCreateDto
@@ -12,7 +9,7 @@ namespace G5_MovieTicketBookingSystem.DTOs.UserDto
         public string? PasswordConfirm { get; set; }
         public string? fullname { get; set; }
 
-      
+
     }
 
 

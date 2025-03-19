@@ -17,7 +17,7 @@
      
         Error.Clear();
 
-        
+  
         if (string.IsNullOrEmpty(userRequestDto.Email) || !IsValidEmail(userRequestDto.Email))
         {
             Error["Email"] = "Please enter a valid email address.";
@@ -101,7 +101,7 @@
                     <div class="form-group checkgroup">
                         <input type="checkbox" id="bal2" @bind="rememberMe">
                         <label for="bal2">remember password</label>
-                        <a href="#0" class="forget-pass">Forget Password</a>
+                        <a href="/request-email " class="forget-pass">Forget Password</a>
                     </div>
                      <div class="form-group text-center">
                         <input disabled="@isLoading" placeholder=" @(isLoading ? "Logging in..." : "Log in")" type="submit" value="Login">
