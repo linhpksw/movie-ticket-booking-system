@@ -20,9 +20,8 @@ namespace G5_MovieTicketBookingSystem
             // Add services to the container.
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
-            builder.Services.AddRazorPages();
-            builder.Services.AddServerSideBlazor();
-            builder.Services.AddSignalR(); // Support for real-time features
+
+            builder.Services.AddSignalR(); // Real-time
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddAntiforgery();
             builder.Services.AddHttpClient("EmailClient", client =>
@@ -32,31 +31,30 @@ namespace G5_MovieTicketBookingSystem
             builder.Services.AddControllersWithViews();
             builder.Services.AddControllers();
             builder.Services.AddSingleton<EmailSender>();
-            // Add distributed memory cache for session storage
+
+            // Cache for session
             builder.Services.AddDistributedMemoryCache();
+
+            // Named HttpClient
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7000") });
 
-
-
-            // Khởi tạo 1 cookies cho ứng dụng khi đăng nhập
+            // Auth & Authz
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
                     options.Cookie.Name = "auth-token";
                     options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
                     options.LoginPath = "/login";
-                    options.AccessDeniedPath= "/access-denied";                  
+                    options.AccessDeniedPath = "/access-denied";
                 });
             builder.Services.AddAuthorization();
             builder.Services.AddCascadingAuthenticationState();
 
-            
-
-            // Register the DbContext with SQL Server
+            // Register DbContext
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
-                       .LogTo(Console.WriteLine, LogLevel.Information) // Log SQL để debug
-                       .EnableSensitiveDataLogging()); // Hiển thị dữ liệu nhạy cảm trong log
+                       .LogTo(Console.WriteLine, LogLevel.Information)
+                       .EnableSensitiveDataLogging());
 
             // Register services
             builder.Services.AddScoped<ICinemaService, CinemaService>();
@@ -69,7 +67,7 @@ namespace G5_MovieTicketBookingSystem
             builder.Services.AddScoped<ITransactionLogService, TransactionLogService>();
             builder.Services.AddScoped<IOrderItemService, OrderItemService>();
             builder.Services.AddScoped<ITicketService, TicketService>();
-            builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
+
             // Register repositories
             builder.Services.AddScoped<ISeatLockRepository, SeatLockRepository>();
             builder.Services.AddScoped<IOrderRepository, OrderRepository>();
@@ -81,10 +79,11 @@ namespace G5_MovieTicketBookingSystem
             builder.Services.AddScoped<IShowtimeRepository, ShowtimeRepository>();
             builder.Services.AddScoped<IMovieRepository, MovieRepository>();
             builder.Services.AddScoped<IScreenSeatRepository, ScreenSeatRepository>();
+            builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            // Middleware pipeline
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Error");
@@ -100,10 +99,11 @@ namespace G5_MovieTicketBookingSystem
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseAntiforgery();
+
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
-            app.MapBlazorHub();
-            app.MapRazorPages();
+
+           
             app.MapControllers();
             app.MapFallbackToFile("pages/404.html");
 

@@ -1,22 +1,19 @@
-﻿<header class="header-section">
+﻿@inject NavigationManager Navigation
+
+<header class="header-section">
     <div class="container">
         <div class="header-wrapper">
             <div class="logo">
-                <a href="/">
+                <a style="cursor: pointer;" @onclick="@(e => ForceReload("/"))">
                     <img src="/assets/images/logo/logo.png" alt="logo">
                 </a>
             </div>
             <ul class="menu">
                 <li>
-                    <a href="/">Home</a>
+                    <a style="cursor: pointer;" @onclick="@(e => ForceReload("/"))">Home</a>
                 </li>
                 <li>
-                    <a href="#0">Movies</a>
-                    <!-- ... sub-menu items ... -->
-                </li>
-                <li>
-                    <a href="#0">Pages</a>
-                    <!-- ... sub-menu items ... -->
+                    <a style="cursor: pointer;" @onclick="@(e => ForceReload("/seat-plan/1"))">Seat Plan</a>
                 </li>
                 <li>
                     <a href="contact.html">Contact</a>
@@ -43,3 +40,11 @@
         </div>
     </div>
 </header>
+
+@code {
+    private void ForceReload(string url)
+    {
+        // Forces a full page reload for the given URL
+        Navigation.NavigateTo(url, forceLoad: true);
+    }
+}
