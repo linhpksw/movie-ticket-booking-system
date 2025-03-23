@@ -17,24 +17,25 @@ namespace G5_MovieTicketBookingSystem
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-            builder.Services.AddRazorComponents()
-                .AddInteractiveServerComponents();
-            builder.Services.AddRazorPages();
+
+        // Add services to the container.
+        // Add distributed memory cache for session storage
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7000") });
+            builder.Services.AddControllers();
+            builder.Services.AddSingleton<EmailSender>();
             builder.Services.AddServerSideBlazor();
-            builder.Services.AddSignalR(); // Support for real-time features
+             builder.Services.AddRazorComponents()
+            .AddInteractiveServerComponents();
+            builder.Services.AddControllersWithViews();
+            builder.Services.AddSignalR(); // SignalR hỗ trợ real-time
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddAntiforgery();
             builder.Services.AddHttpClient("EmailClient", client =>
             {
                 client.BaseAddress = new Uri("https://localhost:7000");
             });
-            builder.Services.AddControllersWithViews();
-            builder.Services.AddControllers();
-            builder.Services.AddSingleton<EmailSender>();
-            // Add distributed memory cache for session storage
-            builder.Services.AddDistributedMemoryCache();
-            builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7000") });
+
 
             // Register session service
             builder.Services.AddSession(options =>
@@ -103,6 +104,7 @@ namespace G5_MovieTicketBookingSystem
             builder.Services.AddScoped<IShowtimeRepository, ShowtimeRepository>();
             builder.Services.AddScoped<IMovieRepository, MovieRepository>();
             builder.Services.AddScoped<IScreenSeatRepository, ScreenSeatRepository>();
+
 
             var app = builder.Build();
 
