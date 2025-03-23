@@ -1,10 +1,7 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using G5_MovieTicketBookingSystem.DTOs;
 using G5_MovieTicketBookingSystem.Mappers;
 using G5_MovieTicketBookingSystem.Models;
 using G5_MovieTicketBookingSystem.Repositories;
-using G5_MovieTicketBookingSystem.Repositories.Impl;
 
 namespace G5_MovieTicketBookingSystem.Services.Impl
 {

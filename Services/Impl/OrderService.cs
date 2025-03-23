@@ -2,9 +2,6 @@
 using G5_MovieTicketBookingSystem.Models;
 using G5_MovieTicketBookingSystem.Repositories;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace G5_MovieTicketBookingSystem.Services.Impl
 {

@@ -1,0 +1,135 @@
+﻿@page "/login"
+@inject NavigationManager NavigationManager
+@inject HttpClient HttpClient
+@using System.Diagnostics
+@using G5_MovieTicketBookingSystem.DTOs.UserDto
+@code {
+    private bool isLoading = false;
+    private bool rememberMe = false;
+    [SupplyParameterFromForm]
+    private UserRequestDto userRequestDto { get; set; } = new UserRequestDto();
+    private Dictionary<string, string> Error = new Dictionary<string, string>(); // Lưu lỗi
+    [Inject]
+    public IUserServices UserServices { get; set; }
+    private ICollection<UserRole>? UserRoles;
+    private async Task HandleLogin()
+    {
+     
+        Error.Clear();
+
+  
+        if (string.IsNullOrEmpty(userRequestDto.Email) || !IsValidEmail(userRequestDto.Email))
+        {
+            Error["Email"] = "Please enter a valid email address.";
+        }
+
+        if (string.IsNullOrEmpty(userRequestDto.Password))
+        {
+            Error["Password"] = "Password is required.";
+        }
+
+       
+        if (Error.Count > 0)
+        {
+            return;
+        }
+
+       
+        isLoading = true;
+
+        isLoading = false;
+        UserResponseDto userResponseDto = await UserServices.Login(userRequestDto);
+        
+        if (userResponseDto != null)
+        {
+            UserRoles = userResponseDto.UserRoles;
+            NavigationManager.NavigateTo("/");
+        }
+        else { Error.Add("Account", "Account is not exist"); }
+       
+    }
+
+    private bool IsValidEmail(string email)
+    {
+        try
+        {
+            var mailAddress = new System.Net.Mail.MailAddress(email);
+            return mailAddress.Address == email;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+}
+
+<!-- ==========Preloader========== -->
+<!-- ==========Sign-In-Section========== -->
+<section class="account-section bg_img" data-background="./assets/images/account/account-bg.jpg">
+    <div class="container">
+        <div class="padding-top padding-bottom">
+            <div class="account-area">
+                <div class="section-header-3">
+                    <span class="cate">hello</span>
+                    <h2 class="title">welcome back</h2>
+                </div>
+                
+                
+                <form method="post"  class="account-form" @onsubmit="@HandleLogin" @formname="login">
+                    <AntiforgeryToken />
+                    @if (Error.ContainsKey("Account"))
+                    {
+                        <span class="text-danger">@Error["Account"]</span>
+                    }
+                    <div class="form-group">
+                        <label for="email2">Email<span>*</span></label>
+                        <InputText type="text" placeholder="Password" @bind-Value="userRequestDto.Email" id="pass2" required />
+
+                        @if (Error.ContainsKey("Email"))
+                        {
+                            <span class="text-danger">@Error["Email"]</span>
+                        }
+                    </div>
+                    <div class="form-group">
+                        <label for="pass3">Password<span>*</span></label>
+                        <InputText type="password" placeholder="Password" @bind-Value="userRequestDto.Password" id="pass2" required />
+                        @if (Error.ContainsKey("Password"))
+                        {
+                            <span class="text-danger">@Error["Password"]</span>
+                        }
+                    </div>
+                    <div class="form-group checkgroup">
+                        <input type="checkbox" id="bal2" @bind="rememberMe">
+                        <label for="bal2">remember password</label>
+                        <a href="/request-email " class="forget-pass">Forget Password</a>
+                    </div>
+                     <div class="form-group text-center">
+                        <input disabled="@isLoading" placeholder=" @(isLoading ? "Logging in..." : "Log in")" type="submit" value="Login">
+                    </div>
+                
+                </form>
+                <div class="option">
+                    Don't have an account? <a href="/SignUp">sign up now</a>
+                </div>
+                <div class="or"><span>Or</span></div>
+                <ul class="social-icons">
+                    <li>
+                        <a href="#0">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#0" class="active">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#0">
+                            <i class="fab fa-google"></i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>

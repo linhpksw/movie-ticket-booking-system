@@ -3,8 +3,6 @@ using G5_MovieTicketBookingSystem.Models;
 
 //using G5_MovieTicketBookingSystem.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq;
 
 namespace G5_MovieTicketBookingSystem.Services
 {
