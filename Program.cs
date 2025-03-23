@@ -38,44 +38,19 @@ namespace G5_MovieTicketBookingSystem
 
 
 
-            // Register session service
-            builder.Services.AddSession(options =>
-            {
-                options.Cookie.Name = "G5MovieSession"; // Tên cookie của Session
-                options.IdleTimeout = TimeSpan.FromMinutes(60); // Thời gian tồn tại: 60 phút
-                options.Cookie.HttpOnly = true; // Bảo mật: Chỉ cho phép truy cập qua HTTP
-                options.Cookie.IsEssential = true; // Đánh dấu cookie là thiết yếu (bắt buộc cho GDPR)
-            });
+            // Khởi tạo 1 cookies cho ứng dụng khi đăng nhập
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options =>
+                {
+                    options.Cookie.Name = "auth-token";
+                    options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+                    options.LoginPath = "/login";
+                    options.AccessDeniedPath= "/access-denied";                  
+                });
+            builder.Services.AddAuthorization();
+            builder.Services.AddCascadingAuthenticationState();
 
-            // Cấu hình xác thực Google
-            builder.Services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
-            })
-            .AddCookie(options =>
-            {
-                options.Cookie.Name = "G5MovieAuthCookie";
-                options.ExpireTimeSpan = TimeSpan.FromDays(7);
-                options.SlidingExpiration = true;
-                options.LoginPath = "/login";
-                options.LogoutPath = "/logout";
-            })
-            .AddGoogle(options =>
-            {
-
-                var clientId = builder.Configuration["Authentication:Google:client_id"];
-                var clientSecret = builder.Configuration["Authentication:Google:client_secret"];
-
-                options.ClientId = clientId;
-                options.ClientSecret = clientSecret;
-                options.SaveTokens = true; // Lưu token!
-                options.CallbackPath = new PathString("/auth/google-response"); // Khớp với endpoint trong AuthController
-                options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.Scope.Add("https://www.googleapis.com/auth/userinfo.profile");
-                options.Scope.Add("https://www.googleapis.com/auth/userinfo.email");
-            });
+            
 
             // Register the DbContext with SQL Server
             builder.Services.AddDbContext<AppDbContext>(options =>
@@ -119,7 +94,7 @@ namespace G5_MovieTicketBookingSystem
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();
-            app.UseSession(); // Gọi một lần duy nhất
+
             app.UseCors("AllowSpecificOrigin");
 
             app.UseAuthentication();

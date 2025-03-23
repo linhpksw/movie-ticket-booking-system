@@ -2,6 +2,7 @@
 using G5_MovieTicketBookingSystem.Models;
 using G5_MovieTicketBookingSystem.Repositories;
 using G5_MovieTicketBookingSystem.Util;
+using System.Security.Claims;
 namespace G5_MovieTicketBookingSystem.Services.Impl
 {
     public class UserServices : IUserServices
@@ -42,7 +43,7 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
                 }
 
                 var userResponse = UserMapper.MapToUserResponseDto(existingUser);
-
+                
 
                 _logger.LogInformation("User {Email} logged in successfully with UserId {UserId}.", userResponse.Email, userResponse.UserId);
 

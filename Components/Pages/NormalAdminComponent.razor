@@ -1,0 +1,21 @@
+﻿@page "/normal-admin"
+@using Microsoft.AspNetCore.Authorization
+@inject IJSRuntime js
+@attribute [Authorize(Roles = "1")]
+
+<h3>NormalAdminComponent @message</h3>
+
+@code {
+    [CascadingParameter]
+    private Task<Microsoft.AspNetCore.Components.Authorization.AuthenticationState> authenticationStateTask { get; set; }
+
+    private string message;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authenticationState = await authenticationStateTask;
+        var user = authenticationState.User;
+        message = $"Hello {user.Identity.Name}";
+        int x = 10;
+    }
+}
