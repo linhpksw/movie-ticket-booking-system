@@ -1,4 +1,4 @@
-﻿using G5_MovieTicketBookingSystem.Components;
+using G5_MovieTicketBookingSystem.Components;
 using G5_MovieTicketBookingSystem.Data;
 using G5_MovieTicketBookingSystem.Repositories;
 using G5_MovieTicketBookingSystem.Repositories.Impl;
@@ -20,7 +20,8 @@ namespace G5_MovieTicketBookingSystem
             // Add services to the container.
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
-
+            //builder.Services.AddRazorPages();
+            //builder.Services.AddServerSideBlazor();
             builder.Services.AddSignalR(); // Real-time
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddAntiforgery();
@@ -67,7 +68,7 @@ namespace G5_MovieTicketBookingSystem
             builder.Services.AddScoped<ITransactionLogService, TransactionLogService>();
             builder.Services.AddScoped<IOrderItemService, OrderItemService>();
             builder.Services.AddScoped<ITicketService, TicketService>();
-
+            builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
             // Register repositories
             builder.Services.AddScoped<ISeatLockRepository, SeatLockRepository>();
             builder.Services.AddScoped<IOrderRepository, OrderRepository>();
@@ -79,7 +80,7 @@ namespace G5_MovieTicketBookingSystem
             builder.Services.AddScoped<IShowtimeRepository, ShowtimeRepository>();
             builder.Services.AddScoped<IMovieRepository, MovieRepository>();
             builder.Services.AddScoped<IScreenSeatRepository, ScreenSeatRepository>();
-            builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
+            
 
             var app = builder.Build();
 
@@ -103,7 +104,7 @@ namespace G5_MovieTicketBookingSystem
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
 
-           
+
             app.MapControllers();
             app.MapFallbackToFile("pages/404.html");
 
