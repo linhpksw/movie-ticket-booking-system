@@ -1,19 +1,26 @@
 ﻿@page "/seat-plan/{showtimeId:int}"
 @inject IShowtimeService ShowtimeService
+@inject ISeatLockService SeatLockService
 @inject IMovieService MovieService
 @inject IScreenSeatService ScreenSeatService
 @inject NavigationManager Navigation
-@layout MainLayout
 
 @code {
     [Parameter]
     public int ShowtimeId { get; set; }
+
+    private int userId = 1;
 
     private ShowtimeDto? showtime;
     private MovieDto? movie;
     private CinemaDto? cinema;
     private List<ShowtimeDto> showtimes = new List<ShowtimeDto>();
     private List<ScreenSeatDto> screenSeats = new List<ScreenSeatDto>();
+
+    private Dictionary<int, SeatStatus> seatAvailabilities = new();
+    private List<ScreenSeatDto> chosenSeats = new List<ScreenSeatDto>(); // user selection
+
+    private decimal totalPrice = 0m;
 
     private LoadState CurrentState = LoadState.Loading;
     private string? ErrorMessage;
@@ -35,20 +42,28 @@
             showtimes = await ShowtimeService.GetShowTimeByMovieAndCinemaWithinDay(movie.MovieId, cinema.CinemaId, showtime.ShowDate);
             screenSeats = await ScreenSeatService.GetScreenSeatsByShowtime(showtime.MovieId, cinema.CinemaId, showtime.ShowDate, showtime.ShowTime);
 
+            // NEW: get the seat availability from the SeatLockService
+            if (screenSeats.Any())
+            {
+                var seatIds = screenSeats.Select(s => s.ScreenSeatId).ToList();
+                seatAvailabilities = await SeatLockService.GetSeatsAvailabilityAsync(ShowtimeId, seatIds);
+            }
+
+
             if (showtime != null && movie != null && cinema != null && showtimes != null)
             {
                 CurrentState = LoadState.Success;
             }
             else
             {
-                Navigation.NavigateTo("/error", forceLoad: true);
+                // Navigation.NavigateTo("/error", forceLoad: true);
             }
         }
         catch (Exception ex)
         {
             ErrorMessage = ex.Message;
             CurrentState = LoadState.Failure;
-            Navigation.NavigateTo("/error", forceLoad: true);
+            // Navigation.NavigateTo("/error", forceLoad: true);
         }
     }
 
@@ -70,14 +85,36 @@
         _ => ""
     };
 
-    // Map seat type to image path
-    private string GetSeatImage(int seatTypeId) => seatTypeId switch
+    // Return the correct seat image based on status
+    private string GetSeatImage(ScreenSeatDto seat)
     {
-        1 => "assets/images/movie/normal-free.png",
-        2 => "assets/images/movie/vip-free.png",
-        3 => "assets/images/movie/sweetbox-free.png",
-        _ => "assets/images/movie/normal-free.png"
-    };
+        if (seatAvailabilities.TryGetValue(seat.ScreenSeatId, out var status))
+        {
+            if (status.IsSold || (!status.IsAvailable && status.LockedBy != userId))
+            {
+                return seat.SeatTypeId switch
+                {
+                    1 => "assets/images/movie/seat-booked.png",
+                    2 => "assets/images/movie/seat-booked.png",
+                    3 => "assets/images/movie/sweetbox-booked.png",
+                    _ => "assets/images/movie/seat-booked.png"
+                };
+            }
+            if (!status.IsAvailable && status.LockedBy == userId)
+            {
+                // Show the image for a seat chosen by the current user.
+                return "assets/images/movie/seat-chosen.png";
+            }
+        }
+
+        return seat.SeatTypeId switch
+        {
+            1 => "assets/images/movie/normal-free.png",
+            2 => "assets/images/movie/vip-free.png",
+            3 => "assets/images/movie/sweetbox-free.png",
+            _ => "assets/images/movie/normal-free.png"
+        };
+    }
 
     // Extract the row letter from the seat label (e.g., 'A1' -> 'A', 'F1,F2' -> 'F')
     private string GetRowLetter(string seatLabel)
@@ -120,6 +157,60 @@
             }
         }
         return groupedSeats;
+    }
+
+    private async Task OnSeatClicked(ScreenSeatDto seat)
+    {
+        bool alreadyChosen = chosenSeats.Any(s => s.ScreenSeatId == seat.ScreenSeatId);
+        if (alreadyChosen)
+        {
+            // The user wants to UN‐choose the seat:
+            chosenSeats.RemoveAll(s => s.ScreenSeatId == seat.ScreenSeatId);
+            await SeatLockService.UnlockSeatAsync(ShowtimeId, userId, seat.ScreenSeatId);
+
+            // No need to manual update, Signal R will refresh seatAvailabilities automatically.
+        }
+        else
+        {
+            // The user wants to choose this seat:
+            chosenSeats.Add(seat);
+            await SeatLockService.LockSeatAsync(ShowtimeId, userId, seat.ScreenSeatId);
+
+            // No need to manual update, Signal R will refresh seatAvailabilities automatically.
+        }
+
+        // Recalculate total or do any needed logic
+        totalPrice = chosenSeats.Sum(s =>
+        {
+            // Example logic—look up base prices for seat type, etc.
+            if (s.SeatTypeId == 1) return 100m; // Normal
+            if (s.SeatTypeId == 2) return 150m; // VIP
+            if (s.SeatTypeId == 3) return 200m; // Sweetbox
+            return 100m;
+        });
+
+        // Force UI refresh
+        StateHasChanged();
+    }
+
+    private bool IsSeatClickable(ScreenSeatDto seat)
+    {
+        if (seatAvailabilities.TryGetValue(seat.ScreenSeatId, out var status))
+        {
+            // If the seat is sold, it is not clickable.
+            if (status.IsSold)
+            {
+                return false;
+            }
+            // If the seat is locked by someone else, it is not clickable.
+            if (!status.IsAvailable)
+            {
+                // Allow clicking if it's locked by the current user (for unlocking).
+                return status.LockedBy == userId;
+            }
+        }
+        // If no special status exists, allow clicking.
+        return true;
     }
 }
 
@@ -214,8 +305,12 @@ else
                                                     <ul>
                                                         @foreach (var seat in seatChunk)
                                                         {
+                                                            // If IsSeatClickable is false, do not attach the onclick handler
+                                                            bool canClick = IsSeatClickable(seat);
                                                             <li class="single-seat seat-free">
-                                                                <img src="@GetSeatImage(seat.SeatTypeId)" alt="seat" />
+                                                                <img src="@GetSeatImage(seat)" alt="seat"
+                                                                     style="cursor:@(canClick ? "pointer" : "default")"
+                                                                    @onclick="@(() => OnSeatClicked(seat))" />
                                                                 <span class="sit-num">@seat.SeatLabel</span>
 
                                                             </li>
@@ -237,14 +332,14 @@ else
                 <div class="proceed-to-book">
                     <div class="book-item">
                         <span>You have Choosed Seat</span>
-                        <h3 class="title">d9, d10</h3>
+                        <h3 class="title">@string.Join(", ", chosenSeats.Select(s => s.SeatLabel))</h3>
                     </div>
                     <div class="book-item">
                         <span>total price</span>
-                        <h3 class="title">$150</h3>
+                        <h3 class="title">$@totalPrice</h3>
                     </div>
                     <div class="book-item">
-                        <a href="movie-checkout.html" class="custom-button">proceed</a>
+                        <a href="movie-checkout.html" class="custom-button" @onclick="ProceedToCheckout">proceed</a>
                     </div>
                 </div>
             </div>
@@ -254,3 +349,11 @@ else
 }
 
 <ScrollToTop />
+
+@code {
+    private void ProceedToCheckout()
+    {
+        // e.g. Navigate to a checkout page, or do an in‐page flow
+        Navigation.NavigateTo($"movie-checkout/{ShowtimeId}", forceLoad: true);
+    }
+}

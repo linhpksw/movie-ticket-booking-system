@@ -1,5 +1,6 @@
-﻿using G5_MovieTicketBookingSystem.Data;
 using G5_MovieTicketBookingSystem.Models;
+using G5_MovieTicketBookingSystem.Commons;
+using G5_MovieTicketBookingSystem.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace G5_MovieTicketBookingSystem.Repositories.Impl
@@ -12,57 +13,72 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
         {
             _dbContext = dbContext;
         }
-
-        public async Task<SeatLock?> GetByUserIdAsync(int userId)
+        public async Task LockSeatAsync(int showtimeId, int userId, int screenSeatId)
         {
-            return await _dbContext.SeatLocks
-                .Where(sl => sl.UserId == userId)
-                .FirstOrDefaultAsync();
+            DateTime lockStartTime = DateTime.UtcNow;
+            DateTime lockExpiryTime = lockStartTime.AddMinutes(CommonConstant.LOCK_EXPIRY_MINS);
+
+            string insertQuery = $@"
+            INSERT INTO SeatLocks (UserId, ScreenSeatId, ShowtimeId, LockStartTime, LockExpiryTime)
+            VALUES ('{userId}', {screenSeatId}, {showtimeId}, '{lockStartTime:yyyy-MM-dd HH:mm:ss}', '{lockExpiryTime:yyyy-MM-dd HH:mm:ss}')
+            ";
+
+            await _dbContext.Database.ExecuteSqlRawAsync(insertQuery);
         }
 
-        public async Task<SeatLock?> GetLatestByUserIdAsync(int? userId)
+
+        public async Task UnlockSeatAsync(int showtimeId, int userId, int screenSeatId)
         {
-            return await _dbContext.SeatLocks
-                .Where(sl => sl.UserId == userId)
-                .OrderByDescending(sl => sl.LockStartTime) // Sort by LockStartTime to get the latest lock
-                .FirstOrDefaultAsync();
+            string deleteQuery = $@"
+            DELETE FROM SeatLocks
+            WHERE UserId = '{userId}'
+            AND ScreenSeatId = {screenSeatId}
+            AND ShowtimeId = {showtimeId}
+            ";
+
+            await _dbContext.Database.ExecuteSqlRawAsync(deleteQuery);
         }
 
-        public async Task<SeatLock?> GetLatestByMovieIdAsync(int movieId)
+        public async Task<HashSet<int>> GetSoldSeatsAsync(int showtimeId, List<int> screenSeatIds)
         {
-            //return await _dbContext.SeatLocks
-            //    .Where(sl => sl.ScreenSeat != null && sl.ScreenSeat.Showtimes.Any(s => s.MovieId == movieId))
-            //    .OrderByDescending(sl => sl.LockStartTime)
-            //    .FirstOrDefaultAsync();
-            return null;
+            // Create a comma-separated string of seat IDs
+            string seatIdsString = string.Join(",", screenSeatIds);
+
+            // Interpolate the seat IDs directly into the query for the IN clause.
+            string query = $@"
+                SELECT DISTINCT OI.ScreenSeatId 
+                FROM OrderItems OI
+                JOIN Orders O ON OI.OrderId = O.OrderId
+                WHERE OI.ShowtimeId = {{0}} 
+                AND OI.ScreenSeatId IN ({seatIdsString})
+                AND O.OrderStatus = 'PAID'";
+
+            var result = await _dbContext.OrderItems
+                .FromSqlRaw(query, showtimeId)
+                .Select(oi => oi.ScreenSeatId)
+                .ToListAsync();
+
+            return result.ToHashSet();
         }
 
-        public async Task<SeatLock> CreateAsync(SeatLock seatLock)
+        public async Task<Dictionary<int, int>> GetLockedSeatsWithOwnersAsync(int showtimeId, List<int> screenSeatIds)
         {
-            _dbContext.SeatLocks.Add(seatLock);
-            await _dbContext.SaveChangesAsync();
-            return seatLock;
-        }
+            string seatIdsString = string.Join(",", screenSeatIds);
+            string query = $@"
+                SELECT ScreenSeatId, UserId
+                FROM SeatLocks
+                WHERE ShowtimeId = {{0}}
+                  AND LockExpiryTime > GETDATE()
+                  AND ScreenSeatId IN ({seatIdsString})";
 
-        public async Task<bool> UpdateAsync(SeatLock seatLock)
-        {
-            _dbContext.SeatLocks.Update(seatLock);
-            var result = await _dbContext.SaveChangesAsync();
-            return result > 0;
-        }
+            var results = await _dbContext.SeatLocks
+                .FromSqlRaw(query, showtimeId)
+                .Select(sl => new { sl.ScreenSeatId, sl.UserId })
+                .ToListAsync();
 
-        public async Task<bool> DeleteAsync(int seatLockId)
-        {
-            var seatLock = await _dbContext.SeatLocks
-                .FirstOrDefaultAsync(sl => sl.SeatLockId == seatLockId);
-            if (seatLock == null)
-            {
-                return false;
-            }
-
-            _dbContext.SeatLocks.Remove(seatLock);
-            var result = await _dbContext.SaveChangesAsync();
-            return result > 0;
+            // Build a dictionary of seatId -> userId (if multiple rows exist for a seat, you can decide to take the first)
+            return results.GroupBy(x => x.ScreenSeatId)
+                          .ToDictionary(g => g.Key, g => g.First().UserId);
         }
     }
 }

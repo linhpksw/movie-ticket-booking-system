@@ -4,7 +4,7 @@ using G5_MovieTicketBookingSystem.Models;
 //using G5_MovieTicketBookingSystem.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace G5_MovieTicketBookingSystem.Services
+namespace G5_MovieTicketBookingSystem.Services.Impl
 {
     public class PaymentService
     {

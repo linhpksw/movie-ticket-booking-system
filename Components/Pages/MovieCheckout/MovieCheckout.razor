@@ -66,27 +66,27 @@
     {
         try
         {
-            var latestSeatLock = await SeatLockService.GetLatestSeatLockByUserIdAsync(userId);
+            // var latestSeatLock = await SeatLockService.GetLatestSeatLockByUserIdAsync(userId);
 
-            if (latestSeatLock != null)
-            {
-                lockExpiryTime = latestSeatLock.LockExpiryTime;
-                lockStartTime = latestSeatLock.LockStartTime;
+            // if (latestSeatLock != null)
+            // {
+            //     lockExpiryTime = latestSeatLock.LockExpiryTime;
+            //     lockStartTime = latestSeatLock.LockStartTime;
 
-                if (lockExpiryTime.HasValue && lockStartTime.HasValue)
-                {
-                    var timeRemaining = lockExpiryTime.Value - DateTime.UtcNow;
-                    remainingTime = timeRemaining.TotalSeconds > 0 ? $"{timeRemaining.Minutes:D2}:{timeRemaining.Seconds:D2}" : "Expired";
-                }
-                else
-                {
-                    remainingTime = "Expired";
-                }
-            }
-            else
-            {
-                remainingTime = "No seat locks found for this user.";
-            }
+            //     if (lockExpiryTime.HasValue && lockStartTime.HasValue)
+            //     {
+            //         var timeRemaining = lockExpiryTime.Value - DateTime.UtcNow;
+            //         remainingTime = timeRemaining.TotalSeconds > 0 ? $"{timeRemaining.Minutes:D2}:{timeRemaining.Seconds:D2}" : "Expired";
+            //     }
+            //     else
+            //     {
+            //         remainingTime = "Expired";
+            //     }
+            // }
+            // else
+            // {
+            //     remainingTime = "No seat locks found for this user.";
+            // }
         }
         catch (Exception ex)
         {
