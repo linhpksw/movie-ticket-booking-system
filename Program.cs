@@ -20,7 +20,8 @@ namespace G5_MovieTicketBookingSystem
             // Add services to the container.
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
-
+            builder.Services.AddRazorPages();
+            builder.Services.AddServerSideBlazor();
             builder.Services.AddSignalR(); // Real-time
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddAntiforgery();
@@ -102,8 +103,9 @@ namespace G5_MovieTicketBookingSystem
 
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
+            app.MapBlazorHub();
+            app.MapRazorPages();
 
-           
             app.MapControllers();
             app.MapFallbackToFile("pages/404.html");
 
