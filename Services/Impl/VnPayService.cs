@@ -1,8 +1,5 @@
 ﻿using G5_MovieTicketBookingSystem.DTOs.VNPAY;
 using G5_MovieTicketBookingSystem.libraries;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
-using System;
 
 namespace G5_MovieTicketBookingSystem.Services.Impl
 {

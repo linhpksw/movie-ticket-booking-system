@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace G5_MovieTicketBookingSystem.DTOs
 {
     public class MovieDto

@@ -1,0 +1,147 @@
+﻿@page "/sign-up"
+@using System.Diagnostics
+@using Microsoft.EntityFrameworkCore.Metadata.Internal
+@using G5_MovieTicketBookingSystem.Services.Impl
+@using G5_MovieTicketBookingSystem.DTOs.UserDto
+@inject NavigationManager NavigationManager
+@inject IHttpClientFactory HttpClientFactory
+<!-- Sign-Up Section -->
+<section class="account-section bg_img" data-background="./assets/images/account/account-bg.jpg">
+    <div class="container">
+        <div class="padding-top padding-bottom">
+            <div class="account-area">
+                <div class="section-header-3">
+                    <span class="cate">welcome</span>
+                    <h2 class="title">to Boleto </h2>
+                </div>
+                <form method="post" @onsubmit="@Submit" class="account-form" @formname="SignUp">
+                    <AntiforgeryToken />
+
+                    @if (Error.ContainsKey("Agree"))
+                    {
+                        <p>@Error["Agree"]</p>
+                    }
+                    @if (Error.ContainsKey("Account"))
+                    {
+                        <p>@Error["Account"]</p>
+                    }
+                    <div class="form-group" style="display: flex; gap: 20px;">
+                        <div style="flex: 1;">
+                            <label for="LastName">LastName<span>*</span></label>
+                            <InputText type="text" placeholder="Enter Your LastName" @bind-Value="lastname" id="pass1" required />
+                        </div>
+                        <div style="flex: 1;">
+                            <label for="FirstName">FirstName<span>*</span></label>
+                            <InputText type="text" placeholder="Enter Your FirstName" @bind-Value="firstname" id="pass1" required />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="email1">Email<span>*</span></label>
+                        <InputText type="text" placeholder="Enter Your Email" @bind-Value="Model.Email" id="pass1" required />
+                        @if (Error.ContainsKey("Email"))
+                        {
+                            <p>@Error["Email"]</p>
+                        }
+                    </div>
+                    <div class="form-group">
+                        <label for="pass1">Password<span>*</span></label>
+                        <InputText type="password" placeholder="Password" @bind-Value="Model.Password" id="pass1" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="pass2">Confirm Password<span>*</span></label>
+                        <InputText type="password" placeholder="Password" @bind-Value="Model.PasswordConfirm" id="pass2" required />
+                        @if (Error.ContainsKey("Password"))
+                        {
+                            <p>@Error["Password"]</p>
+                        }
+                    </div>
+                    <div class="form-group checkgroup">
+                        <input type="checkbox" id="bal" @bind-value="isCheck" required/>
+                        <label for="bal">I agree to the <a href="#0">Terms, Privacy Policy</a> and <a href="#0">Fees</a></label>
+                    </div>
+                    <div class="form-group text-center">
+                        <input type="submit" value="Sign Up">
+                    </div>
+                </form>
+                <div class="option">
+                    Already have an account? <a href="/login">Login</a>
+                </div>
+                <div class="or"><span>Or</span></div>
+                <ul class="social-icons">
+                    <li><a href="#0"><i class="fab fa-facebook-f"></i></a></li>
+                    <li><a href="#0" class="active"><i class="fab fa-twitter"></i></a></li>
+                    <li>
+                        <a href="https://localhost:7000/getAccount"></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+@code {
+
+    [SupplyParameterFromForm]
+    private UserCreateDto Model { get; set; } = new UserCreateDto();
+    private Dictionary<string, string> Error = new Dictionary<string, string>();
+    private bool isCheck = false;
+    [Inject]
+    public IUserServices UserServices { get; set; }
+
+    private HttpClient _client;
+    [SupplyParameterFromForm]
+    public string? lastname { get; set; } // Dùng nullable reference type (chỉ có dấu ?)
+
+    [SupplyParameterFromForm]
+    public string? firstname { get; set; }
+
+    private async Task Submit()
+    {
+        Error.Clear();
+
+        if (string.IsNullOrEmpty(Model.Email))
+        {
+            Error.Add("Email", "Email is required");
+
+        }
+        else if (!Model.Email.Contains("@"))
+        {
+            Error.Add("Email", "Email must contain @ symbol");
+        }
+
+        if (string.IsNullOrEmpty(Model.Password))
+        {
+            Error.Add("Password", "Password is required");
+        }
+        else if (Model.Password.Length < 8)
+        {
+            Error.Add("Password", "Password must be at least 8 characters");
+        }
+        else if (Model.Password != Model.PasswordConfirm)
+        {
+            Error.Add("Password", "Passwords do not match");
+            Console.WriteLine("Passwords do not match");
+        }
+
+        if (isCheck)
+        {
+            Error.Add("Agree", "You have to agree with policy");
+          
+        }
+
+        if (Error.Count > 0)
+        {
+            return;
+        }
+        Model.fullname = firstname + lastname;
+        UserResponseDto userResponseDto = await UserServices.Register(Model, new List<int>() { 10});
+        if (userResponseDto==null)
+        {
+            Error.Add("Account", "Account is exist");
+
+        }
+        if (userResponseDto != null)
+        {
+            NavigationManager.NavigateTo("/Login");
+        }
+    }
+}

@@ -1,4 +1,5 @@
-﻿using G5_MovieTicketBookingSystem.Data;
+
+using G5_MovieTicketBookingSystem.Data;
 using G5_MovieTicketBookingSystem.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,19 +7,64 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
 {
     public class UserRepository : IUserRepository
     {
-        private readonly AppDbContext _context;
+        private readonly AppDbContext _dbContext;
 
-        public UserRepository(AppDbContext context)
+
+        public UserRepository(AppDbContext dbContext)
         {
-            _context = context;
+            _dbContext = dbContext;
         }
+
+
+        public async Task<User?> GetUserByEmail(string email)
+        {
+            return await _dbContext.Users
+                .AsNoTracking() // Bỏ qua cache của DbContext
+                .Include(u => u.UserRoles) // Load quan hệ UserRoles
+                .Include(u => u.Orders)    // Load quan hệ Orders
+                .Include(u => u.SeatLocks) // Load quan hệ SeatLocks
+                .Include(u => u.TicketScanLogs) // Load quan hệ TicketScanLogs
+                .FirstOrDefaultAsync(u => u.Email == email);
+        }
+
+
+        public async Task<User> SignUpAsync(User user)
+        {
+            try
+            {
+                _dbContext.Users.Add(user);
+                await _dbContext.SaveChangesAsync();
+                Console.WriteLine("User successfully added to database."); // Debug log
+                return user; // Trả về user sau khi lưu thành công
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+                Console.WriteLine($"StackTrace: {ex.StackTrace}");
+                throw; // Giữ nguyên lỗi để debug
+            }
+        }
+
+
+        public async Task<bool> IsUsernameExistsAsync(string username)
+        {
+            return await _dbContext.Users.AnyAsync(u => u.Username == username);
+        }
+
 
         public async Task<User?> GetUserByIdAsync(int? userId)
         {
-            return await _context.Users
+            return await _dbContext.Users
                 .Include(u => u.UserRoles)  // Load các vai trò của user
                 .Include(u => u.Orders)     // Load các đơn hàng của user
                 .FirstOrDefaultAsync(u => u.UserId == userId);
+        }
+
+        public async Task<User?> UpdateUserAsync(User user)
+        {
+            _dbContext.Users.Update(user);  // Cập nhật người dùng
+            await _dbContext.SaveChangesAsync();  // Lưu thay đổi vào cơ sở dữ liệu
+            return user;  // Trả về người dùng đã được cập nhật
         }
     }
 }

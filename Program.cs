@@ -4,73 +4,110 @@ using G5_MovieTicketBookingSystem.Repositories;
 using G5_MovieTicketBookingSystem.Repositories.Impl;
 using G5_MovieTicketBookingSystem.Services;
 using G5_MovieTicketBookingSystem.Services.Impl;
-using Microsoft.AspNetCore.SignalR;
+using G5_MovieTicketBookingSystem.Util;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.EntityFrameworkCore;
 
-namespace G5_MovieTicketBookingSystem;
-
-public class Program
+namespace G5_MovieTicketBookingSystem
 {
-    public static void Main(string[] args)
+    public class Program
     {
-        var builder = WebApplication.CreateBuilder(args);
-
-        // Add services to the container.
-        builder.Services.AddRazorComponents()
-            .AddInteractiveServerComponents();
-
-        builder.Services.AddSignalR(); // SignalR hỗ trợ real-time
-        builder.Services.AddHttpContextAccessor();
-        builder.Services.AddAntiforgery();
-        builder.Services.AddHttpClient();
-
-        // Register the DbContext with SQL Server
-        builder.Services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
-                   .LogTo(Console.WriteLine, LogLevel.Information) // Log SQL để debug
-                   .EnableSensitiveDataLogging()); // Hiển thị dữ liệu nhạy cảm trong log
-
-        builder.Services.AddScoped<ICinemaService, CinemaService>();
-        builder.Services.AddScoped<IShowtimeService, ShowtimeService>();
-        builder.Services.AddScoped<IMovieService, MovieService>();
-        builder.Services.AddScoped<ISeatLockService, SeatLockService>();
-        builder.Services.AddScoped<IVnPayService, VnPayService>();
-        builder.Services.AddScoped<IUserService, UserService>();
-        builder.Services.AddScoped<IScreenSeatService, ScreenSeatService>();
-        builder.Services.AddScoped<ITransactionLogService, TransactionLogService>();
-        builder.Services.AddScoped<IOrderItemService, OrderItemService>();
-        builder.Services.AddScoped<ITicketService, TicketService>();
-
-        builder.Services.AddScoped<ISeatLockRepository, SeatLockRepository>();
-        builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-        builder.Services.AddScoped<IUserRepository, UserRepository>();
-        builder.Services.AddScoped<IOrderItemRepository, OrderItemRepository>();
-        builder.Services.AddScoped<ITransactionLogRepository, TransactionLogRepository>();
-        builder.Services.AddScoped<ITicketRepository, TicketRepository>();
-        builder.Services.AddScoped<ICinemaRepository, CinemaRepository>();
-        builder.Services.AddScoped<IShowtimeRepository, ShowtimeRepository>();
-        builder.Services.AddScoped<IMovieRepository, MovieRepository>();
-        builder.Services.AddScoped<IScreenSeatRepository, ScreenSeatRepository>();
-
-        var app = builder.Build();
-        // Configure the HTTP request pipeline.
-        if (!app.Environment.IsDevelopment())
+        public static void Main(string[] args)
         {
-            app.UseExceptionHandler("/Error");
-            // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-            app.UseHsts();
+            var builder = WebApplication.CreateBuilder(args);
+
+            // Add services to the container.
+            builder.Services.AddRazorComponents()
+                .AddInteractiveServerComponents();
+
+            builder.Services.AddSignalR(); // Real-time
+            builder.Services.AddHttpContextAccessor();
+            builder.Services.AddAntiforgery();
+            builder.Services.AddHttpClient("EmailClient", client =>
+            {
+                client.BaseAddress = new Uri("https://localhost:7000");
+            });
+            builder.Services.AddControllersWithViews();
+            builder.Services.AddControllers();
+            builder.Services.AddSingleton<EmailSender>();
+
+            // Cache for session
+            builder.Services.AddDistributedMemoryCache();
+
+            // Named HttpClient
+            builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7000") });
+
+            // Auth & Authz
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options =>
+                {
+                    options.Cookie.Name = "auth-token";
+                    options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+                    options.LoginPath = "/login";
+                    options.AccessDeniedPath = "/access-denied";
+                });
+            builder.Services.AddAuthorization();
+            builder.Services.AddCascadingAuthenticationState();
+
+            // Register DbContext
+            builder.Services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+                       .LogTo(Console.WriteLine, LogLevel.Information)
+                       .EnableSensitiveDataLogging());
+
+            // Register services
+            builder.Services.AddScoped<ICinemaService, CinemaService>();
+            builder.Services.AddScoped<IShowtimeService, ShowtimeService>();
+            builder.Services.AddScoped<IMovieService, MovieService>();
+            builder.Services.AddScoped<ISeatLockService, SeatLockService>();
+            builder.Services.AddScoped<IVnPayService, VnPayService>();
+            builder.Services.AddScoped<IUserServices, UserServices>();
+            builder.Services.AddScoped<IScreenSeatService, ScreenSeatService>();
+            builder.Services.AddScoped<ITransactionLogService, TransactionLogService>();
+            builder.Services.AddScoped<IOrderItemService, OrderItemService>();
+            builder.Services.AddScoped<ITicketService, TicketService>();
+
+            // Register repositories
+            builder.Services.AddScoped<ISeatLockRepository, SeatLockRepository>();
+            builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IOrderItemRepository, OrderItemRepository>();
+            builder.Services.AddScoped<ITransactionLogRepository, TransactionLogRepository>();
+            builder.Services.AddScoped<ITicketRepository, TicketRepository>();
+            builder.Services.AddScoped<ICinemaRepository, CinemaRepository>();
+            builder.Services.AddScoped<IShowtimeRepository, ShowtimeRepository>();
+            builder.Services.AddScoped<IMovieRepository, MovieRepository>();
+            builder.Services.AddScoped<IScreenSeatRepository, ScreenSeatRepository>();
+            builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
+
+            var app = builder.Build();
+
+            // Middleware pipeline
+            if (!app.Environment.IsDevelopment())
+            {
+                app.UseExceptionHandler("/Error");
+                app.UseHsts();
+            }
+
+            app.UseHttpsRedirection();
+            app.UseStaticFiles();
+            app.UseRouting();
+
+            app.UseCors("AllowSpecificOrigin");
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+            app.UseAntiforgery();
+
+            app.MapRazorComponents<App>()
+                .AddInteractiveServerRenderMode();
+
+           
+            app.MapControllers();
+            app.MapFallbackToFile("pages/404.html");
+
+            app.Run();
         }
-
-        app.UseHttpsRedirection();
-
-        app.UseStaticFiles();
-        app.UseAntiforgery();
-
-        app.MapRazorComponents<App>()
-            .AddInteractiveServerRenderMode();
-
-        app.MapFallbackToFile("pages/404.html");
-
-        app.Run();
     }
 }

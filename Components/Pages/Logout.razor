@@ -1,0 +1,61 @@
+﻿@page "/logout"
+@using Microsoft.AspNetCore.Authentication
+@inject NavigationManager NavigationManager
+
+<div class="logout-container">
+    <div class="logout-box">
+        <h2 class="logout-title">Logout Successful</h2>
+        <p class="logout-desc">✅ You have been logged out successfully!</p>
+        <p class="logout-desc">You will be redirected to the login page shortly...</p>
+    </div>
+</div>
+
+<style>
+    .logout-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f0f2f5;
+    }
+
+    .logout-box {
+        background: white;
+        padding: 2.5rem 3rem;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        max-width: 450px;
+        width: 100%;
+    }
+
+    .logout-title {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+
+    .logout-desc {
+        font-size: 1rem;
+        color: #666;
+        margin-bottom: 0.8rem;
+    }
+</style>
+
+@code {
+    [CascadingParameter]
+    public HttpContext HttpContext { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        if (HttpContext.User.Identity.IsAuthenticated)
+        {
+            await HttpContext.SignOutAsync();
+            NavigationManager.NavigateTo("/login",true);
+        }      
+    }
+}
+  
