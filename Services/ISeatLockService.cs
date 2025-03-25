@@ -10,5 +10,7 @@ namespace G5_MovieTicketBookingSystem.Services
         Task LockSeatAsync(int showtimeId, int userId, int screenSeatId);
         Task UnlockSeatAsync(int showtimeId, int userId, int screenSeatId);
         Task<Dictionary<int, SeatStatus>> GetSeatsAvailabilityAsync(int showtimeId, List<int> screenSeatIds);
+        Task<SeatLock?> GetUserLockAsync(int showtimeId, int userId);
+        Task UnlockAllSeatsByExpiryAsync(int showtimeId, int userId, DateTime expiryTime);
     }
 }

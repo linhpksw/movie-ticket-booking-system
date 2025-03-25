@@ -1,7 +1,7 @@
-using G5_MovieTicketBookingSystem.Repositories;
 using G5_MovieTicketBookingSystem;
 using G5_MovieTicketBookingSystem.DTOs;
 using G5_MovieTicketBookingSystem.Models;
+using G5_MovieTicketBookingSystem.Repositories;
 using G5_MovieTicketBookingSystem.Repositories;
 using G5_MovieTicketBookingSystem.Services;
 using Microsoft.AspNetCore.SignalR;
@@ -61,6 +61,16 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
             }
 
             return result;
+        }
+
+        public Task<SeatLock?> GetUserLockAsync(int showtimeId, int userId)
+        {
+            return _seatLockRepository.GetUserLockAsync(showtimeId, userId);
+        }
+
+        public Task UnlockAllSeatsByExpiryAsync(int showtimeId, int userId, DateTime expiryTime)
+        {
+            return _seatLockRepository.UnlockAllSeatsByExpiryAsync(showtimeId, userId, expiryTime);
         }
     }
 }

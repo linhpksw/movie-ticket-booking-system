@@ -2,16 +2,21 @@ using G5_MovieTicketBookingSystem.DTOs;
 using G5_MovieTicketBookingSystem.Mappers;
 using G5_MovieTicketBookingSystem.Models;
 using G5_MovieTicketBookingSystem.Repositories;
+using G5_MovieTicketBookingSystem.Repositories.Impl;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace G5_MovieTicketBookingSystem.Services.Impl
 {
     public class ScreenSeatService : IScreenSeatService
     {
         private readonly IScreenSeatRepository _screenSeatRepository;
+        private readonly ISeatTypeRepository _seatTypeRepository;
 
-        public ScreenSeatService(IScreenSeatRepository screenSeatRepository)
+        public ScreenSeatService(IScreenSeatRepository screenSeatRepository, ISeatTypeRepository seatTypeRepository)
         {
             _screenSeatRepository = screenSeatRepository;
+            _seatTypeRepository = seatTypeRepository;
         }
 
         public async Task<List<ScreenSeat>> GetAllScreenSeatsAsync()
@@ -45,8 +50,16 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
 
             if (screenSeats == null || !screenSeats.Any()) return new List<ScreenSeatDto>();
 
-
             return screenSeats.Select(ScreenSeatMapper.ToDto).ToList();
+        }
+
+        public async Task<Dictionary<int, decimal>> GetSeatTypePriceMapAsync()
+        {
+            var seatTypes = await _seatTypeRepository.GetAllSeatTypesAsync();
+
+            if (seatTypes == null || !seatTypes.Any()) return new Dictionary<int, decimal>();
+
+            return seatTypes.ToDictionary(st => st.SeatTypeId, st => st.BasePrice);
         }
     }
 }

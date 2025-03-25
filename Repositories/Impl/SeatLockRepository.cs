@@ -1,6 +1,6 @@
-using G5_MovieTicketBookingSystem.Models;
 using G5_MovieTicketBookingSystem.Commons;
 using G5_MovieTicketBookingSystem.Data;
+using G5_MovieTicketBookingSystem.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace G5_MovieTicketBookingSystem.Repositories.Impl
@@ -15,17 +15,59 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
         }
         public async Task LockSeatAsync(int showtimeId, int userId, int screenSeatId)
         {
-            DateTime lockStartTime = DateTime.UtcNow;
-            DateTime lockExpiryTime = lockStartTime.AddMinutes(CommonConstant.LOCK_EXPIRY_MINS);
+            // Check for an existing active lock for the given showtime and user.
+            var existingLock = await GetUserLockAsync(showtimeId, userId);
 
-            string insertQuery = $@"
-            INSERT INTO SeatLocks (UserId, ScreenSeatId, ShowtimeId, LockStartTime, LockExpiryTime)
-            VALUES ('{userId}', {screenSeatId}, {showtimeId}, '{lockStartTime:yyyy-MM-dd HH:mm:ss}', '{lockExpiryTime:yyyy-MM-dd HH:mm:ss}')
-            ";
-
-            await _dbContext.Database.ExecuteSqlRawAsync(insertQuery);
+            if (existingLock != null)
+            {
+                // Use the existing lock's start and expiry times.
+                DateTime lockStartTime = existingLock.LockStartTime;
+                DateTime lockExpiryTime = existingLock.LockExpiryTime;
+                string insertQuery = $@"
+                    INSERT INTO SeatLocks (UserId, ScreenSeatId, ShowtimeId, LockStartTime, LockExpiryTime)
+                    VALUES ('{userId}', {screenSeatId}, {showtimeId}, '{lockStartTime:yyyy-MM-dd HH:mm:ss}', '{lockExpiryTime:yyyy-MM-dd HH:mm:ss}')
+                ";
+                await _dbContext.Database.ExecuteSqlRawAsync(insertQuery);
+            }
+            else
+            {
+                // Create a new lock record.
+                TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                DateTime utcNow = DateTime.UtcNow;
+                DateTime lockStartTime = TimeZoneInfo.ConvertTimeFromUtc(utcNow, vietnamTimeZone);
+                DateTime lockExpiryTime = lockStartTime.AddMinutes(CommonConstant.LOCK_EXPIRY_MINS);
+                string insertQuery = $@"
+                    INSERT INTO SeatLocks (UserId, ScreenSeatId, ShowtimeId, LockStartTime, LockExpiryTime)
+                    VALUES ('{userId}', {screenSeatId}, {showtimeId}, '{lockStartTime:yyyy-MM-dd HH:mm:ss}', '{lockExpiryTime:yyyy-MM-dd HH:mm:ss}')
+                ";
+                await _dbContext.Database.ExecuteSqlRawAsync(insertQuery);
+            }
         }
 
+        public async Task<SeatLock?> GetUserLockAsync(int showtimeId, int userId)
+        {
+            // Query for an active lock (with LockExpiryTime in the future) for this user and showtime.
+            string query = $@"
+                 SELECT TOP 1 *
+                 FROM SeatLocks
+                 WHERE ShowtimeId = {showtimeId}
+                 AND UserId = '{userId}'
+                 AND LockExpiryTime > GETDATE()
+                 ORDER BY LockStartTime ASC";
+
+            return await _dbContext.SeatLocks.FromSqlRaw(query).FirstOrDefaultAsync();
+        }
+
+        public async Task UnlockAllSeatsByExpiryAsync(int showtimeId, int userId, DateTime expiryTime)
+        {
+            string deleteQuery = $@"
+                 DELETE FROM SeatLocks
+                 WHERE UserId = '{userId}'
+                 AND ShowtimeId = {showtimeId}
+                 AND LockExpiryTime = '{expiryTime:yyyy-MM-dd HH:mm:ss}'";
+
+            await _dbContext.Database.ExecuteSqlRawAsync(deleteQuery);
+        }
 
         public async Task UnlockSeatAsync(int showtimeId, int userId, int screenSeatId)
         {
