@@ -4,30 +4,121 @@
 @inject IMovieService MovieService
 @inject IScreenSeatService ScreenSeatService
 @inject NavigationManager Navigation
+@inject IHubContext<MovieHub> hub
+@inject IJSRuntime JS
 
 @code {
     [Parameter]
     public int ShowtimeId { get; set; }
 
     private int userId = 1;
-
+    private TimeSpan timeLeft;
+    private readonly TimeSpan DefaultTimeSpan = TimeSpan.FromMinutes(CommonConstant.COUNT_DOWN_TIMER_MINS);
+    private bool isTimeUp = false;
+    private bool _isCountdownRunning = false;
+    private SeatLock? userLock;
     private ShowtimeDto? showtime;
     private MovieDto? movie;
     private CinemaDto? cinema;
     private List<ShowtimeDto> showtimes = new List<ShowtimeDto>();
     private List<ScreenSeatDto> screenSeats = new List<ScreenSeatDto>();
-
+    private Dictionary<int, decimal> seatTypePriceMap = new();
     private Dictionary<int, SeatStatus> seatAvailabilities = new();
-    private List<ScreenSeatDto> chosenSeats = new List<ScreenSeatDto>(); // user selection
-
+    private List<ScreenSeatDto> chosenSeats = new List<ScreenSeatDto>();
     private decimal totalPrice = 0m;
-
     private LoadState CurrentState = LoadState.Loading;
     private string? ErrorMessage;
+    private DotNetObjectReference<SeatPlan>? _dotNetRef;
+
+    // Realtime Signal R
+    [JSInvokable]
+    public async Task RefreshSeatData()
+    {
+        await LoadDataAsync();
+
+        // Check if we have a valid lock and if the countdown isn't already running.
+        if (userLock != null && !_isCountdownRunning)
+        {
+            _ = CountdownRoutine();
+        }
+
+        StateHasChanged();
+    }
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _dotNetRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("registerSeatLockCallback", _dotNetRef);
+        }
+    }
+
+    public void Dispose()
+    {
+        _dotNetRef?.Dispose();
+    }
+
 
     protected override async Task OnInitializedAsync()
     {
         await LoadDataAsync();
+
+        // Start the countdown only if a seat lock exists and the countdown isn't already running.
+        if (userLock != null && !_isCountdownRunning)
+        {
+            _ = CountdownRoutine();
+        }
+    }
+
+    private async Task CountdownRoutine()
+    {
+        // Prevent multiple overlapping loops
+        if (_isCountdownRunning) return;
+
+        _isCountdownRunning = true;
+
+        while (timeLeft.TotalSeconds > 0)
+        {
+            await Task.Delay(1000);
+
+            // **Check if user canceled the loop (e.g., by unlocking all seats)**
+            if (!_isCountdownRunning)
+            {
+                // Break immediately, do NOT subtract a second
+                break;
+            }
+
+            timeLeft = timeLeft.Subtract(TimeSpan.FromSeconds(1));
+            await InvokeAsync(StateHasChanged);
+
+            // If time left is zero or negative, break
+            if (timeLeft.TotalSeconds <= 0)
+            {
+                break;
+            }
+        }
+
+        // If we left the loop because the user cleared seats, stop here
+        if (!_isCountdownRunning)
+        {
+            // The countdown was manually stopped
+            return;
+        }
+
+        // Otherwise, we ran out of time
+        isTimeUp = true;
+        await InvokeAsync(StateHasChanged);
+
+        if (userLock != null)
+        {
+            await SeatLockService.UnlockAllSeatsByExpiryAsync(ShowtimeId, userId, userLock.LockExpiryTime);
+        }
+
+        _isCountdownRunning = false;
+
+        Navigation.NavigateTo("/", forceLoad: true);
     }
 
     private async Task LoadDataAsync()
@@ -41,18 +132,48 @@
             cinema = await ShowtimeService.GetCinemaByShowtimeId(showtime.ShowtimeId);
             showtimes = await ShowtimeService.GetShowTimeByMovieAndCinemaWithinDay(movie.MovieId, cinema.CinemaId, showtime.ShowDate);
             screenSeats = await ScreenSeatService.GetScreenSeatsByShowtime(showtime.MovieId, cinema.CinemaId, showtime.ShowDate, showtime.ShowTime);
+            seatTypePriceMap = await ScreenSeatService.GetSeatTypePriceMapAsync();
 
             // NEW: get the seat availability from the SeatLockService
             if (screenSeats.Any())
             {
                 var seatIds = screenSeats.Select(s => s.ScreenSeatId).ToList();
                 seatAvailabilities = await SeatLockService.GetSeatsAvailabilityAsync(ShowtimeId, seatIds);
+
+                // Instead of starting with an empty chosenSeats list,
+                // retrieve the seats already locked by the current user from the DB.
+                chosenSeats = screenSeats
+                    .Where(s => seatAvailabilities.TryGetValue(s.ScreenSeatId, out var status)
+                                && !status.IsAvailable && status.LockedBy == userId)
+                    .ToList();
+
+                // Recalculate the total price from the chosen seats.
+                totalPrice = chosenSeats.Sum(s => seatTypePriceMap.TryGetValue(s.SeatTypeId, out decimal price) ? price : 0);
             }
 
 
             if (showtime != null && movie != null && cinema != null && showtimes != null)
             {
                 CurrentState = LoadState.Success;
+
+                userLock = await SeatLockService.GetUserLockAsync(ShowtimeId, userId);
+
+                if (userLock != null)
+                {
+                    // Use the lock's expiry time to calculate remaining time.
+                    DateTime now = DateTime.Now;
+                    timeLeft = userLock.LockExpiryTime - now;
+                    if (timeLeft.TotalSeconds < 0)
+                    {
+                        timeLeft = TimeSpan.Zero;
+                    }
+                }
+                else
+                {
+                    // If no lock exists, initialize to the full countdown.
+                    // (This case should not occur if a seat has been clicked.)
+                    timeLeft = TimeSpan.FromMinutes(CommonConstant.COUNT_DOWN_TIMER_MINS);
+                }
             }
             else
             {
@@ -161,6 +282,9 @@
 
     private async Task OnSeatClicked(ScreenSeatDto seat)
     {
+        if (!IsSeatClickable(seat))
+            return;
+
         bool alreadyChosen = chosenSeats.Any(s => s.ScreenSeatId == seat.ScreenSeatId);
         if (alreadyChosen)
         {
@@ -179,15 +303,27 @@
             // No need to manual update, Signal R will refresh seatAvailabilities automatically.
         }
 
-        // Recalculate total or do any needed logic
-        totalPrice = chosenSeats.Sum(s =>
+        // If no seats left in chosenSeats, that means user has cleared all
+        if (chosenSeats.Count == 0)
         {
-            // Example logic—look up base prices for seat type, etc.
-            if (s.SeatTypeId == 1) return 100m; // Normal
-            if (s.SeatTypeId == 2) return 150m; // VIP
-            if (s.SeatTypeId == 3) return 200m; // Sweetbox
-            return 100m;
-        });
+            // 1) Optionally ensure the DB no longer has any locks for this user
+            //    (Or you already did so one by one above.)
+            //    If you want to remove *all* locks at once:
+            // await SeatLockService.UnlockAllSeatsAsync(ShowtimeId, userId);
+
+            // 2) Stop the countdown loop & reset
+            _isCountdownRunning = false;
+            timeLeft = DefaultTimeSpan;
+            isTimeUp = false;  
+            userLock = null;
+        }
+
+        // Recalculate total
+        totalPrice = chosenSeats.Sum(s => seatTypePriceMap.TryGetValue(s.SeatTypeId, out decimal price) ? price : 0);
+
+        // Broadcast to all clients so they know seat availability changed
+        //    This calls "ReceiveSeatLockUpdate" on the JS side (below).
+        await hub.Clients.All.SendAsync("ReceiveSeatLockUpdate");
 
         // Force UI refresh
         StateHasChanged();
@@ -262,8 +398,15 @@ else
                     </select>
                 </div>
                 <div class="item">
-                    <h5 class="title">05:00</h5>
-                    <p>Mins Left</p>
+                    @if (!isTimeUp)
+                    {
+                        <p>Thời gian đặt chỗ còn</p>
+                        <h5 class="title">@timeLeft.ToString(@"mm\:ss")</h5>
+                    }
+                    else
+                    {
+                        <h5 class="title">Hết giờ!</h5>
+                    }
                 </div>
             </div>
         </div>
@@ -309,8 +452,8 @@ else
                                                             bool canClick = IsSeatClickable(seat);
                                                             <li class="single-seat seat-free">
                                                                 <img src="@GetSeatImage(seat)" alt="seat"
-                                                                     style="cursor:@(canClick ? "pointer" : "default")"
-                                                                    @onclick="@(() => OnSeatClicked(seat))" />
+                                                                style="cursor:@(canClick ? "pointer" : "default")"
+                                                                     @onclick="@(canClick ? (() => OnSeatClicked(seat)) : null)" />
                                                                 <span class="sit-num">@seat.SeatLabel</span>
 
                                                             </li>
@@ -331,21 +474,52 @@ else
             <div class="proceed-book bg_img" style="background-image: url('/assets/images/movie/movie-bg-proceed.jpg');">
                 <div class="proceed-to-book">
                     <div class="book-item">
-                        <span>You have Choosed Seat</span>
-                        <h3 class="title">@string.Join(", ", chosenSeats.Select(s => s.SeatLabel))</h3>
+                        @if (chosenSeats.Any())
+                        {
+                            <span>Bạn đã chọn ghế</span>
+                        }
+                        else
+                        {
+                            <span>Bạn chưa chọn ghế nào</span>
+                        }
+                        <h3 class="title">
+                            @string.Join(", ", chosenSeats
+                                     .SelectMany(s => s.SeatLabel.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                                     .Select(s => s.Trim()))
+                        </h3>
                     </div>
                     <div class="book-item">
-                        <span>total price</span>
-                        <h3 class="title">$@totalPrice</h3>
+                        <span>Tổng tiền</span>
+                        <h3 class="title">@NumberUtil.FormatCurrency(totalPrice)</h3>
                     </div>
                     <div class="book-item">
-                        <a href="movie-checkout.html" class="custom-button" @onclick="ProceedToCheckout">proceed</a>
+                        <a href="movie-checkout.html" class="custom-button" @onclick="ProceedToCheckout">Thanh toán</a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     <!-- ==========Movie-Section========== -->
+
+    <script>
+        "use strict";
+
+        function registerSeatLockCallback(dotNetRef) {
+            var connection = new signalR.HubConnectionBuilder()
+                .withUrl("/movieHub")
+                .build();
+
+            connection.on("ReceiveSeatLockUpdate", function () {
+                // Instead of a full reload, call the C# method to refresh the seat data.
+                dotNetRef.invokeMethodAsync("RefreshSeatData")
+                    .catch(err => console.error(err.toString()));
+            });
+
+            connection.start().catch(function (err) {
+                console.error(err.toString());
+            });
+        }
+    </script>
 }
 
 <ScrollToTop />
@@ -357,3 +531,4 @@ else
         Navigation.NavigateTo($"movie-checkout/{ShowtimeId}", forceLoad: true);
     }
 }
+

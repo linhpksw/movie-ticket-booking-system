@@ -1,5 +1,6 @@
 ﻿using G5_MovieTicketBookingSystem.Components;
 using G5_MovieTicketBookingSystem.Data;
+using G5_MovieTicketBookingSystem.Hubs;
 using G5_MovieTicketBookingSystem.Repositories;
 using G5_MovieTicketBookingSystem.Repositories.Impl;
 using G5_MovieTicketBookingSystem.Services;
@@ -80,6 +81,7 @@ namespace G5_MovieTicketBookingSystem
             builder.Services.AddScoped<IMovieRepository, MovieRepository>();
             builder.Services.AddScoped<IScreenSeatRepository, ScreenSeatRepository>();
             builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
+            builder.Services.AddScoped<ISeatTypeRepository, SeatTypeRepository>();
 
             var app = builder.Build();
 
@@ -106,6 +108,8 @@ namespace G5_MovieTicketBookingSystem
            
             app.MapControllers();
             app.MapFallbackToFile("pages/404.html");
+
+            app.MapHub<MovieHub>("/movieHub");
 
             app.Run();
         }
