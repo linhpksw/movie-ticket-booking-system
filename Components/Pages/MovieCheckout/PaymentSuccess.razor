@@ -6,7 +6,7 @@
 @inject ITransactionLogService TransactionLogService
 @inject IOrderItemService OrderItemService
 @inject ITicketService TicketService
-
+@inject NavigationManager Navigation
 @if (paymentInfo != null)
 {
     <div class="padding-bottom padding-top">
@@ -51,14 +51,14 @@ else
                 {
                     name = orderInfo.Split("-")[0].Trim();
                 }
-                if (statusOrder == "00")
-                {
+                // if (statusOrder == "00")
+                // {
                     paymentStatus = "Success";
-                }
-                else
-                {
-                    paymentStatus = "Failed";
-                }
+                // }
+                // else
+                // {
+                //     paymentStatus = "Failed";
+                // }
                 //add transaction log
                 TransactionLog transactionLog = new TransactionLog
                     {
@@ -73,25 +73,25 @@ else
                 AddTransactionLog(transactionLog);
 
                 //add ticket
-                if (statusOrder == "00")
-                {
-                    List<OrderItem> orderItemList = await OrderItemService.GetOrderItemsByOrderIdAsync(curOrder.OrderId);
-                    foreach (var orderItem in orderItemList)
-                    {
-                        string uniqueCode = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper();
-                        Ticket ticket = new Ticket
-                            {
-                                OrderItemId = orderItem.OrderItemId,
-                                OrderItem = orderItem,
-                                UniqueCode = uniqueCode,
-                                IssueTimestamp = DateTime.Now,
-                                TicketStatus = "Active",
-                                ScannedTimestamp = null
-                            };
+                // if (statusOrder == "00")
+                // {
+                    // List<OrderItem> orderItemList = await OrderItemService.GetOrderItemsByOrderIdAsync(curOrder.OrderId);
+                    // foreach (var orderItem in orderItemList)
+                    // {
+                    //     string uniqueCode = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper();
+                    //     Ticket ticket = new Ticket
+                    //         {
+                    //             OrderItemId = orderItem.OrderItemId,
+                    //             OrderItem = orderItem,
+                    //             UniqueCode = uniqueCode,
+                    //             IssueTimestamp = DateTime.Now,
+                    //             TicketStatus = "Active",
+                    //             ScannedTimestamp = null
+                    //         };
 
-                        await AddTicket(ticket);
-                    }
-                }
+                    //     await AddTicket(ticket);
+                    // }
+                // }
 
 
                 paymentInfo = new PaymentInformationModel
@@ -101,6 +101,7 @@ else
                         OrderDescription = orderInfo,
                         Name = name
                     };
+                Navigation.NavigateTo("/", true);
             }
             catch (Exception ex)
             {
@@ -113,14 +114,14 @@ else
     {
 
 
-        if (statusOrder == "00")
-        {
+        // if (statusOrder == "00")
+        // {
             await OrderService.UpdateOrderStatusAsync(OrderId, "Success");
-        }
-        else
-        {
-            await OrderService.UpdateOrderStatusAsync(OrderId, "Failed");
-        }
+        // }
+        // else
+        // {
+        //     await OrderService.UpdateOrderStatusAsync(OrderId, "Failed");
+        // }
 
     }
 

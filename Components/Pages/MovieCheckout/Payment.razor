@@ -83,7 +83,7 @@
                 TransactionTimestamp = DateTime.Now,
                 GatewayResponse = "Pending"
             };
-        // AddTransactionLog(transactionLog);
+        AddTransactionLog(transactionLog);
         // Kiểm tra nếu dữ liệu đầy đủ
         if (!string.IsNullOrEmpty(paymentModel.OrderType) && paymentModel.Amount > 0)
         {
@@ -148,6 +148,10 @@
 
     private async Task AddTransactionLog(TransactionLog transactionLog)
     {
+        if (string.IsNullOrEmpty(transactionLog.GatewayResponse))
+        {
+            transactionLog.GatewayResponse = "Pending"; 
+        }
         TransactionLogService.AddTransactionLogAsync(transactionLog);
     }
 }
