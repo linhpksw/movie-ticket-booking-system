@@ -10,14 +10,14 @@
 @if (paymentInfo != null)
 {
     <div class="padding-bottom padding-top">
-<h3>Chi tiết thanh toán</h3>
+        <h3>Chi tiết thanh toán</h3>
 
-    <p><strong>Loại đơn hàng:</strong> @paymentInfo.OrderType</p>
-    <p><strong>Số tiền:</strong> @paymentInfo.Amount.ToString("N0") VND</p>
-    <p><strong>Mô tả:</strong> @paymentInfo.OrderDescription</p>
-    <p><strong>Khách hàng:</strong> @paymentInfo.Name</p>
+        <p><strong>Loại đơn hàng:</strong> @paymentInfo.OrderType</p>
+        <p><strong>Số tiền:</strong> @paymentInfo.Amount.ToString("N0") VND</p>
+        <p><strong>Mô tả:</strong> @paymentInfo.OrderDescription</p>
+        <p><strong>Khách hàng:</strong> @paymentInfo.Name</p>
 
-    <a href="/" class="btn btn-primary">Quay lại trang chủ</a>
+        <a href="/" class="btn btn-primary">Quay lại trang chủ</a>
     </div>
 }
 else
@@ -41,11 +41,11 @@ else
                 string orderInfo = queryCollection["vnp_OrderInfo"];
                 string name = "Khách hàng";
                 string statusOrder = queryCollection["vnp_TransactionStatus"];
-                userId = 1; 
+                userId = 1;
 
                 Order curOrder = await OrderService.GetLatestOrderByUserIdAsync(userId.Value);
                 // Gọi phương thức UpdateOrderAfterPayment để cập nhật trạng thái đơn hàng sau khi thanh toán.
-                await UpdateOrderAfterPayment(curOrder.OrderId,statusOrder);
+                await UpdateOrderAfterPayment(curOrder.OrderId, statusOrder);
 
                 if (!string.IsNullOrEmpty(orderInfo) && orderInfo.Contains("-"))
                 {
@@ -53,44 +53,44 @@ else
                 }
                 if (statusOrder == "00")
                 {
-                    paymentStatus ="Success";
+                    paymentStatus = "Success";
                 }
                 else
                 {
-                    paymentStatus = "Failed"; 
+                    paymentStatus = "Failed";
                 }
                 //add transaction log
                 TransactionLog transactionLog = new TransactionLog
                     {
                         OrderId = curOrder.OrderId,
                         Order = curOrder,
-                        PaymentGateway = "VNPAY", 
+                        PaymentGateway = "VNPAY",
                         PaymentStatus = paymentStatus,
-                        Amount = Convert.ToDecimal(queryCollection["vnp_Amount"]) / 100, 
-                        TransactionTimestamp = DateTime.Now, 
-                        GatewayResponse = queryCollection["vnp_TransactionStatus"] 
+                        Amount = Convert.ToDecimal(queryCollection["vnp_Amount"]) / 100,
+                        TransactionTimestamp = DateTime.Now,
+                        GatewayResponse = queryCollection["vnp_TransactionStatus"]
                     };
                 AddTransactionLog(transactionLog);
 
                 //add ticket
                 if (statusOrder == "00")
                 {
-                List<OrderItem> orderItemList = await OrderItemService.GetOrderItemsByOrderIdAsync(curOrder.OrderId);
-                foreach (var orderItem in orderItemList) 
-                {
-                    string uniqueCode = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper();
-                    Ticket ticket = new Ticket
-                        {
-                            OrderItemId = orderItem.OrderItemId,  
-                            OrderItem = orderItem,  
-                            UniqueCode = uniqueCode,
-                            IssueTimestamp = DateTime.Now,  
-                            TicketStatus = "Active", 
-                            ScannedTimestamp = null  
-                        };
+                    List<OrderItem> orderItemList = await OrderItemService.GetOrderItemsByOrderIdAsync(curOrder.OrderId);
+                    foreach (var orderItem in orderItemList)
+                    {
+                        string uniqueCode = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper();
+                        Ticket ticket = new Ticket
+                            {
+                                OrderItemId = orderItem.OrderItemId,
+                                OrderItem = orderItem,
+                                UniqueCode = uniqueCode,
+                                IssueTimestamp = DateTime.Now,
+                                TicketStatus = "Active",
+                                ScannedTimestamp = null
+                            };
 
-                    await AddTicket(ticket);
-                }
+                        await AddTicket(ticket);
+                    }
                 }
 
 
@@ -109,22 +109,23 @@ else
         }
     }
 
-    private async Task UpdateOrderAfterPayment(int OrderId , string statusOrder)
+    private async Task UpdateOrderAfterPayment(int OrderId, string statusOrder)
     {
-     
-       
-            if (statusOrder == "00")
-            {
-                await OrderService.UpdateOrderStatusAsync(OrderId, "Success");
-            }
-            else
-            {
-                await OrderService.UpdateOrderStatusAsync(OrderId, "Failed");
-            }
-       
+
+
+        if (statusOrder == "00")
+        {
+            await OrderService.UpdateOrderStatusAsync(OrderId, "Success");
+        }
+        else
+        {
+            await OrderService.UpdateOrderStatusAsync(OrderId, "Failed");
+        }
+
     }
 
-    private async Task AddTransactionLog(TransactionLog transactionLog){
+    private async Task AddTransactionLog(TransactionLog transactionLog)
+    {
         await TransactionLogService.AddTransactionLogAsync(transactionLog);
     }
 

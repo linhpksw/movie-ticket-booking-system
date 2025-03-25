@@ -1,4 +1,4 @@
-﻿using G5_MovieTicketBookingSystem.DTOs;
+using G5_MovieTicketBookingSystem.DTOs;
 using G5_MovieTicketBookingSystem.Mappers;
 using G5_MovieTicketBookingSystem.Models;
 using G5_MovieTicketBookingSystem.Repositories;
@@ -36,6 +36,10 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
 
 
             return showtimes.Select(ShowtimeMapper.ToDto).ToList();
+        }
+        public async Task<Showtime> GetShowtimeByScreenSeatId(int ScreenSeatId)
+        {
+            return await _showtimeRepository.GetShowtimeByScreenSeatId(ScreenSeatId);
         }
 
         public async Task<List<Showtime>> GetUpcomingShowtimes()

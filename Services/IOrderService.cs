@@ -9,6 +9,7 @@ namespace G5_MovieTicketBookingSystem.Services
         Task UpdateOrderStatusAsync(int orderId, string status);
         Task<bool> CreateOrderWithItemsAsync(Order order, List<OrderItem> orderItems);
         Task<Order> GetLatestOrderByUserIdAsync(int? userId);
+        Task<Showtime> GetShowtimeByOrderIdAsync(int orderId);
 
     }
 }

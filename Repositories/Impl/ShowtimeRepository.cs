@@ -1,4 +1,4 @@
-﻿using G5_MovieTicketBookingSystem.Data;
+using G5_MovieTicketBookingSystem.Data;
 using G5_MovieTicketBookingSystem.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -58,6 +58,15 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
             ";
 
             return await _dbContext.Showtimes.FromSqlRaw(query).ToListAsync(); ;
+        }
+        public async Task<Showtime> GetShowtimeByScreenSeatId(int screenSeatId)
+        {
+            return await _dbContext.Showtimes
+                .AsNoTracking()  // Đảm bảo không theo dõi
+                .Include(s => s.Screen)
+                .ThenInclude(sc => sc.ScreenSeats)
+                .FirstOrDefaultAsync(s => s.Screen.ScreenSeats
+                    .Any(ss => ss.ScreenSeatId == screenSeatId));
         }
     }
 }

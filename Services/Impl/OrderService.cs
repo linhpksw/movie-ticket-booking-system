@@ -69,7 +69,27 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
             return await _orderRepository.GetLatestOrderByUserIdAsync(userId);
         }
 
+        public async Task<Showtime> GetShowtimeByOrderIdAsync(int orderId)
+        {
+            // Truy vấn Showtime dựa trên OrderId từ cơ sở dữ liệu
+            var order = await _context.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(ss => ss.Showtime) 
+                .FirstOrDefaultAsync(o => o.OrderId == orderId);
 
+            if (order == null || order.OrderItems == null || !order.OrderItems.Any())
+            {
+                return null; // Trả về null nếu không có OrderItems
+            }
+
+            // Lấy Showtime từ OrderItems đầu tiên
+            var showtimeId = order.OrderItems.FirstOrDefault().ShowtimeId;
+            var showtime = await _context.Showtimes
+                .Include(s => s.Movie)
+                .Include(s => s.Screen)
+                .FirstOrDefaultAsync(s => s.ShowtimeId == showtimeId);
+            return showtime; // Trả về Showtime liên quan đến OrderId
+        }
 
 
     }

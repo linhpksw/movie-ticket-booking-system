@@ -121,22 +121,33 @@
     private async Task AddOrderItem(OrderItemDto newOrderItemDto)
     {
         var order = await OrderService.GetOrderByIdAsync(newOrderItemDto.OrderId);
-        var screenSeat = await ScreenSeatService.GetScreenSeatByIdAsync(NewOrderItemDto.ScreenSeatId);
+        var screenSeat = await ScreenSeatService.GetScreenSeatByIdAsync(newOrderItemDto.ScreenSeatId);
 
-        var newOrderItem = new OrderItem
-            {
-                OrderId = newOrderItemDto.OrderId,
-                ScreenSeatId = newOrderItemDto.ScreenSeatId,
-                PriceCharged = newOrderItemDto.PriceCharged,
-                Order = order,
-                ScreenSeat = screenSeat,
-                Showtime = null
-            };
+        // Lấy Showtime từ Order hoặc ScreenSeat (cần đảm bảo có ShowTime hợp lệ)
+        var showtime = await OrderService.GetShowtimeByOrderIdAsync(order.OrderId); // Cần phải tạo phương thức GetShowtimeByOrderIdAsync
 
-        await OrderItemService.AddOrderItemAsync(newOrderItem);
+        if (showtime != null)
+        {
+            var newOrderItem = new OrderItem
+                {
+                    OrderId = newOrderItemDto.OrderId,
+                    ScreenSeatId = newOrderItemDto.ScreenSeatId,
+                    PriceCharged = newOrderItemDto.PriceCharged,
+                    Order = order,
+                    ScreenSeat = screenSeat,
+                    Showtime = showtime // Gán Showtime hợp lệ vào OrderItem
+                };
+
+            await OrderItemService.AddOrderItemAsync(newOrderItem);
+        }
+        else
+        {
+            Console.WriteLine("❌ Không tìm thấy Showtime hợp lệ cho Order.");
+        }
     }
-    // private async Task AddTransactionLog(TransactionLog transactionLog)
-    // {
-    //     TransactionLogService.AddTransactionLogAsync(transactionLog);
-    // }
+
+    private async Task AddTransactionLog(TransactionLog transactionLog)
+    {
+        TransactionLogService.AddTransactionLogAsync(transactionLog);
+    }
 }

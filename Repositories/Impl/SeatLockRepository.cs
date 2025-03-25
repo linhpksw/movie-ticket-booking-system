@@ -43,7 +43,28 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
                 await _dbContext.Database.ExecuteSqlRawAsync(insertQuery);
             }
         }
+        public async Task<List<SeatLock>> GetAllByUserIdAsync(int? userId)
+        {
+            return await _dbContext.SeatLocks
+                .Where(sl => sl.UserId == userId)
+                .AsNoTracking()
+                .ToListAsync();
+        }
+        public async Task<SeatLock?> GetLatestByUserIdAsync(int? userId)
+        {
+            return await _dbContext.SeatLocks
+                .Where(sl => sl.UserId == userId)
+                .OrderByDescending(sl => sl.LockStartTime)
+                 .AsNoTracking()
+                .FirstOrDefaultAsync();
+        }
 
+        public async Task<bool> UpdateAsync(SeatLock seatLock)
+        {
+            _dbContext.SeatLocks.Update(seatLock);
+            var result = await _dbContext.SaveChangesAsync();
+            return result > 0;
+        }
         public async Task<SeatLock?> GetUserLockAsync(int showtimeId, int userId)
         {
             // Query for an active lock (with LockExpiryTime in the future) for this user and showtime.

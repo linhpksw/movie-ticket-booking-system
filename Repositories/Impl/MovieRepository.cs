@@ -17,7 +17,15 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
         public async Task<Movie?> GetByIdAsync(int id)
         {
             return await _dbContext.Movies
-                .FirstOrDefaultAsync(c => c.MovieId == id);
+                .Include(m => m.Showtimes)
+                    .ThenInclude(st => st.Screen)
+                            .ThenInclude(s => s.Cinema) // Đảm bảo lấy cả Cinema
+                .Include(m => m.Showtimes)
+                    .ThenInclude(st => st.Screen)
+                    .ThenInclude(s => s.ScreenSeats)
+                        .ThenInclude(ss => ss.SeatType) // Đảm bảo lấy SeatType
+                .FirstOrDefaultAsync(m => m.MovieId == id);
+            return null;
         }
 
         // 1) Đang khởi chiếu (ReleaseDate <= Today)
