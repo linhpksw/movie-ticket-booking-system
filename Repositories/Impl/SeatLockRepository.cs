@@ -118,7 +118,7 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
                 JOIN Orders O ON OI.OrderId = O.OrderId
                 WHERE OI.ShowtimeId = {{0}} 
                 AND OI.ScreenSeatId IN ({seatIdsString})
-                AND O.OrderStatus = 'PAID'";
+                AND O.OrderStatus = 'Success'";
 
             var result = await _dbContext.OrderItems
                 .FromSqlRaw(query, showtimeId)

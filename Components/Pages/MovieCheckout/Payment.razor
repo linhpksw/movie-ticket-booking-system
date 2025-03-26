@@ -70,7 +70,7 @@
 
         // await AddOrder();
         await AddOrder();
-        UpdateSoldOut(ShowtimeId);
+        // UpdateSoldOut(ShowtimeId);
         Order OrderLasted = await OrderService.GetLatestOrderByUserIdAsync(userId.Value);
         NewOrderItemDto.OrderId = OrderLasted.OrderId;
         NewOrderItemDto.ScreenSeatId = screenSeatId;
@@ -129,10 +129,10 @@
     private async Task AddOrderItem(OrderItemDto newOrderItemDto)
     {
         var order = await OrderService.GetOrderByIdAsync(newOrderItemDto.OrderId);
-        var screenSeat = await ScreenSeatService.GetScreenSeatByIdAsync(newOrderItemDto.ScreenSeatId);
+        var screenSeat = await ScreenSeatService.GetScreenSeatByUserId(userId);
 
         // Lấy Showtime từ Order hoặc ScreenSeat (cần đảm bảo có ShowTime hợp lệ)
-        var showtime = await OrderService.GetShowTimeByScreenId(screenSeat.Screen.ScreenId);
+        var showtime = await ShowtimeService.getShowTimeById(ShowtimeId);
 
         if (showtime != null)
         {
@@ -143,7 +143,7 @@
                     PriceCharged = newOrderItemDto.PriceCharged,
                     Order = order,
                     ScreenSeat = screenSeat,
-                    Showtime = showtime // Gán Showtime hợp lệ vào OrderItem
+                    Showtime = showtime 
                 };
 
             await OrderItemService.AddOrderItemAsync(newOrderItem);

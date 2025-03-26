@@ -90,5 +90,22 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
             }
         }
 
+        public Task<ScreenSeat> GetScreenSeatByShowtimeId(int showTimeId)
+        {
+            var showtime = _dbContext.Showtimes
+                .Include(s => s.Screen)
+                .ThenInclude(sc => sc.ScreenSeats)
+                .FirstOrDefault(s => s.ShowtimeId == showTimeId);
+
+            if (showtime != null && showtime.Screen != null && showtime.Screen.ScreenSeats.Any())
+            {
+                return Task.FromResult(showtime.Screen.ScreenSeats.LastOrDefault());
+            }
+            else
+            {
+                return Task.FromResult<ScreenSeat>(null);
+            }
+        }
+
     }
 }

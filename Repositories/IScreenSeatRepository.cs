@@ -9,5 +9,7 @@ namespace G5_MovieTicketBookingSystem.Repositories
         Task UpdateScreenSeatAsync(ScreenSeat screenSeat);
         Task DeleteScreenSeatAsync(int screenSeatId);
         Task<List<ScreenSeat>> GetScreenSeatsByShowtime(int movieId, int cinemaId, DateOnly showDate, TimeOnly showTime);
+
+        Task<ScreenSeat> GetScreenSeatByUserIdAsync(int? userId);
     }
 }

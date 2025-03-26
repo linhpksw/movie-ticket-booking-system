@@ -57,5 +57,6 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
              await _showtimeRepository.UpdateSoldOut(id);
         }
 
+      
     }
 }

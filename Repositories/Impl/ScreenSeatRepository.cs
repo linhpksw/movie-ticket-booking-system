@@ -76,5 +76,24 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
                 .FromSqlRaw(query, showDate, showTime, movieId, cinemaId)
                 .ToListAsync();
         }
+
+        public async Task<ScreenSeat> GetScreenSeatByUserIdAsync(int? userId)
+        {
+            var seatLock = await _context.SeatLocks
+                .Where(sl => sl.UserId == userId)
+                .OrderByDescending(sl => sl.SeatLockId)
+                .FirstOrDefaultAsync();
+
+            if (seatLock == null)
+            {
+                return null; // Nếu không tìm thấy SeatLock, trả về null
+            }
+
+            var screenSeat = await _context.ScreenSeats
+                .FirstOrDefaultAsync(ss => ss.ScreenSeatId == seatLock.ScreenSeatId);
+
+            return screenSeat;
+        }
+
     }
 }
