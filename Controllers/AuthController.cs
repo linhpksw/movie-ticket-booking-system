@@ -1,6 +1,5 @@
 ﻿using G5_MovieTicketBookingSystem.Commons;
 using G5_MovieTicketBookingSystem.DTOs;
-using G5_MovieTicketBookingSystem.Models;
 using G5_MovieTicketBookingSystem.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -9,8 +8,8 @@ using System.Security.Claims;
 
 namespace G5_MovieTicketBookingSystem.Controllers
 {
-    [ApiController]
     [Route("api/[controller]/")]
+    [ApiController]
     public class AuthController : ControllerBase
     {
         private readonly IUserServices _userServices;
@@ -34,14 +33,17 @@ namespace G5_MovieTicketBookingSystem.Controllers
 
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, response.Email),
+                new Claim(ClaimTypes.Name, response.Email), // Added for Identity.Name
+                new Claim(ClaimTypes.Email, response.Email),
                 new Claim(ClaimTypes.Role, roleId.ToString())
             };
 
-            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            var principal = new ClaimsPrincipal(identity);
+            ClaimsIdentity identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+            ClaimsPrincipal principal = new ClaimsPrincipal(identity);
 
             await HttpContext.SignInAsync(principal);
+
             return Ok(response);
         }
     }

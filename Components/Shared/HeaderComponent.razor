@@ -1,5 +1,5 @@
 ﻿@inject NavigationManager Navigation
-
+ 
 <header class="header-section">
     <div class="container">
         <div class="header-wrapper">
@@ -21,10 +21,11 @@
                 <Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
                     <NotAuthorized>
                         <li class="header-button pr-0">
-                            <a href="/sign-up">Join Us</a>
+                            <a href="/login">Join Us</a>
                         </li>
                     </NotAuthorized>
-                    <Authorized>
+                    <Authorized Context="auth">
+                        <span>Xin chào @auth.User.Identity.Name</span>
                         <li class="header-button pr-0">
                             <a href="/logout">Log out</a>
                         </li>

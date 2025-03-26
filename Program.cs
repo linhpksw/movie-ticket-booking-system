@@ -25,7 +25,6 @@ namespace G5_MovieTicketBookingSystem
             builder.Services.AddScoped<ToastService>();
 
             builder.Services.AddSignalR();
-            builder.Services.AddHttpContextAccessor();
             builder.Services.AddAntiforgery();
             builder.Services.AddHttpClient();
             builder.Services.AddControllersWithViews();
@@ -38,11 +37,27 @@ namespace G5_MovieTicketBookingSystem
             // Named HttpClient
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7000") });
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowSpecificOrigin", policyBuilder =>
+                {
+                    policyBuilder
+                        .WithOrigins("https://localhost:7000") // or whatever your Blazor site runs on
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
+                });
+            });
+
             // Auth & Authz
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
                     options.Cookie.Name = "auth-token";
+
+                    options.Cookie.SameSite = SameSiteMode.None;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+
                     options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
                     options.LoginPath = "/login";
                     options.AccessDeniedPath = "/access-denied";
@@ -99,6 +114,7 @@ namespace G5_MovieTicketBookingSystem
 
             app.UseAuthentication();
             app.UseAuthorization();
+
             app.UseAntiforgery();
 
             app.MapRazorComponents<App>()

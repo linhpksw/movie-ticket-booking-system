@@ -1,5 +1,4 @@
 ﻿@page "/login"
-@inject NavigationManager NavigationManager
 @inject ToastService toastService
 @inject IUserServices UserServices
 @inject HttpClient httpClient
@@ -16,6 +15,7 @@
 
 
                 <form method="post" class="account-form" @onsubmit="HandleLogin" @formname="login">
+                    <AntiforgeryToken/>
                     <div class="form-group">
                         <label for="credential">Tài khoản<span>*</span></label>
                         <InputText type="text" placeholder="Nhập tài khoản của bạn" @bind-Value="request.Email" id="credential" required />
@@ -40,8 +40,12 @@
 <Toast @ref="toastService.ToastComponent" />
 
 @code {
-    private bool isLoading = false;
+    [CascadingParameter]
+    public HttpContext? HttpContext { get; set; }
+    [SupplyParameterFromForm]
     private UserLoginRequestDto request { get; set; } = new UserLoginRequestDto();
+
+    private bool isLoading = false;
 
     private async Task HandleLogin()
     {
@@ -49,18 +53,19 @@
         {
             isLoading = true;
 
-            // Call the API endpoint in AuthController
-            var response = await httpClient.PostAsJsonAsync("/api/Auth/login", request);
-
-
-            if (response.IsSuccessStatusCode)
+            var claims = new List<Claim>
             {
-                NavigationManager.NavigateTo("/", forceLoad: true);
-            }
-            else
-            {
-                toastService.ShowDangerToast("Login Failed", "Invalid credentials.");
-            }
+                new Claim(ClaimTypes.Name, request.Email)
+            };
+
+            ClaimsIdentity identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            ClaimsPrincipal principal = new ClaimsPrincipal(identity);
+
+            await HttpContext?.SignInAsync(principal);
+
+            HttpContext.Response.Redirect("/");
+
+            return;
         }
         catch (Exception ex)
         {
