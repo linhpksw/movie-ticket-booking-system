@@ -1,4 +1,5 @@
 ﻿@using G5_MovieTicketBookingSystem.DTOs.MovieBookingPlan
+@rendermode InteractiveServer
 
 <section class="book-section bg-one">
     <div class="container">
@@ -88,6 +89,7 @@
     public async Task HandleDateChange(ChangeEventArgs e)
     {
         movieShowtimeFilterDto.ShowDate = DateTime.Parse(e.Value.ToString());
+        Console.WriteLine(e.Value.ToString());
         await OnFilterChanged.InvokeAsync(movieShowtimeFilterDto);
     }
     public async Task HandleCinemaChange(ChangeEventArgs e)

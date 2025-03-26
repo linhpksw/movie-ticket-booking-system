@@ -1,4 +1,5 @@
 ﻿@page "/movie-booking-plan"
+@rendermode InteractiveServer
 @inject ICinemaService CinemaService
 @inject IShowtimeService ShowtimeService
 @inject IMovieService MovieService
@@ -69,7 +70,6 @@ OnFilterChanged="HandleFilterChange" />
     {
         movieShowtimeDtos = await MovieService.GetMovieShowtimeDtos(filter);
         PrintMovieShowtimeDto(movieShowtimeDtos);
-        var x = 5;
     }
     private async Task HandleFilterChange(MovieShowtimeFilterDto inputFilter)
     {
@@ -95,7 +95,7 @@ OnFilterChanged="HandleFilterChange" />
             {
                 foreach (var show in movie.Showtime)
                 {
-                    Console.WriteLine($"  Showtime: {show.Showtimehour} - Available Seats: {show.IsSoldOut}");
+                    Console.WriteLine($"  Showtime: {show.Showtimehour} - IsSoldOut: {show.IsSoldOut}");
                 }
             }
             Console.WriteLine(new string('-', 40));
