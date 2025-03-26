@@ -17,10 +17,10 @@
     public int ShowtimeId { get; set; }
     private int? userId;
     private User? currentUser;
+    private Showtime showtime;
     private string remainingTime = "Loading...";
     private bool isProcessing = false;
     private string message = "";
-
     private MovieDto movie = new()
         {
             Title = "Unknown Movie",
@@ -38,7 +38,7 @@
     {
         try
         {
-            var showtime = await ShowtimeService.getShowTimeById(ShowtimeId);
+             showtime = await ShowtimeService.getShowTimeById(ShowtimeId);
 
             // userId = showtime.SeatLocks.LastOrDefault().UserId;
             userId = 1;
@@ -157,13 +157,8 @@
                 </a>
             </div>
             <div class="item date-item">
-                <span class="date">@movie?.Showtimes.FirstOrDefault()?.ShowDate.ToString("yyyy-MM-dd")</span>
-                <select class="select-bar">
-                    @foreach (var showtime in movie?.Showtimes ?? new List<ShowtimeDto>())
-                    {
-                        <option value="@showtime.ShowtimeId">@showtime.ShowTime.ToString("hh\\:mm")</option>
-                    }
-                </select>
+                <span class="date">@movie?.Showtimes.FirstOrDefault()?.ShowDate.ToString("dddd, dd MMMM yyyy")</span>
+                @showtime?.ShowTime.ToString("hh\\:mm")
             </div>
             <div class="item">
                 <h5 class="title">Remaining Time</h5>
@@ -205,21 +200,16 @@
                     </div>
                 }
 
-                <form class="checkout-contact-form">
+                <form class="container">
                     <div class="form-group">
                         <label for="FullName"><i class="fas fa-user"></i> Full Name</label>
-                        <input type="text" id="FullName" name="FullName" placeholder="Enter your full name" class="form-control" oninput="validateFullName()">
+                        <input type="text" id="FullName" name="FullName" placeholder="Enter your full name" class="form-control" value="@currentUser?.Fullname" readonly>
                         <span class="text-danger" id="errorFullName"></span>
                     </div>
                     <div class="form-group">
                         <label for="Email"><i class="fas fa-envelope"></i> Email</label>
-                        <input type="email" id="Email" name="Email" placeholder="Enter your email" class="form-control" oninput="validateEmail()">
+                        <input type="email" id="Email" name="Email" placeholder="Enter your email" class="form-control" value="@currentUser?.Email" readonly>
                         <span class="text-danger" id="errorEmail"></span>
-                    </div>
-                    <div class="form-group">
-                        <label for="Phone"><i class="fas fa-phone"></i> Phone Number</label>
-                        <input type="text" id="Phone" name="Phone" placeholder="Enter your phone number" class="form-control" oninput="validatePhone()">
-                        <span class="text-danger" id="errorPhone"></span>
                     </div>
                 </form>
                 <button type="button" onclick="redirectToPayment()" class="btn btn-primary">Pay with VNPAY</button>
@@ -260,7 +250,7 @@
                                 {
                                     @foreach (var seat in screenSeats)
                                     {
-                                        <li>@seat.SeatLabel (@seat.SeatType?.SeatTypeName) - $@(seat.SeatType?.BasePrice ?? 0)</li>
+                                        <li>@seat.SeatLabel (@seat.SeatType?.SeatTypeName) -    @NumberUtil.FormatCurrency(seat.SeatType?.BasePrice ?? 0)</li>
                                     }
                                 }
                                 else
@@ -273,7 +263,7 @@
                             <h6 class="subtitle mb-0">
                                 <span>Tickets Price</span>
                                 <span>
-                                    $@(screenSeats.Sum(seat => seat.SeatType?.BasePrice ?? 0))
+                                    @NumberUtil.FormatCurrency((screenSeats.Sum(seat => seat.SeatType?.BasePrice ?? 0)))
                                 </span>
                             </h6>
                         </li>
@@ -283,7 +273,7 @@
                     <h6 class="subtitle">
                         <span>Amount Payable</span>
                         <span>
-                            $@(screenSeats.Sum(seat => seat.SeatType?.BasePrice ?? 0))
+                            @NumberUtil.FormatCurrency((screenSeats.Sum(seat => seat.SeatType?.BasePrice ?? 0)))
                         </span>
                     </h6>
                     <a href="/" class="custom-button back-button">Change </a>
