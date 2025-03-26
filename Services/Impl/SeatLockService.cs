@@ -124,16 +124,16 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
             return _seatLockRepository.UnlockAllSeatsByExpiryAsync(showtimeId, userId, expiryTime);
         }
 
-        public async Task<List<SeatLock>> GetAllByUserIdAsync(int? userId)
+        public async Task<List<SeatLock>> GetAllByUserIdAsync(int? userId, int showTimeId)
         {
             if (!userId.HasValue)
             {
                 return new List<SeatLock>();
             }
 
-            var seatLocks = await _seatLockRepository.GetAllByUserIdAsync(userId);
+            var seatLocks = await _seatLockRepository.GetAllByUserIdAsync(userId, showTimeId);
 
-            var orderItems = await _orderRepository.GetOrderItemByUserIdAsync(userId.Value);
+            var orderItems = await _orderRepository.GetOrderItemByUserIdAsync(userId.Value,showTimeId);
 
             var orderScreenSeatIds = orderItems.Select(item => item.ScreenSeatId).ToList();
 

@@ -148,10 +148,10 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
                           .ToDictionary(g => g.Key, g => g.First().UserId);
         }
 
-        public async Task<List<SeatLock>> GetAllByUserIdAsync(int? userId)
+        public async Task<List<SeatLock>> GetAllByUserIdAsync(int? userId ,int showTimeId)
         {
             return await _dbContext.SeatLocks
-                .Where(sl => sl.UserId == userId)
+                .Where(sl => sl.UserId == userId && sl.ShowtimeId == showTimeId)
                 .AsNoTracking()
                 .ToListAsync();
         }

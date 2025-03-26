@@ -144,7 +144,7 @@
                 // retrieve the seats already locked by the current user from the DB.
                 chosenSeats = screenSeats
                     .Where(s => seatAvailabilities.TryGetValue(s.ScreenSeatId, out var status)
-                                && !status.IsAvailable && status.LockedBy == userId)
+                                && !status.IsAvailable && status.LockedBy == userId && !status.IsSold)
                     .ToList();
 
                 // Recalculate the total price from the chosen seats.

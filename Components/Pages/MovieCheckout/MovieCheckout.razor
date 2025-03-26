@@ -59,7 +59,7 @@
                     Showtimes = new List<ShowtimeDto>()
                 };
            
-            List<SeatLock> seatLocks = await SeatLockService.GetAllByUserIdAsync(userId);
+            List<SeatLock> seatLocks = await SeatLockService.GetAllByUserIdAsync(userId,ShowtimeId);
             foreach (SeatLock seatLock in seatLocks)
             {
                 ScreenSeat screenSeat = await ScreenSeatService.GetScreenSeatByIdAsync(seatLock.ScreenSeatId);
