@@ -1,4 +1,5 @@
 ﻿using G5_MovieTicketBookingSystem.DTOs;
+using G5_MovieTicketBookingSystem.Models;
 
 namespace G5_MovieTicketBookingSystem.Services
 {
@@ -9,5 +10,7 @@ namespace G5_MovieTicketBookingSystem.Services
         Task<CinemaDto?> GetCinemaByShowtimeId(int showtimeId);
 
         Task<List<ShowtimeDto>> GetShowTimeByMovieAndCinemaWithinDay(int movieId, int cinemaId, DateOnly showDate);
+
+        Task<List<Showtime>> GetUpcomingShowtimes();
     }
 }

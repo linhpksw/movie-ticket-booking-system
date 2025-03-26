@@ -1,13 +1,11 @@
 ﻿using G5_MovieTicketBookingSystem.DTOs;
+using G5_MovieTicketBookingSystem.Models;
 
 namespace G5_MovieTicketBookingSystem.Services
 {
     public interface ICinemaService
     {
-        Task<IEnumerable<CinemaDto>> GetAllAsync();
+        Task<List<Cinema>> GetAllAsync();
         Task<CinemaDto?> GetByIdAsync(int id);
-        Task<CinemaDto> CreateAsync(CinemaDto dto);
-        Task<CinemaDto> UpdateAsync(int id, CinemaDto dto);
-        Task DeleteAsync(int id);
     }
 }

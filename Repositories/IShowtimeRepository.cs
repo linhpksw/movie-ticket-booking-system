@@ -9,5 +9,7 @@ namespace G5_MovieTicketBookingSystem.Repositories
         Task<Cinema?> GetCinemaByShowtimeId(int showtimeId);
 
         Task<List<Showtime>> GetShowTimeByMovieAndCinemaWithinDay(int movieId, int cinemaId, DateOnly showDate);
+
+        Task<List<Showtime>> GetUpcomingShowtimes();
     }
 }

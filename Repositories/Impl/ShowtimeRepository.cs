@@ -46,5 +46,18 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
                 .FromSqlRaw(query, showDate, cinemaId, movieId)
                 .ToListAsync();
         }
+
+        public async Task<List<Showtime>> GetUpcomingShowtimes()
+        {
+            string query = @"
+                SELECT *
+                FROM Showtimes
+                WHERE ShowDate >= CAST(GETDATE() AS DATE)
+                  AND ShowDate < DATEADD(day, 7, CAST(GETDATE() AS DATE))
+                ORDER BY ShowDate ASC
+            ";
+
+            return await _dbContext.Showtimes.FromSqlRaw(query).ToListAsync(); ;
+        }
     }
 }
