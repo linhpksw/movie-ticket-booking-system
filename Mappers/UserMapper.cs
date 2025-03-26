@@ -5,9 +5,9 @@ namespace G5_MovieTicketBookingSystem.Mappers
 {
     public static class UserMapper
     {
-        public static UserDto toDto(User user)
+        public static UserResponseDto toResponseDto(User user)
         {
-            return new UserDto
+            return new UserResponseDto
             {
                 UserId = user.UserId,
                 Email = user.Email,
@@ -17,15 +17,14 @@ namespace G5_MovieTicketBookingSystem.Mappers
             };
         }
 
-        public static User toEntity(UserDto userDto)
+        public static User toEntity(UserRegisterRequestDto request)
         {
             return new User
             {
-                UserId = userDto.UserId,
-                Email = userDto.Email,
-                Fullname = userDto.Fullname,
-                Password = userDto.Password,
-                Username = userDto.Username
+                Email = request.Email,
+                Fullname = request.Fullname,
+                Password = request.Password,
+                Username = request.Username
             };
         }
     }

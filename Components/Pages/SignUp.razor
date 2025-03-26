@@ -18,45 +18,37 @@
 
                     <div class="form-group" style="display: flex; gap: 20px;">
                         <div style="flex: 1;">
-                            <label for="LastName">LastName<span>*</span></label>
-                            <InputText type="text" placeholder="Enter Your LastName" @bind-Value="lastname" id="pass1" required />
+                            <label for="lastName">Họ <span>*</span></label>
+                            <InputText type="text" placeholder="Nhập họ của bạn " @bind-Value="lastname" id="lastName" required />
                         </div>
                         <div style="flex: 1;">
-                            <label for="FirstName">FirstName<span>*</span></label>
-                            <InputText type="text" placeholder="Enter Your FirstName" @bind-Value="firstname" id="pass1" required />
+                            <label for="firstName">Tên <span>*</span></label>
+                            <InputText type="text" placeholder="Nhập tên của bạn" @bind-Value="firstname" id="firstName" required />
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="email1">Email<span>*</span></label>
-                        <InputText type="text" placeholder="Enter Your Email" @bind-Value="UserDto.Email" id="pass1" required />
+                        <label for="email">Email <span>*</span></label>
+                        <InputText type="text" placeholder="Enter Your Email" @bind-Value="request.Email" id="email" required />
                     </div>
                     <div class="form-group">
-                        <label for="pass1">Password<span>*</span></label>
-                        <InputText type="password" placeholder="Password" @bind-Value="UserDto.Password" id="pass1" required />
+                        <label for="password">Mật khẩu <span>*</span></label>
+                        <InputText type="password" placeholder="Nhập mật khẩu của bạn" @bind-Value="request.Password" id="password" required />
                     </div>
                     <div class="form-group">
-                        <label for="pass2">Confirm Password<span>*</span></label>
-                        <InputText type="password" placeholder="Password" @bind-Value="UserDto.PasswordConfirm" id="pass2" required />
+                        <label for="confirmPassword">Nhập lại mật khẩu <span>*</span></label>
+                        <InputText type="password" placeholder="Nhập lại mật khẩu của bạn" @bind-Value="request.PasswordConfirm" id="confirmPassword" required />
                     </div>
                     <div class="form-group checkgroup">
-                        <input type="checkbox" id="bal" @bind-value="isAgree" required/>
-                        <label for="bal">I agree to the <a href="#0">Terms, Privacy Policy</a> and <a href="#0">Fees</a></label>
+                        <input type="checkbox" id="agree" @bind-value="isAgree" required/>
+                        <label for="agree">Tôi đồng ý với các <a href="#0">Điều khoản, Chính sách</a> và <a href="#0">Chi phí</a></label>
                     </div>
                     <div class="form-group text-center">
-                        <input type="submit" value="Sign Up">
+                        <input type="submit" value="@(isLoading ? "Đang đăng ký..." : "Đăng ký")">
                     </div>
                 </form>
                 <div class="option">
-                    Already have an account? <a href="/login">Login</a>
+                    Bạn đã có tài khoản? <a href="/login">Đăng nhập ngay</a>
                 </div>
-                <div class="or"><span>Or</span></div>
-                <ul class="social-icons">
-                    <li><a href="#0"><i class="fab fa-facebook-f"></i></a></li>
-                    <li><a href="#0" class="active"><i class="fab fa-twitter"></i></a></li>
-                    <li>
-                        <a href="https://localhost:7000/getAccount"></a>
-                    </li>
-                </ul>
             </div>
         </div>
     </div>
@@ -66,23 +58,25 @@
 
 @code {
     [SupplyParameterFromForm]
-    private UserDto UserDto { get; set; } = new UserDto();
-    private Dictionary<string, string> Error = new Dictionary<string, string>();
-
+    private UserRegisterRequestDto request { get; set; } = new UserRegisterRequestDto();
+    private bool isLoading = false;
     public string? lastname { get; set; }
     public string? firstname { get; set; }
     public bool isAgree { get; set; }
+
 
     private async Task Submit()
     {
         try
         {
+            isLoading = true;
+
             // Combine names into the Model
-            UserDto.Fullname = $"{firstname} {lastname}";
+            request.Fullname = $"{lastname} {firstname}";
 
-            var userDto = await UserServices.Register(UserDto);
+            var userDto = await UserServices.Register(request);
 
-            toastService.ShowSuccessToast("Thành công", $"Tạo thành công tài khoản {userDto.Fullname}");
+            toastService.ShowSuccessToast("Thành công", $"Tạo thành công tài khoản {request.Fullname}");
 
             // Redirect user
             NavigationManager.NavigateTo("/login", forceLoad: true);
@@ -90,6 +84,10 @@
         catch (Exception ex)
         {
             toastService.ShowErrorToast("Lỗi định dạng", ex.Message);
+        }
+        finally
+        {
+            isLoading = false;
         }
     }
 }

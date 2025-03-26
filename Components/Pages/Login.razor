@@ -2,9 +2,8 @@
 @inject NavigationManager NavigationManager
 @inject ToastService toastService
 @inject IUserServices UserServices
-@inject IHttpContextAccessor HttpContextAccessor
+@inject HttpClient httpClient
 
-<!-- ==========Preloader========== -->
 <!-- ==========Sign-In-Section========== -->
 <section class="account-section bg_img" style="background-image: url('/assets/images/account/account-bg.jpg');">
     <div class="container">
@@ -16,17 +15,17 @@
                 </div>
 
 
-                <form method="post" class="account-form" @onsubmit="@HandleLogin" @formname="login">
+                <form method="post" class="account-form" @onsubmit="HandleLogin" @formname="login">
                     <div class="form-group">
                         <label for="credential">Tài khoản<span>*</span></label>
-                        <InputText type="text" placeholder="Nhập tài khoản của bạn" @bind-Value="userDto.Email" id="credential" required />
+                        <InputText type="text" placeholder="Nhập tài khoản của bạn" @bind-Value="request.Email" id="credential" required />
                     </div>
                     <div class="form-group">
                         <label for="password">Mật khẩu<span>*</span></label>
-                        <InputText type="password" placeholder="Nhập mật khẩu của bạn" @bind-Value="userDto.Password" id="password" required />
+                        <InputText type="password" placeholder="Nhập mật khẩu của bạn" @bind-Value="request.Password" id="password" required />
                     </div>
                     <div class="form-group text-center">
-                        <input disabled="@isLoading" placeholder=" @(isLoading ? "Đang đăng nhập..." : "Đăng nhập")" type="submit" value="Đăng nhập">
+                        <input disabled="@isLoading" type="submit" value="@(isLoading ? "Đang đăng nhập..." : "Đăng nhập")">
                     </div>
 
                 </form>
@@ -42,7 +41,7 @@
 
 @code {
     private bool isLoading = false;
-    private UserDto userDto { get; set; } = new UserDto();
+    private UserLoginRequestDto request { get; set; } = new UserLoginRequestDto();
 
     private async Task HandleLogin()
     {
@@ -50,29 +49,18 @@
         {
             isLoading = true;
 
-            var user = await UserServices.Login(userDto);
+            // Call the API endpoint in AuthController
+            var response = await httpClient.PostAsJsonAsync("/api/Auth/login", request);
 
-            if (user is null)
+
+            if (response.IsSuccessStatusCode)
             {
-                // Show error
-                toastService.ShowDangerToast("Login Failed", "Invalid credentials.");
-                return;
+                NavigationManager.NavigateTo("/", forceLoad: true);
             }
-
-            List<UserRole> userRoles = await UserServices.GetUserRolesAsync();
-
-            var claims = new List<Claim>
+            else
             {
-                new Claim(ClaimTypes.Name, userDto.Email),
-                new Claim(ClaimTypes.Role, userRoles.FirstOrDefault()?.RoleId.ToString() ?? string.Empty)
-            };
-
-            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            var principal = new ClaimsPrincipal(identity);
-
-            await HttpContextAccessor.HttpContext.SignInAsync(principal);
-
-            NavigationManager.NavigateTo("/", forceLoad: true);
+                toastService.ShowDangerToast("Login Failed", "Invalid credentials.");
+            }
         }
         catch (Exception ex)
         {

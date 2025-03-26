@@ -24,13 +24,10 @@ namespace G5_MovieTicketBookingSystem
 
             builder.Services.AddScoped<ToastService>();
 
-            builder.Services.AddSignalR(); // Real-time
+            builder.Services.AddSignalR();
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddAntiforgery();
-            builder.Services.AddHttpClient("EmailClient", client =>
-            {
-                client.BaseAddress = new Uri("https://localhost:7000");
-            });
+            builder.Services.AddHttpClient();
             builder.Services.AddControllersWithViews();
             builder.Services.AddControllers();
             builder.Services.AddSingleton<EmailSender>();

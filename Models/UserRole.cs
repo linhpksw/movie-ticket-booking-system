@@ -18,8 +18,8 @@ public class UserRole
 
     // Navigation
     [ForeignKey(nameof(UserId))]
-    public required User User { get; set; }
+    public User User { get; set; }
 
     [ForeignKey(nameof(RoleId))]
-    public required Role Role { get; set; }
+    public Role Role { get; set; }
 }

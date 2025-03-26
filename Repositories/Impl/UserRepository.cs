@@ -1,5 +1,6 @@
 
 using G5_MovieTicketBookingSystem.Data;
+using G5_MovieTicketBookingSystem.DTOs;
 using G5_MovieTicketBookingSystem.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -28,53 +29,39 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
         }
 
 
-        public async Task<User> SignUpAsync(User user, int roleId)
+        public async Task<User> SignUpAsync(UserRegisterRequestDto user, int roleId)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
 
             try
             {
-                // 1) Insert into [Users] with OUTPUT to get the newly inserted row
-                var sqlInsertUser = @"
-                    INSERT INTO [Users] (Username, Email, Password, Fullname)
-                    OUTPUT 
-                        INSERTED.UserId, 
-                        INSERTED.Username, 
-                        INSERTED.Email, 
-                        INSERTED.Password, 
-                        INSERTED.Fullname
-                    VALUES ({0}, {1}, {2}, {3});
-                ";
-
-                // EF will map the OUTPUT columns back into a User entity
-                var insertedUser = await _context.Users
-                    .FromSqlRaw(
-                        sqlInsertUser,
-                        user.Username,
-                        user.Email,
-                        user.Password,
-                        user.Fullname
-                    )
-                    .FirstOrDefaultAsync();
-
-                if (insertedUser == null)
+                // 1) Create a new User entity
+                var newUser = new User
                 {
-                    // Handle the unlikely case of an insert returning no rows
-                    throw new Exception("Failed to insert user.");
-                }
+                    Username = user.Username,
+                    Email = user.Email,
+                    Password = user.Password,
+                    Fullname = user.Fullname
+                };
 
-                // 2) Insert into [UserRoles] using the new user_id
-                await _context.Database.ExecuteSqlRawAsync(
-                    "INSERT INTO [UserRoles] (UserId, RoleId) VALUES ({0}, {1});",
-                    insertedUser.UserId,
-                    roleId
-                );
+                // Add and save the new user
+                _context.Users.Add(newUser);
+                await _context.SaveChangesAsync();
 
-                // If needed, commit the transaction
+                // 2) Insert into [UserRoles] using the new user's ID
+                var userRole = new UserRole
+                {
+                    UserId = newUser.UserId,
+                    RoleId = roleId
+                };
+                _context.UserRoles.Add(userRole);
+                await _context.SaveChangesAsync();
+
+                // Commit the transaction
                 await transaction.CommitAsync();
 
-                // Return the user with the new primary key
-                return user;
+                // Return the newly inserted user (with its generated UserId)
+                return newUser;
             }
             catch
             {

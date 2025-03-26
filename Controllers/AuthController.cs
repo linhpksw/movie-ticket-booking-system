@@ -1,4 +1,5 @@
-﻿using G5_MovieTicketBookingSystem.DTOs;
+﻿using G5_MovieTicketBookingSystem.Commons;
+using G5_MovieTicketBookingSystem.DTOs;
 using G5_MovieTicketBookingSystem.Models;
 using G5_MovieTicketBookingSystem.Services;
 using Microsoft.AspNetCore.Authentication;
@@ -8,9 +9,8 @@ using System.Security.Claims;
 
 namespace G5_MovieTicketBookingSystem.Controllers
 {
-
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/[controller]/")]
     public class AuthController : ControllerBase
     {
         private readonly IUserServices _userServices;
@@ -21,28 +21,28 @@ namespace G5_MovieTicketBookingSystem.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] UserDto userRequestDto)
+        public async Task<IActionResult> Login([FromBody] UserLoginRequestDto request)
         {
-            var UserDto = await _userServices.Login(userRequestDto);
+            UserResponseDto response = await _userServices.Login(request);
 
-            if (UserDto == null)
+            if (response == null)
             {
                 return Unauthorized(new { message = "Invalid credentials." });
             }
 
-            List<UserRole> userRoles = await _userServices.GetUserRolesAsync();
+            int roleId = CommonConstant.CUSTOMER_ROLE;
 
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, UserDto.Email),
-                new Claim(ClaimTypes.Role, userRoles.FirstOrDefault()?.RoleId.ToString() ?? string.Empty)
+                new Claim(ClaimTypes.Name, response.Email),
+                new Claim(ClaimTypes.Role, roleId.ToString())
             };
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
 
             await HttpContext.SignInAsync(principal);
-            return Ok(UserDto);
+            return Ok(response);
         }
     }
 }

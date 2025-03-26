@@ -1,10 +1,7 @@
-﻿
-namespace G5_MovieTicketBookingSystem.DTOs
+﻿namespace G5_MovieTicketBookingSystem.DTOs
 {
-    public class UserDto
+    public class UserRegisterRequestDto
     {
-        public int UserId { get; set; }
-
         public string Username { get; set; }
 
         public string Email { get; set; }
