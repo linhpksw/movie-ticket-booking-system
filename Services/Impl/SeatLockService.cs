@@ -49,24 +49,11 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
                 Console.WriteLine($"No seat lock found for User ID {userId}");
             }
         }
-        public async Task UpdateExpirytimeByUserIdAsync(int? userId, DateTime expiryTime)
+        public async Task UpdateExpirytimeByUserIdAsync(SeatLock seatLock, DateTime expiryTime)
         {
-            if (!userId.HasValue)
-            {
-                Console.WriteLine("User ID is null.");
-                return;
-            }
-
-            var seatLock = await _seatLockRepository.GetLatestByUserIdAsync(userId);
-            if (seatLock != null)
-            {
                 seatLock.LockExpiryTime = expiryTime;
                 await _seatLockRepository.UpdateAsync(seatLock);
-            }
-            else
-            {
-                Console.WriteLine($"No seat lock found for User ID {userId}");
-            }
+            
         }
         public Task LockSeatAsync(int showtimeId, int userId, int screenSeatId)
         {
@@ -119,9 +106,9 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
             return _seatLockRepository.GetUserLockAsync(showtimeId, userId);
         }
 
-        public Task UnlockAllSeatsByExpiryAsync(int showtimeId, int userId, DateTime expiryTime)
+        public Task UnlockAllSeatsByExpiryAsync(int showtimeId, int userId)
         {
-            return _seatLockRepository.UnlockAllSeatsByExpiryAsync(showtimeId, userId, expiryTime);
+            return _seatLockRepository.UnlockAllSeatsByExpiryAsync(showtimeId, userId);
         }
 
         public async Task<List<SeatLock>> GetAllByUserIdAsync(int? userId, int showTimeId)

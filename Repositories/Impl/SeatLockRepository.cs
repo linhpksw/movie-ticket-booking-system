@@ -83,13 +83,13 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
             return await _dbContext.SeatLocks.FromSqlRaw(query).FirstOrDefaultAsync();
         }
 
-        public async Task UnlockAllSeatsByExpiryAsync(int showtimeId, int userId, DateTime expiryTime)
+        public async Task UnlockAllSeatsByExpiryAsync(int showtimeId, int userId)
         {
             string deleteQuery = $@"
                  DELETE FROM SeatLocks
                  WHERE UserId = '{userId}'
                  AND ShowtimeId = {showtimeId}
-                 AND LockExpiryTime = '{expiryTime:yyyy-MM-dd HH:mm:ss}'";
+              ";
 
             await _dbContext.Database.ExecuteSqlRawAsync(deleteQuery);
         }

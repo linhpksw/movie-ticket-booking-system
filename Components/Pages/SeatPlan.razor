@@ -113,7 +113,7 @@
 
         if (userLock != null)
         {
-            await SeatLockService.UnlockAllSeatsByExpiryAsync(ShowtimeId, userId, userLock.LockExpiryTime);
+            await SeatLockService.UnlockAllSeatsByExpiryAsync(ShowtimeId, userId);
         }
 
         _isCountdownRunning = false;

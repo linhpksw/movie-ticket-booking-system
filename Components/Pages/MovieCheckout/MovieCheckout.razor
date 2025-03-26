@@ -16,11 +16,16 @@
     [Parameter]
     public int ShowtimeId { get; set; }
     private int? userId;
+    private TimeSpan timeLeft;
+    private readonly TimeSpan DefaultTimeSpan = TimeSpan.FromMinutes(CommonConstant.COUNT_DOWN_TIMER_MINS);
+    private bool isTimeUp = false;
     private User? currentUser;
     private Showtime showtime;
     private string remainingTime = "Loading...";
     private bool isProcessing = false;
     private string message = "";
+    private List<SeatLock> seatLocks;
+    private DateTime curLockStatTime;
     private MovieDto movie = new()
         {
             Title = "Unknown Movie",
@@ -38,9 +43,9 @@
     {
         try
         {
-             showtime = await ShowtimeService.getShowTimeById(ShowtimeId);
+            showtime = await ShowtimeService.getShowTimeById(ShowtimeId);
 
-            // userId = showtime.SeatLocks.LastOrDefault().UserId;
+
             userId = 1;
             currentUser = await UserService.GetUserByIdAsync(userId.Value);
 
@@ -49,6 +54,7 @@
                 Console.WriteLine("❌ Không tìm thấy user!");
                 return;
             }
+
             var fetchedMovie = await MovieService.GetMovieWithShowtimeAndCinemaAsync(showtime.MovieId);
             movie = fetchedMovie ?? new MovieDto()
                 {
@@ -58,15 +64,16 @@
                     Description = "No description available",
                     Showtimes = new List<ShowtimeDto>()
                 };
-           
-            List<SeatLock> seatLocks = await SeatLockService.GetAllByUserIdAsync(userId,ShowtimeId);
+
+            seatLocks = await SeatLockService.GetAllByUserIdAsync(userId, ShowtimeId);
             foreach (SeatLock seatLock in seatLocks)
             {
                 ScreenSeat screenSeat = await ScreenSeatService.GetScreenSeatByIdAsync(seatLock.ScreenSeatId);
                 screenSeats.Add(screenSeat);
             }
-            await CalculateRemainingTime(userId);
 
+            await CalculateRemainingTime(userId);
+            _ = CountdownRoutine();
             var tokens = Antiforgery.GetAndStoreTokens(HttpContextAccessor.HttpContext);
             antiforgeryToken = tokens.RequestToken;
         }
@@ -76,23 +83,39 @@
         }
     }
 
+    private async Task CountdownRoutine()
+    {
+ 
+
+        while (timeLeft.TotalSeconds > 0)
+        {
+            await Task.Delay(1000);
+
+            timeLeft = timeLeft.Subtract(TimeSpan.FromSeconds(1));
+            await InvokeAsync(StateHasChanged);
+
+            // If time left is zero or negative, break
+            if (timeLeft.TotalSeconds <= 0)
+            {
+                break;
+            }
+        }
+        // Otherwise, we ran out of time
+        isTimeUp = true;
+        await InvokeAsync(StateHasChanged);
+
+        // NavigationManager.NavigateTo("/", forceLoad: true);
+    }
     private async Task CalculateRemainingTime(int? userId)
     {
         try
         {
-            var latestSeatLock = await SeatLockService.GetLatestSeatLockByUserIdAsync(userId);
-
-            if (latestSeatLock == null)
+            foreach (var seatLock in seatLocks)
             {
-                remainingTime = "No seat locks found for this user.";
-                return;
+                curLockStatTime = seatLock.LockStartTime;
+                await SeatLockService.UpdateExpirytimeByUserIdAsync(seatLock, curLockStatTime.AddMinutes(15));
             }
-
-            DateTime curLockStatTime = latestSeatLock.LockStartTime;
-            Console.WriteLine($"Latest Seat Lock: {curLockStatTime}");
-
-            // await SeatLockService.UpdateStarttimeByUserIdAsync(userId, DateTime.Now);
-            await SeatLockService.UpdateExpirytimeByUserIdAsync(userId, curLockStatTime.AddMinutes(15));
+        
 
             var updatedSeatLock = await SeatLockService.GetLatestSeatLockByUserIdAsync(userId);
 
@@ -108,6 +131,11 @@
                 if (timeDiffMinutes < 30)
                 {
                     var timeRemaining = lockExpiryTime.Value - DateTime.Now;
+                    timeLeft = timeRemaining;
+                    if (timeLeft.TotalSeconds < 0)
+                    {
+                        timeLeft = TimeSpan.Zero;
+                    }
                     remainingTime = timeRemaining.TotalSeconds > 0
                         ? $"{timeRemaining.Minutes:D2}:{timeRemaining.Seconds:D2}"
                         : "Expired";
@@ -161,23 +189,17 @@
                 @showtime?.ShowTime.ToString("hh\\:mm")
             </div>
             <div class="item">
-                <h5 class="title">Remaining Time</h5>
-                @if (remainingTime == "Expired")
-                {
-                    <p class="text-danger">@remainingTime</p>
-                    <script type="text/javascript">
-                        alert('Your seat has expired.');
-                        window.location.href = '/';
-                    </script>
-                }
-                else if (remainingTime == "No seat locks found for this user.")
-                {
-                    <p class="text-warning">@remainingTime</p>
-                }
-                else
-                {
-                    <p>@remainingTime</p>
-                }
+                <div class="item">
+                    @* @if (!isTimeUp) *@
+                    @* { *@
+                        <p>Thời gian đặt chỗ còn</p>
+                        <h5 class="title">@timeLeft.ToString(@"mm\:ss")</h5>
+                    @* } *@
+                    @* else *@
+                    @* { *@
+                    @*     <h5 class="title">Hết giờ!</h5> *@
+                    @* } *@
+                </div>
             </div>
 
         </div>

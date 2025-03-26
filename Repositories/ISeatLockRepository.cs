@@ -15,7 +15,7 @@ namespace G5_MovieTicketBookingSystem.Repositories
         Task<SeatLock?> GetUserLockAsync(int showtimeId, int userId);
         Task<SeatLock?> GetLatestByUserIdAsync(int? userId);
         Task<bool> UpdateAsync(SeatLock seatLock);
-        Task UnlockAllSeatsByExpiryAsync(int showtimeId, int userId, DateTime expiryTime);
+        Task UnlockAllSeatsByExpiryAsync(int showtimeId, int userId);
 
         Task<List<SeatLock>> GetAllByUserIdAsync(int? userId,int showTimeId);
     }

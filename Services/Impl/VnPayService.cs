@@ -39,8 +39,8 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
                 pay.AddRequestData("vnp_CurrCode", _configuration["Vnpay:CurrCode"]);
                 pay.AddRequestData("vnp_IpAddr", pay.GetIpAddress(context));
                 pay.AddRequestData("vnp_Locale", _configuration["Vnpay:Locale"]);
-                pay.AddRequestData("vnp_OrderInfo", $"{model.Name} - {model.OrderDescription} - {model.Amount} VND");
-                pay.AddRequestData("vnp_OrderType", model.OrderType);
+                pay.AddRequestData("vnp_OrderInfo", $" {model.Name}");
+                pay.AddRequestData("vnp_OrderType", "Type");
                 pay.AddRequestData("vnp_ReturnUrl", returnUrl);
                 pay.AddRequestData("vnp_TxnRef", tick);
 

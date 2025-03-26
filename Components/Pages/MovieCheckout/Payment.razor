@@ -11,6 +11,7 @@
 @inject IScreenSeatService ScreenSeatService
 @inject ITransactionLogService TransactionLogService
 @inject IShowtimeService ShowtimeService
+@inject ISeatLockService SeatLockService
 @inject AppDbContext _context
 @layout MainLayout
 
@@ -113,8 +114,7 @@
                 TransactionTimestamp = DateTime.Now,
                 GatewayResponse = "Pending"
             };
-        AddTransactionLog(transactionLog);
-
+        await AddTransactionLog(transactionLog);
         // Kiểm tra nếu dữ liệu đầy đủ
         if (!string.IsNullOrEmpty(paymentModel.OrderType) && paymentModel.Amount > 0)
         {
@@ -132,6 +132,7 @@
                 }
             }
         }
+       
         else
         {
             Console.WriteLine("❌ Lỗi: Dữ liệu thanh toán không hợp lệ.");

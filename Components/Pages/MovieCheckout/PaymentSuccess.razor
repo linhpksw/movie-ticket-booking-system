@@ -8,24 +8,13 @@
 @inject ITicketService TicketService
 @inject Microsoft.AspNetCore.Components.NavigationManager UriHelper
 @inject IShowtimeService ShowtimeService
+@inject ISeatLockService SeatLockService
 @inject NavigationManager Navigation
-@* @if (paymentInfo != null) *@
-@* { *@
-@*     <div class="padding-bottom padding-top"> *@
-@*         <h3>Chi tiết thanh toán</h3> *@
 
-@*         <p><strong>Loại đơn hàng:</strong> @paymentInfo.OrderType</p> *@
-@*         <p><strong>Số tiền:</strong> @paymentInfo.Amount.ToString("N0") VND</p> *@
-@*         <p><strong>Mô tả:</strong> @paymentInfo.OrderDescription</p> *@
-@*         <p><strong>Khách hàng:</strong> @paymentInfo.Name</p> *@
+<h2 style="text-align: center; color: green; font-size: 36px; font-weight: bold; margin-top: 50px;">
+    Bạn đã đặt vé thành công!
+</h2>
 
-@*         <a href="/" class="btn btn-primary">Quay lại trang chủ</a> *@
-@*     </div> *@
-@* } *@
-@* else *@
-@* { *@
-@*     <p>Không tìm thấy thông tin thanh toán.</p> *@
-@* } *@
 
 @code {
     private PaymentInformationModel? paymentInfo;
@@ -34,6 +23,7 @@
     private TransactionLog? transactionLog;
     private Ticket? ticket;
     private String paymentStatus;
+
     protected override async Task OnInitializedAsync()
     {
         // if (!int.TryParse(paymentInfo.Name.ToString(), out ShowtimeId))
@@ -41,15 +31,22 @@
         //     Console.WriteLine("Lỗi: ShowtimeId không hợp lệ.");
         //     ShowtimeId = 0; 
         // }
-
-        var showtime = await ShowtimeService.getShowTimeById(ShowtimeId);
         // userId = showtime.SeatLocks.LastOrDefault().UserId;
         userId = 1;
+
         var queryCollection = HttpContextAccessor.HttpContext?.Request.Query;
         if (queryCollection != null)
         {
             try
             {
+                string orderType = queryCollection["vnp_OrderInfo"];
+                if (int.TryParse(orderType, out int showtimeId))
+                {
+                    ShowtimeId = showtimeId;
+                }else{
+                    ShowtimeId = 0;
+                }
+                var showtime = await ShowtimeService.getShowTimeById(ShowtimeId);
                 string orderInfo = queryCollection["vnp_OrderInfo"];
                 string name = "Khách hàng";
                 string statusOrder = queryCollection["vnp_TransactionStatus"];
@@ -65,7 +62,7 @@
                 }
                 // if (statusOrder == "00")
                 // {
-                    paymentStatus = "Success";
+                paymentStatus = "Success";
                 // }
                 // else
                 // {
@@ -80,18 +77,18 @@
                         PaymentStatus = paymentStatus,
                         Amount = Convert.ToDecimal(queryCollection["vnp_Amount"]) / 100,
                         TransactionTimestamp = DateTime.Now,
-                        GatewayResponse = queryCollection["vnp_TransactionStatus"]
+                        GatewayResponse = "VNPAY"
                     };
-                AddTransactionLog(transactionLog);
+                await AddTransactionLog(transactionLog);
                 // UpdateSoldOut(ShowtimeId);
                 //add ticket
                 // if (statusOrder == "00")
                 // {
-                    List<OrderItem> orderItemList = await OrderItemService.GetOrderItemsByOrderIdAsync(curOrder.OrderId);
-                    foreach (var orderItem in orderItemList)
-                    {
-                        string uniqueCode = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper();
-                        Ticket ticket = new Ticket
+                List<OrderItem> orderItemList = await OrderItemService.GetOrderItemsByOrderIdAsync(curOrder.OrderId);
+                foreach (var orderItem in orderItemList)
+                {
+                    string uniqueCode = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper();
+                    Ticket ticket = new Ticket
                             {
                                 OrderItemId = orderItem.OrderItemId,
                                 OrderItem = orderItem,
@@ -101,8 +98,8 @@
                                 ScannedTimestamp = null
                             };
 
-                        await AddTicket(ticket);
-                    }
+                    await AddTicket(ticket);
+                }
                 // }
                 paymentInfo = new PaymentInformationModel
                     {
@@ -111,7 +108,14 @@
                         OrderDescription = orderInfo,
                         Name = name
                     };
-                Navigation.NavigateTo("/", true);
+                if (ShowtimeId != 0 ){
+                    await SeatLockService.UnlockAllSeatsByExpiryAsync(ShowtimeId, userId.Value);
+                }
+                if (ShowtimeId == 0)
+                {
+                    Console.WriteLine(" Looix");
+                }
+                // Navigation.NavigateTo("/");
             }
             catch (Exception ex)
             {
