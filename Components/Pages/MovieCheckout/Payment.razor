@@ -124,7 +124,7 @@
         var screenSeat = await ScreenSeatService.GetScreenSeatByIdAsync(newOrderItemDto.ScreenSeatId);
 
         // Lấy Showtime từ Order hoặc ScreenSeat (cần đảm bảo có ShowTime hợp lệ)
-        var showtime = await OrderService.GetShowtimeByOrderIdAsync(order.OrderId); // Cần phải tạo phương thức GetShowtimeByOrderIdAsync
+        var showtime = await OrderService.GetShowTimeByScreenId(screenSeat.Screen.ScreenId);
 
         if (showtime != null)
         {

@@ -11,5 +11,7 @@ namespace G5_MovieTicketBookingSystem.Services
         Task<Order> GetLatestOrderByUserIdAsync(int? userId);
         Task<Showtime> GetShowtimeByOrderIdAsync(int orderId);
 
+        Task<Showtime> GetShowTimeByScreenId(int ScreenId);
+
     }
 }

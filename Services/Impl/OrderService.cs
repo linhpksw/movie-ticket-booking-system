@@ -90,7 +90,15 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
                 .FirstOrDefaultAsync(s => s.ShowtimeId == showtimeId);
             return showtime; // Trả về Showtime liên quan đến OrderId
         }
-
+        public async Task<Showtime> GetShowTimeByScreenId(int ScreenId) {
+            return await _context.Showtimes
+                .Include(s => s.Movie)
+                .Include(s => s.Screen)
+                .Where(s => s.IsSoldOut == false)
+                .FirstOrDefaultAsync(s => s.ScreenId == ScreenId)
+                
+                ;
+        }
 
     }
 }
