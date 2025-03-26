@@ -68,5 +68,27 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
                 .FirstOrDefaultAsync(s => s.Screen.ScreenSeats
                     .Any(ss => ss.ScreenSeatId == screenSeatId));
         }
+
+        public Task<Showtime> getShowTimeById(int id)
+        {
+            return _dbContext.Showtimes.FirstOrDefaultAsync(s => s.ShowtimeId == id);
+        }
+
+        public async Task UpdateSoldOut(int id)
+        {
+            var showtime = await _dbContext.Showtimes.FirstOrDefaultAsync(s => s.ShowtimeId == id);
+
+            if (showtime != null)
+            {
+                showtime.IsSoldOut = true;
+
+                await _dbContext.SaveChangesAsync();
+            }
+            else
+            {
+                Console.WriteLine($"Không tìm thấy Showtime với ShowtimeId = {id}");
+            }
+        }
+
     }
 }

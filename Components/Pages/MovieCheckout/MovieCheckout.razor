@@ -1,4 +1,4 @@
-﻿@page "/checkout"
+﻿@page "/movie-checkout/{showtimeId:int}"
 @inject IMovieService MovieService
 @inject ISeatLockService SeatLockService
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
@@ -8,10 +8,13 @@
 @inject IScreenSeatService ScreenSeatService
 @inject IUserServices UserService
 @inject IScreenSeatService ScreenSeatService
+@inject IShowtimeService ShowtimeService
 @inject NavigationManager NavigationManager
 
 
 @code {
+    [Parameter]
+    public int ShowtimeId { get; set; }
     private int? userId;
     private User? currentUser;
     private string remainingTime = "Loading...";
@@ -35,6 +38,9 @@
     {
         try
         {
+            var showtime = await ShowtimeService.getShowTimeById(ShowtimeId);
+
+            // userId = showtime.SeatLocks.LastOrDefault().UserId;
             userId = 1;
             currentUser = await UserService.GetUserByIdAsync(userId.Value);
 
@@ -43,7 +49,7 @@
                 Console.WriteLine("❌ Không tìm thấy user!");
                 return;
             }
-            var fetchedMovie = await MovieService.GetMovieWithShowtimeAndCinemaAsync(1);
+            var fetchedMovie = await MovieService.GetMovieWithShowtimeAndCinemaAsync(showtime.MovieId);
             movie = fetchedMovie ?? new MovieDto()
                 {
                     Title = "Unknown Movie",
@@ -52,12 +58,10 @@
                     Description = "No description available",
                     Showtimes = new List<ShowtimeDto>()
                 };
-            List<SeatLock> seatLocks = await SeatLockService.GetAllByUserIdAsync(userId);
-            foreach (SeatLock seatLock in seatLocks)
-            {
+           
+            var seatLock = await SeatLockService.GetAllByUserIdAndShowtimeAsync(userId, ShowtimeId);
                 ScreenSeat screenSeat = await ScreenSeatService.GetScreenSeatByIdAsync(seatLock.ScreenSeatId);
                 screenSeats.Add(screenSeat);
-            }
             await CalculateRemainingTime(userId);
 
             var tokens = Antiforgery.GetAndStoreTokens(HttpContextAccessor.HttpContext);
@@ -85,7 +89,7 @@
             Console.WriteLine($"Latest Seat Lock: {curLockStatTime}");
 
             // await SeatLockService.UpdateStarttimeByUserIdAsync(userId, DateTime.Now);
-            // await SeatLockService.UpdateExpirytimeByUserIdAsync(userId, curLockStatTime.AddMinutes(15));
+            await SeatLockService.UpdateExpirytimeByUserIdAsync(userId, curLockStatTime.AddMinutes(15));
 
             var updatedSeatLock = await SeatLockService.GetLatestSeatLockByUserIdAsync(userId);
 
@@ -349,44 +353,48 @@
 
 <script>
     function redirectToPayment() {
-        const userId = @userId;
+        const userId = @userId; // Truyền userId từ backend (có thể dùng Razor hoặc thay bằng giá trị động khác)
         const fullName = document.getElementById('FullName').value;
         const movieTitle = "@(movie?.Title ?? "Unknown Movie")";
         const cinemaName = "@(movie?.Showtimes.FirstOrDefault()?.Screen?.Cinema?.CinemaName ?? "Unknown Cinema")";
         const amount = @screenSeats.Sum(seat => seat.SeatType?.BasePrice ?? 0);
-          const screenSeatIds = JSON.parse('@JsonSerializer.Serialize(screenSeats.Select(s => s.ScreenSeatId))');
+        const screenSeatIds = JSON.parse('@JsonSerializer.Serialize(screenSeats.Select(s => s.ScreenSeatId))');
         const seatLabels = JSON.parse('@JsonSerializer.Serialize(screenSeats.Select(s => s.SeatLabel))');
-
-         const screenSeatId = screenSeatIds.join(", ");
+        const showtimeId = @ShowtimeId;  // Truyền giá trị showtimeId từ backend (bằng Razor hoặc giá trị động)
+        const screenSeatId = screenSeatIds.join(", ");
         const seatLabel = seatLabels.join(", ");
-        const paymentInfo = {
-        orderType: "movie_ticket",
-        amount: amount,
-        orderDescription: `Thanh toán vé xem phim ${movieTitle} tại ${cinemaName} - Ghế: ${seatLabels.join(", ")}`,
-        name: fullName
-    };
 
-            if (!paymentInfo || !paymentInfo.orderType || !paymentInfo.amount) {
-                console.error("Thông tin thanh toán không hợp lệ", paymentInfo);
-                return;
-            }
-                const orderItem = {
-                orderItemId: 123,
-                orderId: 456,
-                movieTitle: movieTitle,
-                seatLabel: seatLabel,
-                cinemaName: cinemaName,
-                fullName: fullName,
-                amount: amount,
-                screenSeatId: screenSeatId,
-                userId: userId
-            };
-             const url = new URL("/payment", window.location.origin);
-              url.searchParams.append("orderType", paymentInfo.orderType);
-            url.searchParams.append("amount", paymentInfo.amount);
-            url.searchParams.append("orderDescription", paymentInfo.orderDescription);
-            url.searchParams.append("name", paymentInfo.name);
-          url.searchParams.append("orderItemId", orderItem.orderItemId);
+        const paymentInfo = {
+            orderType: "movie_ticket",
+            amount: amount,
+            orderDescription: `Thanh toán vé xem phim ${movieTitle} tại ${cinemaName} - Ghế: ${seatLabels.join(", ")}`,
+            name: fullName
+        };
+
+        if (!paymentInfo || !paymentInfo.orderType || !paymentInfo.amount) {
+            console.error("Thông tin thanh toán không hợp lệ", paymentInfo);
+            return;
+        }
+
+        const orderItem = {
+            orderItemId: 123,
+            orderId: 456,
+            movieTitle: movieTitle,
+            seatLabel: seatLabel,
+            cinemaName: cinemaName,
+            fullName: fullName,
+            amount: amount,
+            screenSeatId: screenSeatId,
+            userId: userId,
+            showtimeId: showtimeId  // Thêm showtimeId vào đối tượng đơn hàng
+        };
+
+        const url = new URL("/payment", window.location.origin);
+        url.searchParams.append("orderType", paymentInfo.orderType);
+        url.searchParams.append("amount", paymentInfo.amount);
+        url.searchParams.append("orderDescription", paymentInfo.orderDescription);
+        url.searchParams.append("name", paymentInfo.name);
+        url.searchParams.append("orderItemId", orderItem.orderItemId);
         url.searchParams.append("orderId", orderItem.orderId);
         url.searchParams.append("movieTitle", orderItem.movieTitle);
         url.searchParams.append("seatLabel", orderItem.seatLabel);
@@ -394,7 +402,8 @@
         url.searchParams.append("fullName", orderItem.fullName);
         url.searchParams.append("screenSeatId", orderItem.screenSeatId);
         url.searchParams.append("userId", orderItem.userId);
-            window.location.href = url.toString();
-        }
+        url.searchParams.append("showtimeId", orderItem.showtimeId); // Thêm showtimeId vào URL
 
+        window.location.href = url.toString();
+    }
 </script>

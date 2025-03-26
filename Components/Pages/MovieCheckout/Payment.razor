@@ -9,12 +9,14 @@
 @inject IOrderItemService OrderItemService
 @inject IScreenSeatService ScreenSeatService
 @inject ITransactionLogService TransactionLogService
+@inject IShowtimeService ShowtimeService
 @layout MainLayout
 
 
 @code {
     private PaymentInformationModel paymentModel = new();
     private int? userId;
+    private int ShowtimeId;
     private User? currentUser;
     private Order NewOrder { get; set; } = new()
         {
@@ -47,9 +49,11 @@
         paymentModel.OrderType = queryParams["orderType"];
         paymentModel.Amount = double.TryParse(queryParams["amount"], out double amount) ? amount : 0;
         paymentModel.OrderDescription = queryParams["orderDescription"];
-        paymentModel.Name = queryParams["name"];
-
+        paymentModel.Name = queryParams["showtimeId"];
+        ShowtimeId = Int32.Parse(queryParams["showtimeId"]);
         // Parse các giá trị
+        var showtime = await ShowtimeService.getShowTimeById(ShowtimeId);
+
         userId = Int32.Parse(queryParams["userId"]);
         int orderItemId = Int32.Parse(queryParams["orderItemId"]);
         string movieTitle = queryParams["movieTitle"];
@@ -66,7 +70,7 @@
 
         // await AddOrder();
         await AddOrder();
-
+        UpdateSoldOut(ShowtimeId);
         Order OrderLasted = await OrderService.GetLatestOrderByUserIdAsync(userId.Value);
         NewOrderItemDto.OrderId = OrderLasted.OrderId;
         NewOrderItemDto.ScreenSeatId = screenSeatId;
@@ -106,7 +110,11 @@
             Console.WriteLine("❌ Lỗi: Dữ liệu thanh toán không hợp lệ.");
         }
     }
+    private async Task UpdateSoldOut(int ShowtimeId)
+    {
+        ShowtimeService.UpdateShowTime(ShowtimeId);
 
+    }
 
     private async Task AddOrder()
     {

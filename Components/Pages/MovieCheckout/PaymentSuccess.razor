@@ -6,6 +6,8 @@
 @inject ITransactionLogService TransactionLogService
 @inject IOrderItemService OrderItemService
 @inject ITicketService TicketService
+@inject Microsoft.AspNetCore.Components.NavigationManager UriHelper
+@inject IShowtimeService ShowtimeService
 @inject NavigationManager Navigation
 @* @if (paymentInfo != null) *@
 @* { *@
@@ -27,12 +29,22 @@
 
 @code {
     private PaymentInformationModel? paymentInfo;
+    private int ShowtimeId;
     private int? userId;
     private TransactionLog? transactionLog;
     private Ticket? ticket;
     private String paymentStatus;
     protected override async Task OnInitializedAsync()
     {
+        // if (!int.TryParse(paymentInfo.Name.ToString(), out ShowtimeId))
+        // {
+        //     Console.WriteLine("Lỗi: ShowtimeId không hợp lệ.");
+        //     ShowtimeId = 0; 
+        // }
+
+        var showtime = await ShowtimeService.getShowTimeById(ShowtimeId);
+        // userId = showtime.SeatLocks.LastOrDefault().UserId;
+        userId = 1;
         var queryCollection = HttpContextAccessor.HttpContext?.Request.Query;
         if (queryCollection != null)
         {
@@ -41,7 +53,7 @@
                 string orderInfo = queryCollection["vnp_OrderInfo"];
                 string name = "Khách hàng";
                 string statusOrder = queryCollection["vnp_TransactionStatus"];
-                userId = 1;
+                // userId = 1;
 
                 Order curOrder = await OrderService.GetLatestOrderByUserIdAsync(userId.Value);
                 // Gọi phương thức UpdateOrderAfterPayment để cập nhật trạng thái đơn hàng sau khi thanh toán.
@@ -71,7 +83,7 @@
                         GatewayResponse = queryCollection["vnp_TransactionStatus"]
                     };
                 AddTransactionLog(transactionLog);
-
+                // UpdateSoldOut(ShowtimeId);
                 //add ticket
                 // if (statusOrder == "00")
                 // {
@@ -122,6 +134,12 @@
         // }
 
     }
+
+    // private async Task UpdateSoldOut(int ShowtimeId)
+    // {
+    //      ShowtimeService.UpdateShowTime(ShowtimeId);
+
+    // }
 
     private async Task AddTransactionLog(TransactionLog transactionLog)
     {

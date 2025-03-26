@@ -48,7 +48,65 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
 
         public async Task<MovieDto?> GetMovieWithShowtimeAndCinemaAsync(int id)
         {
-            return null;
+            try
+            {
+                var movie = await _movieRepository.GetByIdAsync(id);
+                if (movie == null)
+                {
+                    _logger.LogWarning($"⚠️ Movie với ID {id} không tồn tại trong database!");
+                    return null;
+                }
+
+                var showtimes = movie.Showtimes.Select(st => new ShowtimeDto
+                {
+                    ShowtimeId = st.ShowtimeId,
+                    MovieId = st.MovieId,
+                    ShowDate = st.ShowDate,
+                    ShowTime = st.ShowTime,
+                    ExperienceType = st.ExperienceType,
+
+                    Screen = new ScreenDto
+                    {
+                        ScreenId = st.Screen.ScreenId,
+                        ScreenName = st.Screen.ScreenName ?? "Unknown Screen",
+                        Cinema = new CinemaDto
+                        {
+                            CinemaId = st.Screen.Cinema.CinemaId,
+                            CinemaName = st.Screen.Cinema.CinemaName ?? "Unknown Cinema",
+                            Address = st.Screen.Cinema.Address ?? "No Address",
+                            City = st.Screen.Cinema.City ?? "No City"
+                        }
+                    },
+
+                    ScreenSeats = st.Screen.ScreenSeats.Select(ss => new ScreenSeatDto
+                    {
+                        ScreenSeatId = ss.ScreenSeatId,
+                        SeatLabel = ss.SeatLabel ?? "Unknown Seat",
+                        SeatType = new SeatTypeDto
+                        {
+                            SeatTypeId = ss.SeatType.SeatTypeId,
+                            SeatTypeName = ss.SeatType.SeatTypeName ?? "Unknown Type",
+                            BasePrice = ss.SeatType.BasePrice
+                        }
+                    }).ToList()
+                }).ToList();
+
+                return new MovieDto
+                {
+                    MovieId = movie.MovieId,
+                    Title = movie.Title ?? "Unknown Movie",
+                    Genre = movie.Genre ?? "Unknown Genre",
+                    Language = movie.Language ?? "Unknown Language",
+                    Rating = movie.Rating,
+                    Description = movie.Description ?? "No description available",
+                    Showtimes = showtimes
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"❌ Lỗi trong GetMovieWithShowtimeAndCinemaAsync: {ex.Message}");
+                return null;
+            }
         }
     }
 }

@@ -27,7 +27,7 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
                 .FirstOrDefaultAsync(m => m.MovieId == id);
             return null;
         }
-
+      
         // 1) Đang khởi chiếu (ReleaseDate <= Today)
         public async Task<List<Movie?>> GetNowShowingAsync()
         {

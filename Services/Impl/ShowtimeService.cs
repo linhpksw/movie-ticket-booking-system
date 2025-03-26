@@ -46,5 +46,16 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
         {
             return await _showtimeRepository.GetUpcomingShowtimes();
         }
+
+        public async Task<Showtime> getShowTimeById(int id)
+        {
+            return await _showtimeRepository.getShowTimeById(id);
+        }
+
+        public async void UpdateShowTime(int id)
+        {
+             await _showtimeRepository.UpdateSoldOut(id);
+        }
+
     }
 }

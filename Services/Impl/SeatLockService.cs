@@ -16,14 +16,9 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
         {
             _seatLockRepository = seatLockRepository;
         }
-        public async Task<List<SeatLock>> GetAllByUserIdAsync(int? userId)
+        public async Task<SeatLock> GetAllByUserIdAndShowtimeAsync(int? userId, int? showTimeId)
         {
-            if (!userId.HasValue)
-            {
-                return new List<SeatLock>();
-            }
-
-            return await _seatLockRepository.GetAllByUserIdAsync(userId.Value);
+            return await _seatLockRepository.GetLastByUserIdAsync(userId.Value,showTimeId.Value);
         }
         public async Task<SeatLock?> GetLatestSeatLockByUserIdAsync(int? userId)
         {

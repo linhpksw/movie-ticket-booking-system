@@ -1,4 +1,4 @@
-using G5_MovieTicketBookingSystem.Commons;
+﻿using G5_MovieTicketBookingSystem.Commons;
 using G5_MovieTicketBookingSystem.Data;
 using G5_MovieTicketBookingSystem.Models;
 using Microsoft.EntityFrameworkCore;
@@ -43,13 +43,17 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
                 await _dbContext.Database.ExecuteSqlRawAsync(insertQuery);
             }
         }
-        public async Task<List<SeatLock>> GetAllByUserIdAsync(int? userId)
+        public async Task<SeatLock> GetLastByUserIdAsync(int? userId, int? showTimeId)
         {
             return await _dbContext.SeatLocks
-                .Where(sl => sl.UserId == userId)
+                .Where(sl => sl.UserId == userId && sl.ShowtimeId == showTimeId)
                 .AsNoTracking()
-                .ToListAsync();
+                .OrderBy(sl => sl.SeatLockId)  
+                .LastOrDefaultAsync(); 
         }
+
+
+
         public async Task<SeatLock?> GetLatestByUserIdAsync(int? userId)
         {
             return await _dbContext.SeatLocks
