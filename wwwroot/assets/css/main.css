@@ -73,7 +73,7 @@ html {
 }
 
 html *::first-letter {
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
 }
 
 /*
@@ -1033,7 +1033,7 @@ input[type="submit"] {
 }
 
 .section-header-1 .title {
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
 }
 
 @media (max-width: 575px) {
@@ -1075,7 +1075,7 @@ input[type="submit"] {
 .section-header-2 .tab-menu li {
   font-size: 16px;
   font-weight: bold;
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   line-height: 30px;
   border: 1px solid #11326f;
   padding: 9px 27px;
@@ -1099,7 +1099,7 @@ input[type="submit"] {
 }
 
 .section-header-2 .left .title {
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   margin-bottom: 19px;
 }
 
@@ -1129,7 +1129,7 @@ input[type="submit"] {
 
 .section-header-3 .cate {
   color: #31d7a9;
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   display: block;
   font-size: 18px;
   margin-bottom: 10px;
@@ -1137,7 +1137,7 @@ input[type="submit"] {
 }
 
 .section-header-3 .title {
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   font-weight: 700;
   margin-bottom: 16px;
 }
@@ -1336,7 +1336,7 @@ input[type="submit"] {
     color: #e9eeff;
     font-size: 16px;
     font-weight: 700;
-    text-transform: uppercase;
+    /*  text-transform: uppercase; */
     padding: 5px;
   }
   .header-wrapper .menu li .submenu {
@@ -1359,7 +1359,7 @@ input[type="submit"] {
     padding: 0 20px;
   }
   .header-wrapper .menu li .submenu li a {
-    text-transform: capitalize;
+    /*  text-transform: capitalize; */
     font-weight: 600;
     display: -webkit-box;
     display: -ms-flexbox;
@@ -1505,7 +1505,7 @@ input[type="submit"] {
     padding: 0;
   }
   .header-wrapper .menu li .submenu li a {
-    text-transform: capitalize;
+    // /*  text-transform: capitalize; */
   }
   .header-wrapper .menu li a {
     display: -webkit-box;
@@ -1518,7 +1518,7 @@ input[type="submit"] {
         -ms-flex-align: center;
             align-items: center;
     color: #e9eeff;
-    text-transform: uppercase;
+    /*  text-transform: uppercase; */
     padding-right: 20px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     padding-top: 7px;
@@ -1631,7 +1631,7 @@ input[type="submit"] {
 .banner-content .title {
   font-size: 80px;
   line-height: 1.1;
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   margin-bottom: 18px;
   font-weight: 800;
 }
@@ -1831,7 +1831,7 @@ input[type="submit"] {
 .details-banner-content .tags a {
   font-size: 14px;
   color: #9aace5;
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
 }
 
 .details-banner-content .tags span::after,
@@ -1849,7 +1849,7 @@ input[type="submit"] {
   border: 1px solid rgba(163, 177, 198, 0.2);
   font-size: 13px;
   color: #9aace5;
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   padding: 3px 17px;
   border-radius: 18px;
   -webkit-transition: all ease 0.3s;
@@ -2047,7 +2047,7 @@ input[type="submit"] {
 }
 
 .details-banner.hero-area .details-banner-wrapper .details-banner-content .title {
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   margin-bottom: 6px;
   font-size: 30px;
 }
@@ -2067,12 +2067,12 @@ input[type="submit"] {
 }
 
 .details-banner.hero-area .details-banner-wrapper .details-banner-content.style-two .title {
-  text-transform: capitalize;
+  /*  text-transform: capitalize; */
 }
 
 .details-banner.hero-area .details-banner-wrapper .details-banner-content.style-two .tags a, .details-banner.hero-area .details-banner-wrapper .details-banner-content.style-two .tags span {
   font-size: 20px;
-  text-transform: capitalize;
+  /*  text-transform: capitalize; */
   color: #d0dbff;
 }
 
@@ -2249,7 +2249,7 @@ input[type="submit"] {
 }
 
 .speaker-banner-content .title {
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
 }
 
 @media (min-width: 768px) {
@@ -2275,7 +2275,7 @@ input[type="submit"] {
 .speaker-banner-content .breadcrumb li, .speaker-banner-content .breadcrumb li a {
   color: #d0dbff;
   font-size: 20px;
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   font-weight: 300;
 }
 
@@ -2311,7 +2311,7 @@ input[type="submit"] {
 }
 
 .main-page-header .breadcrumb li, .main-page-header .breadcrumb li a {
-  text-transform: capitalize;
+  /*  text-transform: capitalize; */
 }
 
 @media (max-width: 991px) {
@@ -2348,7 +2348,7 @@ input[type="submit"] {
 
 .widget-1 .title {
   font-weight: 600;
-  text-transform: capitalize;
+  /*  text-transform: capitalize; */
   margin-bottom: 25px;
 }
 
@@ -2489,7 +2489,7 @@ input[type="submit"] {
 
 .widget-1 .widget-header .m-title {
   font-weight: 600;
-  text-transform: capitalize;
+  /*  text-transform: capitalize; */
 }
 
 .widget-1.widget-check .widget-1-body {
@@ -2500,7 +2500,7 @@ input[type="submit"] {
 .widget-1.widget-check .subtitle {
   font-size: 18px;
   font-weight: 600;
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   border-bottom: 1px solid #1f2b72;
   padding-bottom: 15px;
   margin-bottom: 23px;
@@ -2519,7 +2519,7 @@ input[type="submit"] {
 
 .widget-1.widget-check .add-check-area a {
   color: #dbe2fb;
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   font-size: 12px;
   display: -webkit-inline-box;
   display: -ms-inline-flexbox;
@@ -2592,7 +2592,7 @@ input[type="submit"] {
   padding-left: 10px;
   position: relative;
   font-size: 12px;
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
 }
 
 .widget-1.widget-check .form-group label::before {
@@ -2625,7 +2625,7 @@ input[type="submit"] {
   font-size: 12px;
   border: 1px solid rgba(163, 177, 198, 0.2);
   border-radius: 15px;
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   color: #becdff;
 }
 
@@ -2670,7 +2670,7 @@ input[type="submit"] {
 
 .booking-summery .title {
   font-weight: 600;
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
 }
 
 .booking-summery .title {
@@ -2694,7 +2694,7 @@ input[type="submit"] {
 }
 
 .booking-summery ul li .subtitle {
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   -webkit-box-pack: justify;
       -ms-flex-pack: justify;
           justify-content: space-between;
@@ -2710,7 +2710,7 @@ input[type="submit"] {
       -ms-flex-pack: justify;
           justify-content: space-between;
   font-size: 14px;
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   color: #9aace5;
 }
 
@@ -2742,7 +2742,7 @@ input[type="submit"] {
 }
 
 .proceed-area .subtitle {
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   -webkit-box-pack: justify;
       -ms-flex-pack: justify;
           justify-content: space-between;
@@ -2774,7 +2774,7 @@ input[type="submit"] {
 }
 
 .note .title {
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   margin-bottom: 26px;
 }
 
@@ -2793,7 +2793,7 @@ input[type="submit"] {
 .widget .title {
   margin-bottom: 25px;
   font-size: 24px;
-  text-transform: capitalize;
+  /*  text-transform: capitalize; */
 }
 
 .widget-tags ul {
@@ -2806,7 +2806,7 @@ input[type="submit"] {
 
 .widget-tags ul li a {
   font-size: 14px;
-  text-transform: capitalize;
+  /*  text-transform: capitalize; */
   color: #ffffff;
   padding: 6px 39px;
   border-radius: 20px;
@@ -3000,7 +3000,7 @@ input[type="submit"] {
 .event-grid .movie-content .title,
 .movie-grid .movie-content .title {
   padding: 23px 0;
-  text-transform: capitalize;
+  /*  text-transform: capitalize; */
   border-bottom: 1px dashed #11326f;
 }
 
@@ -3300,7 +3300,7 @@ input[type="submit"] {
 }
 
 .newslater-wrapper .title, .newslater-wrapper .cate {
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
 }
 
 .newslater-wrapper .cate {
@@ -3405,7 +3405,7 @@ input[type="submit"] {
 }
 
 .search-ticket-header {
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
 }
 
 .search-ticket-header .category {
@@ -3471,7 +3471,7 @@ input[type="submit"] {
 .ticket-tab-menu li span {
   font-weight: 700;
   color: #ffffff;
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   padding-left: 10px;
 }
 
@@ -3640,7 +3640,7 @@ input[type="submit"] {
 }
 
 .ticket-search-form.two {
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   font-weight: 600;
 }
 
@@ -3827,7 +3827,7 @@ input[type="submit"] {
 
 /*Movie-Details Section Starts Here*/
 .movie-details .title {
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   margin-bottom: 24px;
 }
 
@@ -3871,7 +3871,7 @@ input[type="submit"] {
 .movie-details .summery-review .tab-menu li {
   font-weight: 600;
   color: #ffffff;
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   margin-right: 30px;
   position: relative;
 }
@@ -3925,7 +3925,7 @@ input[type="submit"] {
 }
 
 .movie-details .item .sub-title {
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   margin-bottom: 28px;
 }
 
@@ -4007,7 +4007,7 @@ input[type="submit"] {
 }
 
 .cast-item .cast-content {
-  text-transform: capitalize;
+  /*  text-transform: capitalize; */
 }
 
 .cast-item .cast-content .cast-title {
@@ -4072,7 +4072,7 @@ input[type="submit"] {
   color: #bdcaf3;
   font-size: 13px;
   display: block;
-  text-transform: capitalize;
+  /*  text-transform: capitalize; */
 }
 
 .movie-review-item .author .movie-review-info span.reply-date {
@@ -4086,7 +4086,7 @@ input[type="submit"] {
 }
 
 .movie-review-item .author .movie-review-info .subtitle {
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   margin-bottom: 6px;
 }
 
@@ -4248,7 +4248,7 @@ input[type="submit"] {
   margin-right: auto;
   margin-left: 20px;
   color: #dbe2fb;
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
 }
 
 .seat-plan-wrapper li .movie-name .location-icon {
@@ -4394,7 +4394,7 @@ input[type="submit"] {
 
 .window-warning .warning-item .title {
   color: #31d7a9;
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   font-weight: 600;
   margin-bottom: 32px;
 }
@@ -4447,7 +4447,7 @@ input[type="submit"] {
   text-align: center;
   max-width: 350px;
   font-weight: 600;
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   padding: 10px;
 }
 
@@ -4499,7 +4499,7 @@ input[type="submit"] {
   text-align: center;
   max-width: 350px;
   font-weight: 600;
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   padding: 10px;
   color: #31d7a9;
 }
@@ -4621,7 +4621,7 @@ input[type="submit"] {
   left: 50%;
   -webkit-transform: translate(-50%, -50%);
   transform: translate(-50%, -50%);
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   font-size: 14px;
 }
 
@@ -4685,14 +4685,14 @@ input[type="submit"] {
 
 .proceed-to-book .book-item span {
   color: #ffffff;
-  text-transform: capitalize;
+  /*  text-transform: capitalize; */
   display: block;
   margin-bottom: 14px;
 }
 
 .proceed-to-book .book-item .title {
   color: #31d7a9;
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
 }
 
 .proceed-to-book .book-item .custom-button {
@@ -4815,7 +4815,7 @@ input[type="submit"] {
   border-radius: 20px;
   margin: 5px;
   cursor: pointer;
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
 }
 
 .grid--area .filter li.hover {
@@ -4895,7 +4895,7 @@ input[type="submit"] {
   position: absolute;
   right: 20px;
   top: 20px;
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
       -ms-flex-direction: column;
@@ -5112,7 +5112,7 @@ input[type="submit"] {
 
 .checkout-widget .payment-option li a span {
   font-size: 12px;
-  text-transform: capitalize;
+  /*  text-transform: capitalize; */
   display: block;
   color: #ffffff;
   line-height: 1.2;
@@ -5351,7 +5351,7 @@ input[type="submit"] {
 .sponsor-tab .tab-menu li {
   margin: 0 10px 20px;
   font-weight: 600;
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   color: #bfceff;
   border: 1px solid #11326f;
   border-radius: 25px;
@@ -5531,12 +5531,12 @@ input[type="submit"] {
 
 .speaker-item .speaker-content .title {
   margin-bottom: 12px;
-  text-transform: capitalize;
+  /*  text-transform: capitalize; */
 }
 
 .speaker-item .speaker-content span {
   color: #31d7a9;
-  text-transform: capitalize;
+  /*  text-transform: capitalize; */
 }
 
 .speaker-item:hover .speaker-thumb img {
@@ -5880,7 +5880,7 @@ input[type="submit"] {
 .countdown li {
   padding: 0 20px;
   text-align: center;
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   margin-bottom: 25px;
 }
 
@@ -5923,7 +5923,7 @@ input[type="submit"] {
 }
 
 .event-search-top .left .title {
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   line-height: 38px;
   font-size: 28px;
   margin-bottom: -8px;
@@ -6198,7 +6198,7 @@ input[type="submit"] {
       -ms-flex-align: center;
           align-items: center;
   font-size: 14px;
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   padding-bottom: 10px;
   -webkit-clip-path: polygon(50% 0%, 100% 0, 100% 100%, 50% 80%, 0 100%, 0 0);
           clip-path: polygon(50% 0%, 100% 0, 100% 100%, 50% 80%, 0 100%, 0 0);
@@ -6394,7 +6394,7 @@ input[type="submit"] {
   -webkit-box-align: center;
       -ms-flex-align: center;
           align-items: center;
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   padding-bottom: 10px;
   font-weight: 600;
   -webkit-clip-path: polygon(50% 0%, 100% 0, 100% 100%, 50% 80%, 0 100%, 0 0);
@@ -6443,7 +6443,7 @@ input[type="submit"] {
 }
 
 .speaker-wrapper .speaker-content .author .title {
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   margin-bottom: 12px;
 }
 
@@ -6454,7 +6454,7 @@ input[type="submit"] {
 
 .speaker-wrapper .speaker-content .content .subtitle {
   font-size: 28px;
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   margin-top: -9px;
   margin-bottom: 28px;
 }
@@ -6757,7 +6757,7 @@ input[type="submit"] {
   left: 0;
   top: 30px;
   font-size: 20px;
-  text-transform: capitalize;
+  /*  text-transform: capitalize; */
   padding: 11px 40px;
   max-width: 100%;
   font-weight: 700;
@@ -7042,7 +7042,7 @@ input[type="submit"] {
 }
 
 .client-item .client-content .title {
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   font-weight: 600;
 }
 
@@ -7122,7 +7122,7 @@ input[type="submit"] {
 .tour-content .list-tour li .content .title {
   margin: 0;
   margin-bottom: 17px;
-  text-transform: capitalize;
+  /*  text-transform: capitalize; */
 }
 
 @media (max-width: 575px) {
@@ -7174,7 +7174,7 @@ input[type="submit"] {
 .about-counter .counter-item .info {
   display: block;
   color: #31d7a9;
-  text-transform: capitalize;
+  /*  text-transform: capitalize; */
   margin-bottom: -8px;
 }
 
@@ -7312,7 +7312,7 @@ input[type="submit"] {
 }
 
 .counter--area .counter-item {
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   padding: 0 55px;
   margin: 0 10px 30px;
   text-align: center;
@@ -7422,7 +7422,7 @@ input[type="submit"] {
 }
 
 .feature-item .feature-content .title {
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   margin-bottom: 24px;
 }
 
@@ -7492,7 +7492,7 @@ input[type="submit"] {
 
 .account-area .account-form .form-group label {
   margin-bottom: 10px;
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   color: rgba(255, 255, 255, 0.7);
 }
 
@@ -7536,7 +7536,7 @@ input[type="submit"] {
   width: auto;
   padding: 0 50px;
   height: 50px;
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   margin: 0 auto;
 }
 
@@ -7582,7 +7582,7 @@ input[type="submit"] {
   padding-left: 5px;
   margin-bottom: 0;
   margin-right: auto;
-  text-transform: capitalize;
+  /*  text-transform: capitalize; */
 }
 
 .account-area .account-form .form-group.checkgroup label a {
@@ -7597,7 +7597,7 @@ input[type="submit"] {
 
 .account-area .account-form .form-group.checkgroup .forget-pass {
   color: #6d7bba;
-  text-transform: capitalize;
+  /*  text-transform: capitalize; */
   font-size: 14px;
 }
 
@@ -7618,7 +7618,7 @@ input[type="submit"] {
 
 .account-area .or {
   text-align: center;
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   color: #ffffff;
   overflow: hidden;
   margin-bottom: 20px;
@@ -7696,7 +7696,7 @@ input[type="submit"] {
 
 .section-404 .title {
   font-weight: 600;
-  text-transform: capitalize;
+  // /*  text-transform: capitalize; */
   margin-bottom: 40px;
 }
 
@@ -7762,7 +7762,7 @@ input[type="submit"] {
 }
 
 .contact-counter-item .contact-counter-content .counter-item .title {
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   display: inline-block;
 }
 
@@ -7828,7 +7828,7 @@ input[type="submit"] {
 
 .contact-form .form-group input[type="submit"] {
   margin-top: 5px;
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   border-radius: 30px;
   background-image: -webkit-linear-gradient(169deg, #5560ff 17%, #aa52a1 63%, #ff4343 100%);
   -webkit-transition: all ease 0.3s;
@@ -7955,7 +7955,7 @@ input[type="submit"] {
 }
 
 .contact-info .info-area .info-item .info-content .title {
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   margin: 0;
   margin-bottom: 5px;
 }
@@ -8442,7 +8442,7 @@ aside {
 
 .blog-author .author-content .title {
   margin: 0;
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   margin-bottom: 18px;
 }
 
@@ -8478,7 +8478,7 @@ aside {
 }
 
 .blog-comment > .title {
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   padding-bottom: 15px;
   font-size: 22px;
 }
@@ -8530,7 +8530,7 @@ aside {
 .comment-area li .blog-thumb-info .title {
   font-size: 16px;
   font-weight: 600;
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
 }
 
 .comment-area li .blog-content {
@@ -8578,7 +8578,7 @@ aside {
 }
 
 .leave-comment .title {
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   padding-bottom: 15px;
   font-size: 22px;
 }
@@ -8627,7 +8627,7 @@ aside {
 }
 
 .blog-form .form-group input[type="submit"] {
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   font-weight: 600;
   width: auto;
   padding: 0 50px;
@@ -9022,7 +9022,7 @@ aside {
   padding: 11px 24px;
   font-weight: 600;
   color: #ffffff;
-  text-transform: uppercase;
+  /*  text-transform: uppercase; */
   border-radius: 25px;
   display: inline-block;
 }

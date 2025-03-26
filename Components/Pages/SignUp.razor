@@ -1,12 +1,11 @@
 ﻿@page "/sign-up"
-@using System.Diagnostics
-@using Microsoft.EntityFrameworkCore.Metadata.Internal
-@using G5_MovieTicketBookingSystem.Services.Impl
-@using G5_MovieTicketBookingSystem.DTOs.UserDto
 @inject NavigationManager NavigationManager
 @inject IHttpClientFactory HttpClientFactory
+@inject IUserServices UserServices
+@inject ToastService toastService
+
 <!-- Sign-Up Section -->
-<section class="account-section bg_img" data-background="./assets/images/account/account-bg.jpg">
+<section class="account-section bg_img" style="background-image: url('/assets/images/account/account-bg.jpg');">
     <div class="container">
         <div class="padding-top padding-bottom">
             <div class="account-area">
@@ -17,14 +16,6 @@
                 <form method="post" @onsubmit="@Submit" class="account-form" @formname="SignUp">
                     <AntiforgeryToken />
 
-                    @if (Error.ContainsKey("Agree"))
-                    {
-                        <p>@Error["Agree"]</p>
-                    }
-                    @if (Error.ContainsKey("Account"))
-                    {
-                        <p>@Error["Account"]</p>
-                    }
                     <div class="form-group" style="display: flex; gap: 20px;">
                         <div style="flex: 1;">
                             <label for="LastName">LastName<span>*</span></label>
@@ -37,26 +28,18 @@
                     </div>
                     <div class="form-group">
                         <label for="email1">Email<span>*</span></label>
-                        <InputText type="text" placeholder="Enter Your Email" @bind-Value="Model.Email" id="pass1" required />
-                        @if (Error.ContainsKey("Email"))
-                        {
-                            <p>@Error["Email"]</p>
-                        }
+                        <InputText type="text" placeholder="Enter Your Email" @bind-Value="UserDto.Email" id="pass1" required />
                     </div>
                     <div class="form-group">
                         <label for="pass1">Password<span>*</span></label>
-                        <InputText type="password" placeholder="Password" @bind-Value="Model.Password" id="pass1" required />
+                        <InputText type="password" placeholder="Password" @bind-Value="UserDto.Password" id="pass1" required />
                     </div>
                     <div class="form-group">
                         <label for="pass2">Confirm Password<span>*</span></label>
-                        <InputText type="password" placeholder="Password" @bind-Value="Model.PasswordConfirm" id="pass2" required />
-                        @if (Error.ContainsKey("Password"))
-                        {
-                            <p>@Error["Password"]</p>
-                        }
+                        <InputText type="password" placeholder="Password" @bind-Value="UserDto.PasswordConfirm" id="pass2" required />
                     </div>
                     <div class="form-group checkgroup">
-                        <input type="checkbox" id="bal" @bind-value="isCheck" required/>
+                        <input type="checkbox" id="bal" @bind-value="isAgree" required/>
                         <label for="bal">I agree to the <a href="#0">Terms, Privacy Policy</a> and <a href="#0">Fees</a></label>
                     </div>
                     <div class="form-group text-center">
@@ -78,70 +61,35 @@
         </div>
     </div>
 </section>
+
+<Toast @ref="toastService.ToastComponent" />
+
 @code {
-
     [SupplyParameterFromForm]
-    private UserCreateDto Model { get; set; } = new UserCreateDto();
+    private UserDto UserDto { get; set; } = new UserDto();
     private Dictionary<string, string> Error = new Dictionary<string, string>();
-    private bool isCheck = false;
-    [Inject]
-    public IUserServices UserServices { get; set; }
 
-    private HttpClient _client;
-    [SupplyParameterFromForm]
-    public string? lastname { get; set; } // Dùng nullable reference type (chỉ có dấu ?)
-
-    [SupplyParameterFromForm]
+    public string? lastname { get; set; }
     public string? firstname { get; set; }
+    public bool isAgree { get; set; }
 
     private async Task Submit()
     {
-        Error.Clear();
+        try
+        {
+            // Combine names into the Model
+            UserDto.Fullname = $"{firstname} {lastname}";
 
-        if (string.IsNullOrEmpty(Model.Email))
-        {
-            Error.Add("Email", "Email is required");
+            var userDto = await UserServices.Register(UserDto);
 
-        }
-        else if (!Model.Email.Contains("@"))
-        {
-            Error.Add("Email", "Email must contain @ symbol");
-        }
+            toastService.ShowSuccessToast("Thành công", $"Tạo thành công tài khoản {userDto.Fullname}");
 
-        if (string.IsNullOrEmpty(Model.Password))
-        {
-            Error.Add("Password", "Password is required");
+            // Redirect user
+            NavigationManager.NavigateTo("/login", forceLoad: true);
         }
-        else if (Model.Password.Length < 8)
+        catch (Exception ex)
         {
-            Error.Add("Password", "Password must be at least 8 characters");
-        }
-        else if (Model.Password != Model.PasswordConfirm)
-        {
-            Error.Add("Password", "Passwords do not match");
-            Console.WriteLine("Passwords do not match");
-        }
-
-        if (isCheck)
-        {
-            Error.Add("Agree", "You have to agree with policy");
-          
-        }
-
-        if (Error.Count > 0)
-        {
-            return;
-        }
-        Model.fullname = firstname + lastname;
-        UserResponseDto userResponseDto = await UserServices.Register(Model, new List<int>() { 10});
-        if (userResponseDto==null)
-        {
-            Error.Add("Account", "Account is exist");
-
-        }
-        if (userResponseDto != null)
-        {
-            NavigationManager.NavigateTo("/Login");
+            toastService.ShowErrorToast("Lỗi định dạng", ex.Message);
         }
     }
 }
