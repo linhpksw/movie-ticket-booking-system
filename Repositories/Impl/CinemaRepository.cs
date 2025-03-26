@@ -17,6 +17,24 @@ public class CinemaRepository : ICinemaRepository
         return await _context.Cinemas.ToListAsync();
     }
 
+    public async Task<IEnumerable<string>> GetAllCitiesAsync()
+    {
+        return await _context.Cinemas
+                .Select(c => c.City)
+                .Distinct()
+                .OrderBy(c => c)
+                .ToListAsync();
+    }
+
+    public async Task<IEnumerable<string>> GetAllCinemaAsync()
+    {
+        return await _context.Cinemas
+                .Select(c => c.CinemaName)
+                .Distinct()
+                .OrderBy(c => c)
+                .ToListAsync();
+    }
+
     public async Task<Cinema?> GetByIdAsync(int id)
     {
         return await _context.Cinemas.Include(c => c.Screens).FirstOrDefaultAsync(c => c.CinemaId == id);

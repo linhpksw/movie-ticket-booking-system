@@ -12,5 +12,6 @@ namespace G5_MovieTicketBookingSystem.Services
         Task<List<ShowtimeDto>> GetShowTimeByMovieAndCinemaWithinDay(int movieId, int cinemaId, DateOnly showDate);
 
         Task<List<Showtime>> GetUpcomingShowtimes();
+        Task<IEnumerable<string>> GetExperienceTypeAsync();
     }
 }

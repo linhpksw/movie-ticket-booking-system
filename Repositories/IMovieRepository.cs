@@ -1,4 +1,5 @@
-﻿using G5_MovieTicketBookingSystem.Models;
+﻿using G5_MovieTicketBookingSystem.DTOs.MovieBookingPlan;
+using G5_MovieTicketBookingSystem.Models;
 
 namespace G5_MovieTicketBookingSystem.Repositories
 {
@@ -11,5 +12,6 @@ namespace G5_MovieTicketBookingSystem.Repositories
         Task<List<Movie?>> GetComingSoonAsync();
 
         Task<List<Movie?>> GetHotMoviesAsync();
+        Task<IEnumerable<MovieShowtimeDto>> GetMovieShowtimeDtos(MovieShowtimeFilterDto movieShowtimeFilterDto);
     }
 }

@@ -1,0 +1,106 @@
+﻿@page "/movie-booking-plan"
+@inject ICinemaService CinemaService
+@inject IShowtimeService ShowtimeService
+@inject IMovieService MovieService
+@using G5_MovieTicketBookingSystem.DTOs.MovieBookingPlan
+
+
+
+
+<!-- Banner Section -->
+<section class="details-banner hero-area bg_img seat-plan-banner" data-background="assets/images/banner/banner03.jpg">
+    <div class="container">
+        <div class="details-banner-wrapper">
+            <div class="details-banner-content">
+                <h3 class="title">Venus</h3>
+                <div class="tags">
+                    <a href="#0">English</a>
+                    <a href="#0">Hindi</a>
+                    <a href="#0">Telegu</a>
+                    <a href="#0">Tamil</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Book Section -->
+<BookSection Cities="cities"
+AvailableDates="availableDates"
+Cinemas="cinemas"
+Experiences="experiences"
+OnFilterChanged="HandleFilterChange" />
+
+<!-- Movie Section -->
+<MovieTable movieShowtimeDtos="movieShowtimeDtos" />
+
+
+@code {
+    // Danh sách dữ liệu từ API
+    private IEnumerable<string> cities = Array.Empty<string>();
+    private IEnumerable<DateTime> availableDates = Array.Empty<DateTime>();
+    private IEnumerable<string> cinemas = Array.Empty<string>();
+    private IEnumerable<string> experiences = Array.Empty<string>();
+    private IEnumerable<MovieShowtimeDto> movieShowtimeDtos = Array.Empty<MovieShowtimeDto>();
+
+    // Các giá trị đã chọn
+    public MovieShowtimeFilterDto filter = new MovieShowtimeFilterDto();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Load dữ liệu ban đầu
+            cities = await CinemaService.GetCitiesAsync();
+            availableDates = Enumerable.Range(0, 7).Select(x => DateTime.Today.AddDays(x)).ToList();
+            cinemas = await CinemaService.GetCinemasAsync();
+            experiences = await ShowtimeService.GetExperienceTypeAsync();
+            filter.ShowDate = DateTime.Today;
+            // Lấy danh sách phim ban đầu
+            await LoadMovieShowtimes();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading data: {ex.Message}");
+        }
+    }
+
+    private async Task LoadMovieShowtimes()
+    {
+        movieShowtimeDtos = await MovieService.GetMovieShowtimeDtos(filter);
+        PrintMovieShowtimeDto(movieShowtimeDtos);
+        var x = 5;
+    }
+    private async Task HandleFilterChange(MovieShowtimeFilterDto inputFilter)
+    {
+        filter.City = inputFilter.City;
+        filter.ShowDate = inputFilter.ShowDate;
+        filter.CinemaName = inputFilter.CinemaName;
+        filter.ExperienceType = inputFilter.ExperienceType;
+        Console.WriteLine(filter.ShowDate);
+
+        await LoadMovieShowtimes();
+
+        PrintMovieShowtimeDto(movieShowtimeDtos);
+
+        StateHasChanged(); // Cập nhật giao diện Blazor
+    }
+
+    private void PrintMovieShowtimeDto(IEnumerable<MovieShowtimeDto> movieShowtimeDtos)
+    {
+        foreach (var movie in movieShowtimeDtos)
+        {
+            Console.WriteLine($"Movie: {movie.Title}");
+            if (movie.Showtime != null)
+            {
+                foreach (var show in movie.Showtime)
+                {
+                    Console.WriteLine($"  Showtime: {show.Showtimehour} - Available Seats: {show.IsSoldOut}");
+                }
+            }
+            Console.WriteLine(new string('-', 40));
+        }
+    }
+
+
+}
