@@ -1,5 +1,6 @@
 
 
+using G5_MovieTicketBookingSystem.DTOs;
 using G5_MovieTicketBookingSystem.Models;
 
 
@@ -7,17 +8,12 @@ namespace G5_MovieTicketBookingSystem.Repositories
 {
     public interface IUserRepository
     {
-        // Đăng ký người dùng mới
-        Task<User> SignUpAsync(User user);
-
-        // Đăng nhập người dùng
+        Task<User> SignUpAsync(UserRegisterRequestDto user, int roleId);
         Task<User?> GetUserByEmail(string email);
         Task<bool> IsUsernameExistsAsync(string username);
         Task<User?> GetUserByIdAsync(int? userId);
-        public  Task<User?> UpdateUserAsync(User user);
+        public Task<User?> UpdateUserAsync(User user);
 
-        // Kiểm tra sự tồn tại của Username hoặc Email trước khi đăng ký
-        //Task<bool> UsernameExistsAsync(string username);
-        //Task<bool> EmailExistsAsync(string email);
+
     }
 }

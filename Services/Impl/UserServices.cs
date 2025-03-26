@@ -1,8 +1,10 @@
-﻿using G5_MovieTicketBookingSystem.DTOs.UserDto;
+﻿using G5_MovieTicketBookingSystem.Commons;
+using G5_MovieTicketBookingSystem.DTOs;
+using G5_MovieTicketBookingSystem.Mappers;
 using G5_MovieTicketBookingSystem.Models;
 using G5_MovieTicketBookingSystem.Repositories;
-using G5_MovieTicketBookingSystem.Util;
-using System.Security.Claims;
+using System.Text.RegularExpressions;
+
 namespace G5_MovieTicketBookingSystem.Services.Impl
 {
     public class UserServices : IUserServices
@@ -13,37 +15,38 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
 
         public UserServices(IUserRepository userRepository, ILogger<UserServices> logger, IUserRoleRepository userRoleRepository)
         {
-            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _userRoleRepository = userRoleRepository ?? throw new ArgumentNullException(nameof(userRoleRepository));
+            _userRepository = userRepository;
+            _logger = logger;
+            _userRoleRepository = userRoleRepository;
         }
 
-        public async Task<UserResponseDto> Login(UserRequestDto userRequestDto)
+        public async Task<UserResponseDto> Login(UserLoginRequestDto request)
         {
             try
             {
-                if (userRequestDto == null)
+                if (request == null)
                 {
                     _logger.LogWarning("Login attempt with null user request.");
                     return null;
                 }
 
-                var existingUser = await _userRepository.GetUserByEmail(userRequestDto.Email);
+                var existingUser = await _userRepository.GetUserByEmail(request.Email);
+
                 if (existingUser == null)
                 {
-                    _logger.LogWarning("Login failed: User with email {Email} not found.", userRequestDto.Email);
+                    _logger.LogWarning("Login failed: User with email {Email} not found.", request.Email);
                     return null;
                 }
 
                 // Kiểm tra mật khẩu bằng BCrypt.Verify
-                if (string.IsNullOrEmpty(userRequestDto.Password) || !BCrypt.Net.BCrypt.Verify(userRequestDto.Password, existingUser.Password))
+                if (string.IsNullOrEmpty(request.Password) || !BCrypt.Net.BCrypt.Verify(request.Password, existingUser.Password))
                 {
-                    _logger.LogWarning("Login failed: Invalid password for user {Email}.", userRequestDto.Email);
+                    _logger.LogWarning("Login failed: Invalid password for user {Email}.", request.Email);
                     return null;
                 }
 
-                var userResponse = UserMapper.MapToUserResponseDto(existingUser);
-                
+                UserResponseDto userResponse = UserMapper.toResponseDto(existingUser);
+
 
                 _logger.LogInformation("User {Email} logged in successfully with UserId {UserId}.", userResponse.Email, userResponse.UserId);
 
@@ -51,92 +54,68 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred during login for email {Email}.", userRequestDto?.Email);
+                _logger.LogError(ex, "An error occurred during login for email {Email}.", request?.Email);
                 throw;
             }
         }
-        public async Task<UserResponseDto> RegisterGoogle(UserCreateDto userCreateDto, List<int> roleIds)
+
+        public async Task<UserResponseDto?> Register(UserRegisterRequestDto request)
         {
-            var existingUser = await _userRepository.GetUserByEmail(userCreateDto.Email);
-            if (existingUser != null)
-            {
+            if (request is null)
+                throw new ArgumentNullException(nameof(request));
 
-                return UserMapper.MapToUserResponseDto(existingUser);
-            }
+            if (string.IsNullOrWhiteSpace(request.Email))
+                throw new Exception("Email is required.");
 
-            if (!string.IsNullOrEmpty(userCreateDto.Password))
-            {
-                userCreateDto.Password = BCrypt.Net.BCrypt.HashPassword(userCreateDto.Password);
-            }
+            if (!request.Email.Contains("@"))
+                throw new Exception("Invalid email format.");
 
-            string uniqueUsername = await GenerateUniqueUsernameAsync(userCreateDto.Email);
-            userCreateDto.username = uniqueUsername;
-            User user = UserMapper.CreateToUser(userCreateDto);
+            if (string.IsNullOrWhiteSpace(request.Password))
+                throw new Exception("Password is required.");
 
-            User userInsert;
-            try
-            {
-                userInsert = await _userRepository.SignUpAsync(user);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Đăng ký thất bại: " + ex.Message);
-            }
+            if (request.Password.Length < 8)
+                throw new Exception("Password must be at least 8 characters.");
 
-            foreach (var roleId in roleIds)
-            {
-                await _userRoleRepository.AssignRoleToUserAsync(user.UserId, roleId);
-            }
+            if (request.Password != request.PasswordConfirm)
+                throw new Exception("Passwords do not match.");
 
-            return UserMapper.MapToUserResponseDto(userInsert);
-        }
-        public async Task<UserResponseDto?> Register(UserCreateDto userCreateDto, List<int> roleIds)
-        {
-            // Kiểm tra xem email đã tồn tại chưa
-            var existingUser = await _userRepository.GetUserByEmail(userCreateDto.Email);
+            var existingUser = await _userRepository.GetUserByEmail(request.Email);
+
             if (existingUser != null)
             {
                 throw new Exception("Email đã được sử dụng.");
             }
 
-            // Mã hóa mật khẩu nếu có nhập
-            if (!string.IsNullOrEmpty(userCreateDto.Password))
+            if (!string.IsNullOrEmpty(request.Password))
             {
-                userCreateDto.Password = BCrypt.Net.BCrypt.HashPassword(userCreateDto.Password);
+                request.Password = BCrypt.Net.BCrypt.HashPassword(request.Password);
             }
 
-            // Tạo tên người dùng duy nhất dựa trên email
-            string uniqueUsername = await GenerateUniqueUsernameAsync(userCreateDto.Email);
-            userCreateDto.username = uniqueUsername;
+            request.Username = await GenerateUniqueUsernameAsync(request.Email);
 
-            // Chuyển đổi DTO thành Entity
-            User user = UserMapper.CreateToUser(userCreateDto);
-
-            // Thêm user vào database
-            User userInsert;
             try
             {
-                userInsert = await _userRepository.SignUpAsync(user);
+                User user = await _userRepository.SignUpAsync(request, CommonConstant.CUSTOMER_ROLE);
+
+                // Trả về thông tin user đã đăng ký
+                return UserMapper.toResponseDto(user);
             }
             catch (Exception ex)
             {
                 throw new Exception("Đăng ký thất bại: " + ex.Message);
             }
-
-            // Gán các role cho user (chạy đồng thời để tối ưu hiệu suất)
-            var roleAssignments = roleIds.Select(roleId =>
-                _userRoleRepository.AssignRoleToUserAsync(userInsert.UserId, roleId));
-            await Task.WhenAll(roleAssignments);
-
-            // Trả về thông tin user đã đăng ký
-            return UserMapper.MapToUserResponseDto(userInsert);
         }
 
 
-        public async Task<string> GenerateUniqueUsernameAsync(string email)
+        private async Task<string> GenerateUniqueUsernameAsync(string email)
         {
-            string baseUsername = UserMapper.GenerateBaseUsername(email);
-            string username = baseUsername;
+            string baseUsername = email.Split('@')[0];
+
+            // Chỉ giữ lại chữ cái, số, dấu . và _
+            baseUsername = Regex.Replace(baseUsername, @"[^a-zA-Z0-9._]", "");
+
+            string username = baseUsername.ToLower();
+
             int attempt = 1;
 
             while (await _userRepository.IsUsernameExistsAsync(username))
@@ -155,27 +134,9 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
             return await _userRepository.GetUserByIdAsync(userId);
         }
 
-        public async Task<UserResponseDto> ChangePasswordAsync(string email, string newPassword)
+        public async Task<List<UserRole>> GetUserRolesAsync()
         {
-            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(newPassword))
-            {
-                throw new ArgumentException("Email or password cannot be empty.");
-            }
-
-            // Tìm người dùng qua email
-            var user = await _userRepository.GetUserByEmail(email);
-
-            if (user == null)
-            {
-                throw new KeyNotFoundException("User not found.");
-            }
-
-            // Cập nhật mật khẩu mới
-            user.Password = newPassword;  // Lưu ý: Mã hóa mật khẩu trong thực tế
-            await _userRepository.UpdateUserAsync(user);
-
-            // Chuyển đổi User thành UserResponseDto
-            return UserMapper.MapToUserResponseDto(user);
+            return await _userRoleRepository.GetUserRolesAsync();
         }
     }
 }

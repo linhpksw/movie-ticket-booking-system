@@ -1,12 +1,11 @@
 ﻿@page "/sign-up"
-@using System.Diagnostics
-@using Microsoft.EntityFrameworkCore.Metadata.Internal
-@using G5_MovieTicketBookingSystem.Services.Impl
-@using G5_MovieTicketBookingSystem.DTOs.UserDto
 @inject NavigationManager NavigationManager
 @inject IHttpClientFactory HttpClientFactory
+@inject IUserServices UserServices
+@inject ToastService toastService
+
 <!-- Sign-Up Section -->
-<section class="account-section bg_img" data-background="./assets/images/account/account-bg.jpg">
+<section class="account-section bg_img" style="background-image: url('/assets/images/account/account-bg.jpg');">
     <div class="container">
         <div class="padding-top padding-bottom">
             <div class="account-area">
@@ -17,131 +16,78 @@
                 <form method="post" @onsubmit="@Submit" class="account-form" @formname="SignUp">
                     <AntiforgeryToken />
 
-                    @if (Error.ContainsKey("Agree"))
-                    {
-                        <p>@Error["Agree"]</p>
-                    }
-                    @if (Error.ContainsKey("Account"))
-                    {
-                        <p>@Error["Account"]</p>
-                    }
                     <div class="form-group" style="display: flex; gap: 20px;">
                         <div style="flex: 1;">
-                            <label for="LastName">LastName<span>*</span></label>
-                            <InputText type="text" placeholder="Enter Your LastName" @bind-Value="lastname" id="pass1" required />
+                            <label for="lastName">Họ <span>*</span></label>
+                            <InputText type="text" placeholder="Nhập họ của bạn " @bind-Value="lastname" id="lastName" required />
                         </div>
                         <div style="flex: 1;">
-                            <label for="FirstName">FirstName<span>*</span></label>
-                            <InputText type="text" placeholder="Enter Your FirstName" @bind-Value="firstname" id="pass1" required />
+                            <label for="firstName">Tên <span>*</span></label>
+                            <InputText type="text" placeholder="Nhập tên của bạn" @bind-Value="firstname" id="firstName" required />
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="email1">Email<span>*</span></label>
-                        <InputText type="text" placeholder="Enter Your Email" @bind-Value="Model.Email" id="pass1" required />
-                        @if (Error.ContainsKey("Email"))
-                        {
-                            <p>@Error["Email"]</p>
-                        }
+                        <label for="email">Email <span>*</span></label>
+                        <InputText type="text" placeholder="Enter Your Email" @bind-Value="request.Email" id="email" required />
                     </div>
                     <div class="form-group">
-                        <label for="pass1">Password<span>*</span></label>
-                        <InputText type="password" placeholder="Password" @bind-Value="Model.Password" id="pass1" required />
+                        <label for="password">Mật khẩu <span>*</span></label>
+                        <InputText type="password" placeholder="Nhập mật khẩu của bạn" @bind-Value="request.Password" id="password" required />
                     </div>
                     <div class="form-group">
-                        <label for="pass2">Confirm Password<span>*</span></label>
-                        <InputText type="password" placeholder="Password" @bind-Value="Model.PasswordConfirm" id="pass2" required />
-                        @if (Error.ContainsKey("Password"))
-                        {
-                            <p>@Error["Password"]</p>
-                        }
+                        <label for="confirmPassword">Nhập lại mật khẩu <span>*</span></label>
+                        <InputText type="password" placeholder="Nhập lại mật khẩu của bạn" @bind-Value="request.PasswordConfirm" id="confirmPassword" required />
                     </div>
                     <div class="form-group checkgroup">
-                        <input type="checkbox" id="bal" @bind-value="isCheck" required/>
-                        <label for="bal">I agree to the <a href="#0">Terms, Privacy Policy</a> and <a href="#0">Fees</a></label>
+                        <input type="checkbox" id="agree" @bind-value="isAgree" required/>
+                        <label for="agree">Tôi đồng ý với các <a href="#0">Điều khoản, Chính sách</a> và <a href="#0">Chi phí</a></label>
                     </div>
                     <div class="form-group text-center">
-                        <input type="submit" value="Sign Up">
+                        <input type="submit" value="@(isLoading ? "Đang đăng ký..." : "Đăng ký")">
                     </div>
                 </form>
                 <div class="option">
-                    Already have an account? <a href="/login">Login</a>
+                    Bạn đã có tài khoản? <a href="/login">Đăng nhập ngay</a>
                 </div>
-                <div class="or"><span>Or</span></div>
-                <ul class="social-icons">
-                    <li><a href="#0"><i class="fab fa-facebook-f"></i></a></li>
-                    <li><a href="#0" class="active"><i class="fab fa-twitter"></i></a></li>
-                    <li>
-                        <a href="https://localhost:7000/getAccount"></a>
-                    </li>
-                </ul>
             </div>
         </div>
     </div>
 </section>
+
+<Toast @ref="toastService.ToastComponent" />
+
 @code {
-
     [SupplyParameterFromForm]
-    private UserCreateDto Model { get; set; } = new UserCreateDto();
-    private Dictionary<string, string> Error = new Dictionary<string, string>();
-    private bool isCheck = false;
-    [Inject]
-    public IUserServices UserServices { get; set; }
-
-    private HttpClient _client;
-    [SupplyParameterFromForm]
-    public string? lastname { get; set; } // Dùng nullable reference type (chỉ có dấu ?)
-
-    [SupplyParameterFromForm]
+    private UserRegisterRequestDto request { get; set; } = new UserRegisterRequestDto();
+    private bool isLoading = false;
+    public string? lastname { get; set; }
     public string? firstname { get; set; }
+    public bool isAgree { get; set; }
+
 
     private async Task Submit()
     {
-        Error.Clear();
+        try
+        {
+            isLoading = true;
 
-        if (string.IsNullOrEmpty(Model.Email))
-        {
-            Error.Add("Email", "Email is required");
+            // Combine names into the Model
+            request.Fullname = $"{lastname} {firstname}";
 
-        }
-        else if (!Model.Email.Contains("@"))
-        {
-            Error.Add("Email", "Email must contain @ symbol");
-        }
+            var userDto = await UserServices.Register(request);
 
-        if (string.IsNullOrEmpty(Model.Password))
-        {
-            Error.Add("Password", "Password is required");
-        }
-        else if (Model.Password.Length < 8)
-        {
-            Error.Add("Password", "Password must be at least 8 characters");
-        }
-        else if (Model.Password != Model.PasswordConfirm)
-        {
-            Error.Add("Password", "Passwords do not match");
-            Console.WriteLine("Passwords do not match");
-        }
+            toastService.ShowSuccessToast("Thành công", $"Tạo thành công tài khoản {request.Fullname}");
 
-        if (isCheck)
-        {
-            Error.Add("Agree", "You have to agree with policy");
-          
+            // Redirect user
+            NavigationManager.NavigateTo("/login", forceLoad: true);
         }
-
-        if (Error.Count > 0)
+        catch (Exception ex)
         {
-            return;
+            toastService.ShowErrorToast("Lỗi định dạng", ex.Message);
         }
-        Model.fullname = firstname + lastname;
-        UserResponseDto userResponseDto = await UserServices.Register(Model, new List<int>() { 10});
-        if (userResponseDto==null)
+        finally
         {
-            Error.Add("Account", "Account is exist");
-
-        }
-        if (userResponseDto != null)
-        {
-            NavigationManager.NavigateTo("/Login");
+            isLoading = false;
         }
     }
 }

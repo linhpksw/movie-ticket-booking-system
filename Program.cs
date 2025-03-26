@@ -7,8 +7,8 @@ using G5_MovieTicketBookingSystem.Services;
 using G5_MovieTicketBookingSystem.Services.Impl;
 using G5_MovieTicketBookingSystem.Util;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.EntityFrameworkCore;
+using NetcodeHub.Packages.Components.Toast;
 
 namespace G5_MovieTicketBookingSystem
 {
@@ -22,13 +22,12 @@ namespace G5_MovieTicketBookingSystem
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
 
-            builder.Services.AddSignalR(); // Real-time
+            builder.Services.AddScoped<ToastService>();
+
+            builder.Services.AddSignalR();
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddAntiforgery();
-            builder.Services.AddHttpClient("EmailClient", client =>
-            {
-                client.BaseAddress = new Uri("https://localhost:7000");
-            });
+            builder.Services.AddHttpClient();
             builder.Services.AddControllersWithViews();
             builder.Services.AddControllers();
             builder.Services.AddSingleton<EmailSender>();
@@ -105,7 +104,7 @@ namespace G5_MovieTicketBookingSystem
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
 
-           
+
             app.MapControllers();
             app.MapFallbackToFile("pages/404.html");
 

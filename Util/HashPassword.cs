@@ -8,7 +8,7 @@
             return BCrypt.Net.BCrypt.Verify(password, hashedPassword);
         }
 
-       public static string Hashing(string password)
+        public static string Hashing(string password)
         {
             // Mã hóa mật khẩu với salt ngẫu nhiên (work factor mặc định là 12)
             string hashed = BCrypt.Net.BCrypt.HashPassword(password);
