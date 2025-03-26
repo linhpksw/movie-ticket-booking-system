@@ -1,4 +1,5 @@
 ﻿using G5_MovieTicketBookingSystem.DTOs;
+using G5_MovieTicketBookingSystem.Models;
 using G5_MovieTicketBookingSystem.Repositories;
 
 namespace G5_MovieTicketBookingSystem.Services.Impl
@@ -8,16 +9,9 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
         private readonly ICinemaRepository _cinemaRepository = cinemaRepository;
         private readonly ILogger<CinemaService> _logger = logger;
 
-        public async Task<IEnumerable<CinemaDto>> GetAllAsync()
+        public async Task<List<Cinema>> GetAllAsync()
         {
-            var entities = await _cinemaRepository.GetAllAsync();
-            return entities.Select(c => new CinemaDto
-            {
-                CinemaId = c.CinemaId,
-                CinemaName = c.CinemaName,
-                City = c.City,
-                Address = c.Address
-            });
+            return await _cinemaRepository.GetAllAsync();
         }
 
         public async Task<CinemaDto?> GetByIdAsync(int id)
@@ -32,57 +26,6 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
                 City = cinema.City,
                 Address = cinema.Address
             };
-        }
-
-        public async Task<CinemaDto> CreateAsync(CinemaDto dto)
-        {
-            //_logger.LogInformation("CreateAsync called with: {Name}, {City}, {Address}",
-            //               dto.CinemaName, dto.City, dto.Address);
-
-            //var entity = new Cinema
-            //{
-            //    CinemaName = dto.CinemaName,
-            //    City = dto.City,
-            //    Address = dto.Address
-            //};
-            //var created = await _cinemaRepository.CreateAsync(entity);
-
-            //_logger.LogInformation("Created a new Cinema with ID {CinemaId}", created.CinemaId);
-
-            //dto.CinemaId = created.CinemaId;
-            //return dto;
-            return null;
-        }
-
-        public async Task<CinemaDto> UpdateAsync(int id, CinemaDto dto)
-        {
-            var existing = await _cinemaRepository.GetByIdAsync(id);
-            if (existing == null)
-            {
-                throw new Exception($"Cinema with ID {id} does not exist.");
-            }
-
-            existing.CinemaName = dto.CinemaName;
-            existing.City = dto.City;
-            existing.Address = dto.Address;
-
-            var updated = await _cinemaRepository.UpdateAsync(existing);
-
-            _logger.LogInformation("Updated Cinema with ID {CinemaId}", updated.CinemaId);
-
-            return new CinemaDto
-            {
-                CinemaId = updated.CinemaId,
-                CinemaName = updated.CinemaName,
-                City = updated.City,
-                Address = updated.Address
-            };
-        }
-
-        public async Task DeleteAsync(int id)
-        {
-            await _cinemaRepository.DeleteAsync(id);
-            _logger.LogInformation("Deleted Cinema with ID {CinemaId}", id);
         }
     }
 }

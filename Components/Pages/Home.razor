@@ -1,5 +1,9 @@
 ﻿@page "/"
 @layout MainLayout
+@inject IShowtimeService showtimeService
+@inject ICinemaService cinemaService
+@inject IMovieService movieService
+@inject NavigationManager NavigationManager
 
 <section class="banner-section">
     <div 
@@ -9,18 +13,284 @@
     <div class="container">
         <div class="banner-content">
             <h1 class="title cd-headline clip">
-                <span class="d-block">book your</span> tickets for
+                <span class="d-block">ĐẶT VÉ NGAY CHO</span>
                 <span class="color-theme cd-words-wrapper p-0 m-0">
-                    <b class="is-visible">Movie</b>
-                    <b>Event</b>
-                    <b>Sport</b>
+                    <b class="is-visible">PHIM HOT NHẤT</b>
+                    <b>COMBO SIÊU HỜI</b>
+                    <b>GHẾ ĐẸP, VIEW XỊN</b>
                 </span>
             </h1>
-            <p>Safe, secure, reliable ticketing.Your ticket to live entertainment!</p>
+            <p>Đặt vé cực nhanh – Xem phim cực đã! Trải nghiệm rạp chiếu như bạn mong đợi.</p>
         </div>
     </div>                                       
 </section>
 
-<SearchComponent/>
+<section class="search-ticket-section padding-top pt-lg-0">
+    <div class="container">
+        <div class="search-tab bg_img" style="background-image: url('/assets/images/ticket/ticket-bg01.jpg');">
+            <div class="row align-items-center mb--20">
+                <div class="col-lg-6 mb-20">
+                    <div class="search-ticket-header">
+                        <h6 class="category">CHÀO MỪNG BẠN ĐẾN VỚI BOLETO </h6>
+                        <h3 class="title">Bạn đang muốn tìm phim nào?</h3>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-20">
+                    <ul class="tab-menu ticket-tab-menu">
+                        <li class="active">
+                            <div class="tab-thumb">
+                                <img src="assets/images/ticket/ticket-tab01.png" alt="ticket">
+                            </div>
+                            <span>Phim ảnh</span>
+                        </li>
 
-<MovieCarousel/>
+                    </ul>
+                </div>
+            </div>
+            <div class="tab-area">
+                <div class="tab-item active">
+                    <form class="ticket-search-form">
+                        <div class="form-group large">
+                            <input type="text" placeholder="Nhập tên phim...">
+                            <button type="submit"><i class="fas fa-search"></i></button>
+                        </div>
+                        <div class="form-group">
+                            <div class="thumb">
+                                <img src="assets/images/ticket/cinema.png" alt="ticket">
+                            </div>
+                            <span class="type">Rạp chiếu phim</span>
+                            <select class="select-bar">
+                                @if (cinemaServicesList == null)
+                                {
+                                    <option>Đang tải...</option>
+                                }
+                                else if (!cinemaServicesList.Any())
+                                {
+                                    <option>Không có rạp nào</option>
+                                }
+                                else
+                                {
+                                    @foreach (var cinema in cinemaServicesList)
+                                    {
+                                        <option value="@cinema.CinemaId">@cinema.CinemaName</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <div class="thumb">
+                                <img src="assets/images/ticket/date.png" alt="ticket">
+                            </div>
+                            <span class="type">Ngày chiếu</span>
+                            <select class="select-bar">
+                                @if (upcomingShowtimes == null)
+                                {
+                                    <option>Đang tải...</option>
+                                }
+                                else if (!upcomingShowtimes.Any())
+                                {
+                                    <option>Không có suất chiếu nào sắp tới</option>
+                                }
+                                else
+                                {
+                                    @foreach (var showtime in upcomingShowtimes)
+                                    {
+                                        <option value="@showtime.ShowDate.ToString("yyyy-MM-dd")">
+                                            @showtime.ShowDate.ToString("dd/MM/yyyy")
+                                        </option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="movie-section padding-top padding-bottom">
+    <div class="container">
+        <div class="tab">
+            <div class="section-header-2">
+                <div class="left">
+                    <h2 class="title">Phim ảnh</h2>
+                    <p>Đừng bỏ lỡ các siêu bom tấn.</p>
+                </div>
+                <ul class="tab-menu">
+                    <li class="@GetActiveClass(0)" @onclick="() => SetActiveTab(0)">
+                        Đang khởi chiếu
+                    </li>
+                    <li class="@GetActiveClass(1)" @onclick="() => SetActiveTab(1)">
+                        Sắp khởi chiếu
+                    </li>
+                    <li class="@GetActiveClass(2)" @onclick="() => SetActiveTab(2)">
+                        Phim HOT
+                    </li>
+                </ul>
+            </div>
+
+            <div class="tab-area mb-30-none">
+                <!-- Tab 1: Đang khởi chiếu -->
+                <div class="tab-item @(activeTab == 0 ? "active" : "")">
+                    <div class="owl-carousel owl-theme tab-slider">
+                        @if (NowShowingMovies != null && NowShowingMovies.Any())
+                        {
+                            @foreach (var movie in NowShowingMovies)
+                            {
+                                <div class="item">
+                                    <div class="movie-grid">
+                                        <div class="movie-thumb c-thumb">
+                                            <a href="#0">
+                                                <img src="assets/images/movie/movie@((movie.MovieId % 12 == 0 ? 12 : movie.MovieId % 12).ToString("D2")).jpg" alt="@movie.Title" />
+                                            </a>
+                                        </div>
+                                        <div class="movie-content bg-one">
+                                            <h5 class="title m-0">
+                                                <a href="#0">@movie.Title</a>
+                                            </h5>
+                                            <ul class="movie-rating-percent">
+                                                @if (movie.Rating > 0)
+                                                {
+                                                    <li>
+                                                        <div class="thumb">
+                                                            <img src="assets/images/movie/star.png" alt="star">
+                                                        </div>
+                                                        <span class="content">@movie.Rating.ToString("F1")</span>
+                                                    </li>
+                                                }
+                                                else
+                                                {
+                                                    <!-- Example: or show default or no rating -->
+                                                    <li>No rating</li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+
+                <!-- Tab 2: Sắp khởi chiếu -->
+                <div class="tab-item @(activeTab == 1 ? "active" : "")">
+                    <div class="owl-carousel owl-theme tab-slider">
+                        @if (ComingSoonMovies != null && ComingSoonMovies.Any())
+                        {
+                            @foreach (var movie in ComingSoonMovies)
+                            {
+                                <div class="item">
+                                    <div class="movie-grid">
+                                        <div class="movie-thumb c-thumb">
+                                            <a href="#0">
+                                                <img src="assets/images/movie/movie@((movie.MovieId % 12 == 0 ? 12 : movie.MovieId % 12).ToString("D2")).jpg" alt="@movie.Title" />
+                                            </a>
+                                        </div>
+                                        <div class="movie-content bg-one">
+                                            <h5 class="title m-0">
+                                                <a href="#0">@movie.Title</a>
+                                            </h5>
+                                            <ul class="movie-rating-percent">
+                                                @if (movie.Rating > 0)
+                                                {
+                                                    <li>
+                                                        <div class="thumb">
+                                                            <img src="assets/images/movie/star.png" alt="star">
+                                                        </div>
+                                                        <span class="content">@movie.Rating.ToString("F1")</span>
+                                                    </li>
+                                                }
+                                                else
+                                                {
+                                                    <!-- Example: or show default or no rating -->
+                                                    <li>No rating</li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+
+                <!-- Tab 3: Phim HOT -->
+                <div class="tab-item @(activeTab == 2 ? "active" : "")">
+                    <div class="owl-carousel owl-theme tab-slider">
+                        @if (HotMovies != null && HotMovies.Any())
+                        {
+                            @foreach (var movie in HotMovies)
+                            {
+                                <div class="item">
+                                    <div class="movie-grid">
+                                        <div class="movie-thumb c-thumb">
+                                            <a href="#0">
+                                                <img src="assets/images/movie/movie@((movie.MovieId % 12 == 0 ? 12 : movie.MovieId % 12).ToString("D2")).jpg" alt="@movie.Title" />
+                                            </a>
+                                        </div>
+                                        <div class="movie-content bg-one">
+                                            <h5 class="title m-0">
+                                                <a href="#0">@movie.Title</a>
+                                            </h5>
+                                            <ul class="movie-rating-percent">
+                                                @if (movie.Rating > 0)
+                                                {
+                                                    <li>
+                                                        <div class="thumb">
+                                                            <img src="assets/images/movie/star.png" alt="star">
+                                                        </div>
+                                                        <span class="content">@movie.Rating.ToString("F1")</span>
+                                                    </li>
+                                                }
+                                                else
+                                                {
+                                                    <!-- Example: or show default or no rating -->
+                                                    <li>No rating</li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@code {
+    private List<Showtime> upcomingShowtimes;
+    private List<Cinema> cinemaServicesList;
+    private int activeTab = 0;
+
+    private List<Movie> NowShowingMovies { get; set; } = new();
+    private List<Movie> ComingSoonMovies { get; set; } = new();
+    private List<Movie> HotMovies { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        upcomingShowtimes = await showtimeService.GetUpcomingShowtimes();
+
+        cinemaServicesList = await cinemaService.GetAllAsync();
+
+        NowShowingMovies = await movieService.GetNowShowingAsync();
+
+        ComingSoonMovies = await movieService.GetComingSoonAsync();
+
+        HotMovies = await movieService.GetHotMoviesAsync();
+    }
+
+    
+    private void SetActiveTab(int index)
+    {
+        activeTab = index;
+    }
+
+    private string GetActiveClass(int tabIndex)
+    {
+        return activeTab == tabIndex ? "active" : string.Empty;
+    }
+}

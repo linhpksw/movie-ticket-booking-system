@@ -37,5 +37,10 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
 
             return showtimes.Select(ShowtimeMapper.ToDto).ToList();
         }
+
+        public async Task<List<Showtime>> GetUpcomingShowtimes()
+        {
+            return await _showtimeRepository.GetUpcomingShowtimes();
+        }
     }
 }
