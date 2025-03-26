@@ -1,4 +1,5 @@
 ﻿@page "/payment"
+@using G5_MovieTicketBookingSystem.Data
 
 @inject IVnPayService VnPayService
 @inject NavigationManager Navigation
@@ -10,6 +11,7 @@
 @inject IScreenSeatService ScreenSeatService
 @inject ITransactionLogService TransactionLogService
 @inject IShowtimeService ShowtimeService
+@inject AppDbContext _context
 @layout MainLayout
 
 
@@ -18,6 +20,7 @@
     private int? userId;
     private int ShowtimeId;
     private User? currentUser;
+    private List<int> screenSeatIds = new();
     private Order NewOrder { get; set; } = new()
         {
             OrderTimestamp = DateTime.UtcNow,
@@ -51,8 +54,6 @@
         paymentModel.OrderDescription = queryParams["orderDescription"];
         paymentModel.Name = queryParams["showtimeId"];
         ShowtimeId = Int32.Parse(queryParams["showtimeId"]);
-        // Parse các giá trị
-        var showtime = await ShowtimeService.getShowTimeById(ShowtimeId);
 
         userId = Int32.Parse(queryParams["userId"]);
         int orderItemId = Int32.Parse(queryParams["orderItemId"]);
@@ -60,7 +61,16 @@
         string seatLabel = queryParams["seatLabel"];
         string cinemaName = queryParams["cinemaName"];
         string fullName = queryParams["fullName"];
-        int screenSeatId = Int32.Parse(queryParams["screenSeatId"]);
+
+        // Cập nhật danh sách screenSeatIds từ query
+        if (!string.IsNullOrEmpty(queryParams["screenSeatId"]))
+        {
+            screenSeatIds = queryParams["screenSeatId"]
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(id => int.TryParse(id.Trim(), out int seatId) ? seatId : -1)
+                .Where(seatId => seatId != -1)
+                .ToList();
+        }
 
         // Xử lý các thông tin trong order
         currentUser = await UserService.GetUserByIdAsync(userId.Value);
@@ -68,15 +78,31 @@
         NewOrder.User = currentUser;
         NewOrder.TotalAmount = (decimal)paymentModel.Amount;
 
-        // await AddOrder();
         await AddOrder();
-        // UpdateSoldOut(ShowtimeId);
         Order OrderLasted = await OrderService.GetLatestOrderByUserIdAsync(userId.Value);
-        NewOrderItemDto.OrderId = OrderLasted.OrderId;
-        NewOrderItemDto.ScreenSeatId = screenSeatId;
-        NewOrderItemDto.PriceCharged = decimal.Parse(queryParams["amount"]);
-        await AddOrderItem(NewOrderItemDto);
-        //add transaction log
+
+        // Debug: In ra giá trị của screenSeatIds
+        Console.WriteLine("Screen Seat IDs: " + string.Join(", ", screenSeatIds));
+
+        // Cập nhật NewOrderItemDto cho từng phần tử trong screenSeatIds
+        foreach (var screenSeatId in screenSeatIds)
+        {
+            // Tạo mới OrderItemDto cho mỗi phần tử
+            var newOrderItemDto = new OrderItemDto
+                {
+                    OrderId = OrderLasted.OrderId,
+                    ScreenSeatId = screenSeatId,
+                    PriceCharged = (decimal)paymentModel.Amount / screenSeatIds.Count
+                };
+
+            // Debug: Kiểm tra các giá trị trước khi thêm vào
+            Console.WriteLine($"Adding Order Item for ScreenSeatId: {screenSeatId}, PriceCharged: {newOrderItemDto.PriceCharged}");
+
+            // Thêm OrderItem
+            await AddOrderItem(newOrderItemDto);
+        }
+
+        // Add transaction log
         TransactionLog transactionLog = new TransactionLog
             {
                 OrderId = OrderLasted.OrderId,
@@ -88,6 +114,7 @@
                 GatewayResponse = "Pending"
             };
         AddTransactionLog(transactionLog);
+
         // Kiểm tra nếu dữ liệu đầy đủ
         if (!string.IsNullOrEmpty(paymentModel.OrderType) && paymentModel.Amount > 0)
         {
@@ -110,6 +137,7 @@
             Console.WriteLine("❌ Lỗi: Dữ liệu thanh toán không hợp lệ.");
         }
     }
+
     private async Task UpdateSoldOut(int ShowtimeId)
     {
         ShowtimeService.UpdateShowTime(ShowtimeId);
@@ -129,7 +157,7 @@
     private async Task AddOrderItem(OrderItemDto newOrderItemDto)
     {
         var order = await OrderService.GetOrderByIdAsync(newOrderItemDto.OrderId);
-        var screenSeat = await ScreenSeatService.GetScreenSeatByUserId(userId);
+        var screenSeat = await ScreenSeatService.GetScreenSeatByIdAsync(newOrderItemDto.ScreenSeatId);
 
         // Lấy Showtime từ Order hoặc ScreenSeat (cần đảm bảo có ShowTime hợp lệ)
         var showtime = await ShowtimeService.getShowTimeById(ShowtimeId);
@@ -153,7 +181,6 @@
             Console.WriteLine("❌ Không tìm thấy Showtime hợp lệ cho Order.");
         }
     }
-
     private async Task AddTransactionLog(TransactionLog transactionLog)
     {
         if (string.IsNullOrEmpty(transactionLog.GatewayResponse))

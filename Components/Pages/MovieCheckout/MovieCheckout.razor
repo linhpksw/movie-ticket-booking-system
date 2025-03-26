@@ -59,9 +59,12 @@
                     Showtimes = new List<ShowtimeDto>()
                 };
            
-            var seatLock = await SeatLockService.GetAllByUserIdAndShowtimeAsync(userId, ShowtimeId);
+            List<SeatLock> seatLocks = await SeatLockService.GetAllByUserIdAsync(userId);
+            foreach (SeatLock seatLock in seatLocks)
+            {
                 ScreenSeat screenSeat = await ScreenSeatService.GetScreenSeatByIdAsync(seatLock.ScreenSeatId);
                 screenSeats.Add(screenSeat);
+            }
             await CalculateRemainingTime(userId);
 
             var tokens = Antiforgery.GetAndStoreTokens(HttpContextAccessor.HttpContext);

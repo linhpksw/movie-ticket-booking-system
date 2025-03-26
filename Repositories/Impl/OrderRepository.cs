@@ -60,6 +60,22 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
             }
         }
 
+        public async Task<List<OrderItem>> GetOrderItemByUserIdAsync(int userId)
+        {
+            var orders = await _context.Orders
+                .Where(o => o.UserId == userId && o.OrderStatus == "Success")
+                .Include(o => o.OrderItems) 
+                .ToListAsync();
+
+            List<OrderItem> orderItems = new List<OrderItem>();
+
+            foreach (var order in orders)
+            {
+                orderItems.AddRange(order.OrderItems);
+            }
+
+            return orderItems; 
+        }
 
     }
 }

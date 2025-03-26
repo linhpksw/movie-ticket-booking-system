@@ -147,5 +147,13 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
             return results.GroupBy(x => x.ScreenSeatId)
                           .ToDictionary(g => g.Key, g => g.First().UserId);
         }
+
+        public async Task<List<SeatLock>> GetAllByUserIdAsync(int? userId)
+        {
+            return await _dbContext.SeatLocks
+                .Where(sl => sl.UserId == userId)
+                .AsNoTracking()
+                .ToListAsync();
+        }
     }
 }

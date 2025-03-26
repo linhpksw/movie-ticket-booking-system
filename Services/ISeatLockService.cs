@@ -16,5 +16,6 @@ namespace G5_MovieTicketBookingSystem.Services
         Task UpdateStarttimeByUserIdAsync(int? userId, DateTime expiryTime);
         Task UpdateExpirytimeByUserIdAsync(int? userId, DateTime expiryTime);
         Task<SeatLock> GetAllByUserIdAndShowtimeAsync(int? userId,int? showTimeId);
+        Task<List<SeatLock>> GetAllByUserIdAsync(int? userId);
     }
 }

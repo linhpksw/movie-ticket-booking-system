@@ -11,10 +11,14 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
     public class SeatLockService : ISeatLockService
     {
         private readonly ISeatLockRepository _seatLockRepository;
+        private readonly IOrderRepository _orderRepository;
+        private readonly IOrderItemRepository orderItemRepository;
 
-        public SeatLockService(ISeatLockRepository seatLockRepository)
+        public SeatLockService(ISeatLockRepository seatLockRepository, IOrderRepository orderRepository, IOrderItemRepository orderItemRepository)
         {
             _seatLockRepository = seatLockRepository;
+            _orderRepository = orderRepository;
+            this.orderItemRepository = orderItemRepository;
         }
         public async Task<SeatLock> GetAllByUserIdAndShowtimeAsync(int? userId, int? showTimeId)
         {
@@ -119,5 +123,26 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
         {
             return _seatLockRepository.UnlockAllSeatsByExpiryAsync(showtimeId, userId, expiryTime);
         }
+
+        public async Task<List<SeatLock>> GetAllByUserIdAsync(int? userId)
+        {
+            if (!userId.HasValue)
+            {
+                return new List<SeatLock>();
+            }
+
+            var seatLocks = await _seatLockRepository.GetAllByUserIdAsync(userId);
+
+            var orderItems = await _orderRepository.GetOrderItemByUserIdAsync(userId.Value);
+
+            var orderScreenSeatIds = orderItems.Select(item => item.ScreenSeatId).ToList();
+
+            var filteredSeatLocks = seatLocks
+                .Where(sl => !orderScreenSeatIds.Contains(sl.ScreenSeatId))
+                .ToList();
+
+            return filteredSeatLocks; 
+        }
+
     }
 }
