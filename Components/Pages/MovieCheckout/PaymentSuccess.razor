@@ -10,6 +10,7 @@
 @inject IShowtimeService ShowtimeService
 @inject ISeatLockService SeatLockService
 @inject NavigationManager Navigation
+@using G5_MovieTicketBookingSystem.Util
 
 <h2 style="text-align: center; color: green; font-size: 36px; font-weight: bold; margin-top: 300px;">
     Bạn đã đặt vé thành công!
@@ -99,7 +100,10 @@
                                 TicketStatus = "Active",
                                 ScannedTimestamp = null
                             };
+                    string subject = $"Mã Vé ";
+                    string body = $"Mã vé {ticket.UniqueCode}";
 
+                    EmailHelper.SendEmail("letrunghieu28042003@gmail.com", subject, body);
                     await AddTicket(ticket);
                 }
                 // }
