@@ -13,10 +13,10 @@
                     <a style="cursor: pointer;" @onclick="@(e => ForceReload("/"))">Home</a>
                 </li>
                 <li>
-                    <a style="cursor: pointer;" href="/check-ticket")">Check-in</a>
+                    <a style="cursor: pointer;" @onclick="@(e => ForceReload("/check-ticket"))">Check-in</a>
                 </li>
                 <li>
-                    <a style="cursor: pointer;" href="/movie-booking-plan" )">Movie Plan</a>
+                    <a style="cursor: pointer;" @onclick="@(e => ForceReload("/movie-booking-plan"))">Movie Plan</a>
                 </li>
                 <li>
                     <a style="cursor: pointer;" @onclick="@(e => ForceReload("/seat-plan/1"))">Seat Plan</a>
@@ -27,13 +27,13 @@
                 <Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
                     <NotAuthorized>
                         <li class="header-button pr-0">
-                            <a href="pages\login.html">Join Us</a>
+                            <a @onclick="@(e => ForceReload("/pages/login.html"))" >Join Us</a>
                         </li>
                     </NotAuthorized>
                     <Authorized Context="auth">
                         <span>Xin chào @auth.User.Identity.Name</span>
                         <li class="header-button pr-0">
-                            <a href="/logout">Log out</a>
+                            <a @onclick="@(e => ForceReload("/logout"))" >Log out</a>
                         </li>
                     </Authorized>
                 </Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
