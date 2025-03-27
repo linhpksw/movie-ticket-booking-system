@@ -1,7 +1,12 @@
-﻿using G5_MovieTicketBookingSystem.Data;
+using G5_MovieTicketBookingSystem.Data;
 using G5_MovieTicketBookingSystem.Models;
 using G5_MovieTicketBookingSystem.Repositories;
 using Microsoft.EntityFrameworkCore;
+using G5_MovieTicketBookingSystem.Components.Pages;
+using G5_MovieTicketBookingSystem.DTOs;
+using G5_MovieTicketBookingSystem.Models;
+using G5_MovieTicketBookingSystem.Repositories;
+using static G5_MovieTicketBookingSystem.Components.Pages.CheckTicket;
 
 namespace G5_MovieTicketBookingSystem.Services.Impl
 {
@@ -31,6 +36,20 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
             return await _context.Tickets
                 .Where(t => t.OrderItem.Order.UserId == userId)
                 .ToListAsync();
+
+        public async Task<bool> CheckIfTicketExistsAsync(string uniqueCode)
+        {
+            if (string.IsNullOrEmpty(uniqueCode))
+            {
+                throw new ArgumentException("Unique code cannot be null or empty.", nameof(uniqueCode));
+            }
+
+            return await _ticketRepository.CheckIfTicketExistsAsync(uniqueCode);
+        }
+
+        public async Task<TicketInfoDto> GetTicketInfoAsync(string ticketCode)
+        {
+           return await _ticketRepository.GetTicketInfoAsync(ticketCode);
         }
     }
 }

@@ -28,6 +28,11 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
             return CinemaMapper.ToDto(cinema);
         }
 
+        public Task<IEnumerable<string>> GetExperienceTypeAsync()
+        {
+            return _showtimeRepository.GetExperienceTypeAsync();
+        }
+
         public async Task<List<ShowtimeDto>> GetShowTimeByMovieAndCinemaWithinDay(int movieId, int cinemaId, DateOnly showDate)
         {
             List<Showtime> showtimes = await _showtimeRepository.GetShowTimeByMovieAndCinemaWithinDay(movieId, cinemaId, showDate);

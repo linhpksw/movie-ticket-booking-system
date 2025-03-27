@@ -27,5 +27,31 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
                 Address = cinema.Address
             };
         }
+
+        public async Task<IEnumerable<string>> GetCitiesAsync()
+        {
+            try
+            {
+                return await _cinemaRepository.GetAllCitiesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting cities list");
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<string>> GetCinemasAsync()
+        {
+            try
+            {
+                return await _cinemaRepository.GetAllCinemaAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting cinemas list");
+                throw;
+            }
+        }
     }
 }

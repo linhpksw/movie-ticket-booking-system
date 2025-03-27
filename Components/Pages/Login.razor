@@ -15,7 +15,8 @@
                 </div>
 
 
-                <form method="post" class="account-form" @onsubmit="HandleLogin" @formname="login">
+                <form method="post" class="account-form" @onsubmit="HandleLogin" @formname="login" >
+                    <AntiforgeryToken/>
                     <div class="form-group">
                         <label for="credential">Tài khoản<span>*</span></label>
                         <InputText type="text" placeholder="Nhập tài khoản của bạn" @bind-Value="request.Email" id="credential" required />
@@ -71,5 +72,5 @@
         {
             isLoading = false;
         }
-    }
+    } 
 }

@@ -32,6 +32,15 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
                 .FirstOrDefaultAsync();
         }
 
+        public async Task<IEnumerable<string>> GetExperienceTypeAsync()
+        {
+            return await _dbContext.Showtimes
+                .Select(s => s.ExperienceType)
+                .Distinct()
+                .OrderBy(s => s)
+                .ToListAsync();
+        }
+
         public async Task<List<Showtime>> GetShowTimeByMovieAndCinemaWithinDay(int movieId, int cinemaId, DateOnly showDate)
         {
             string query = @"

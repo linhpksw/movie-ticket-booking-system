@@ -7,5 +7,7 @@ namespace G5_MovieTicketBookingSystem.Services
     {
         Task<List<Cinema>> GetAllAsync();
         Task<CinemaDto?> GetByIdAsync(int id);
+        Task<IEnumerable<string>> GetCitiesAsync();
+        Task<IEnumerable<string>> GetCinemasAsync();
     }
 }
