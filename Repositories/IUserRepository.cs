@@ -14,6 +14,6 @@ namespace G5_MovieTicketBookingSystem.Repositories
         Task<User?> GetUserByIdAsync(int? userId);
         public Task<User?> UpdateUserAsync(User user);
 
-
+       Task<ScreenSeat> GetScreenSeatByUserId(int? UserId);
     }
 }

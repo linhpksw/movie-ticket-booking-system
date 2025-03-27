@@ -10,6 +10,7 @@ namespace G5_MovieTicketBookingSystem.Services
         Task<UserResponseDto> Register(UserRegisterRequestDto request);
 
         Task<User?> GetUserByIdAsync(int? userId);
+        Task<ScreenSeat> GetScreenSeatByUserId(int? userid);
 
         Task<List<UserRole>> GetUserRolesAsync();
     }

@@ -113,7 +113,7 @@
 
         if (userLock != null)
         {
-            await SeatLockService.UnlockAllSeatsByExpiryAsync(ShowtimeId, userId, userLock.LockExpiryTime);
+            await SeatLockService.UnlockAllSeatsByExpiryAsync(ShowtimeId, userId);
         }
 
         _isCountdownRunning = false;
@@ -144,7 +144,7 @@
                 // retrieve the seats already locked by the current user from the DB.
                 chosenSeats = screenSeats
                     .Where(s => seatAvailabilities.TryGetValue(s.ScreenSeatId, out var status)
-                                && !status.IsAvailable && status.LockedBy == userId)
+                                && !status.IsAvailable && status.LockedBy == userId && !status.IsSold)
                     .ToList();
 
                 // Recalculate the total price from the chosen seats.
@@ -493,7 +493,7 @@ else
                         <h3 class="title">@NumberUtil.FormatCurrency(totalPrice)</h3>
                     </div>
                     <div class="book-item">
-                        <a href="movie-checkout.html" class="custom-button" @onclick="ProceedToCheckout">Thanh toán</a>
+                        <a class="custom-button" @onclick="ProceedToCheckout">Thanh toán</a>
                     </div>
                 </div>
             </div>

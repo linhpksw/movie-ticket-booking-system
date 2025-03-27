@@ -1,4 +1,4 @@
-using G5_MovieTicketBookingSystem.Commons;
+﻿using G5_MovieTicketBookingSystem.Commons;
 using G5_MovieTicketBookingSystem.Data;
 using G5_MovieTicketBookingSystem.Models;
 using Microsoft.EntityFrameworkCore;
@@ -43,7 +43,32 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
                 await _dbContext.Database.ExecuteSqlRawAsync(insertQuery);
             }
         }
+        public async Task<SeatLock> GetLastByUserIdAsync(int? userId, int? showTimeId)
+        {
+            return await _dbContext.SeatLocks
+                .Where(sl => sl.UserId == userId && sl.ShowtimeId == showTimeId)
+                .AsNoTracking()
+                .OrderBy(sl => sl.SeatLockId)  
+                .LastOrDefaultAsync(); 
+        }
 
+
+
+        public async Task<SeatLock?> GetLatestByUserIdAsync(int? userId)
+        {
+            return await _dbContext.SeatLocks
+                .Where(sl => sl.UserId == userId)
+                .OrderByDescending(sl => sl.LockStartTime)
+                 .AsNoTracking()
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<bool> UpdateAsync(SeatLock seatLock)
+        {
+            _dbContext.SeatLocks.Update(seatLock);
+            var result = await _dbContext.SaveChangesAsync();
+            return result > 0;
+        }
         public async Task<SeatLock?> GetUserLockAsync(int showtimeId, int userId)
         {
             // Query for an active lock (with LockExpiryTime in the future) for this user and showtime.
@@ -58,13 +83,13 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
             return await _dbContext.SeatLocks.FromSqlRaw(query).FirstOrDefaultAsync();
         }
 
-        public async Task UnlockAllSeatsByExpiryAsync(int showtimeId, int userId, DateTime expiryTime)
+        public async Task UnlockAllSeatsByExpiryAsync(int showtimeId, int userId)
         {
             string deleteQuery = $@"
                  DELETE FROM SeatLocks
                  WHERE UserId = '{userId}'
                  AND ShowtimeId = {showtimeId}
-                 AND LockExpiryTime = '{expiryTime:yyyy-MM-dd HH:mm:ss}'";
+              ";
 
             await _dbContext.Database.ExecuteSqlRawAsync(deleteQuery);
         }
@@ -93,7 +118,7 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
                 JOIN Orders O ON OI.OrderId = O.OrderId
                 WHERE OI.ShowtimeId = {{0}} 
                 AND OI.ScreenSeatId IN ({seatIdsString})
-                AND O.OrderStatus = 'PAID'";
+                AND O.OrderStatus = 'Success'";
 
             var result = await _dbContext.OrderItems
                 .FromSqlRaw(query, showtimeId)
@@ -121,6 +146,14 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
             // Build a dictionary of seatId -> userId (if multiple rows exist for a seat, you can decide to take the first)
             return results.GroupBy(x => x.ScreenSeatId)
                           .ToDictionary(g => g.Key, g => g.First().UserId);
+        }
+
+        public async Task<List<SeatLock>> GetAllByUserIdAsync(int? userId ,int showTimeId)
+        {
+            return await _dbContext.SeatLocks
+                .Where(sl => sl.UserId == userId && sl.ShowtimeId == showTimeId)
+                .AsNoTracking()
+                .ToListAsync();
         }
     }
 }

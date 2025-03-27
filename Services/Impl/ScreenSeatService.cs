@@ -61,5 +61,10 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
 
             return seatTypes.ToDictionary(st => st.SeatTypeId, st => st.BasePrice);
         }
+
+        public async Task<ScreenSeat> GetScreenSeatByUserId(int? userId)
+        {
+            return await _screenSeatRepository.GetScreenSeatByUserIdAsync(userId);
+        }
     }
 }

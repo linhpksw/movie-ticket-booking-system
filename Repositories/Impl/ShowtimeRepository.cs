@@ -1,4 +1,4 @@
-﻿using G5_MovieTicketBookingSystem.Data;
+using G5_MovieTicketBookingSystem.Data;
 using G5_MovieTicketBookingSystem.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -68,5 +68,53 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
 
             return await _dbContext.Showtimes.FromSqlRaw(query).ToListAsync(); ;
         }
+        public async Task<Showtime> GetShowtimeByScreenSeatId(int screenSeatId)
+        {
+            return await _dbContext.Showtimes
+                .AsNoTracking()  // Đảm bảo không theo dõi
+                .Include(s => s.Screen)
+                .ThenInclude(sc => sc.ScreenSeats)
+                .FirstOrDefaultAsync(s => s.Screen.ScreenSeats
+                    .Any(ss => ss.ScreenSeatId == screenSeatId));
+        }
+
+        public Task<Showtime> getShowTimeById(int id)
+        {
+            return _dbContext.Showtimes.FirstOrDefaultAsync(s => s.ShowtimeId == id);
+        }
+
+        public async Task UpdateSoldOut(int id)
+        {
+            var showtime = await _dbContext.Showtimes.FirstOrDefaultAsync(s => s.ShowtimeId == id);
+
+            if (showtime != null)
+            {
+                showtime.IsSoldOut = true;
+
+                await _dbContext.SaveChangesAsync();
+            }
+            else
+            {
+                Console.WriteLine($"Không tìm thấy Showtime với ShowtimeId = {id}");
+            }
+        }
+
+        public Task<ScreenSeat> GetScreenSeatByShowtimeId(int showTimeId)
+        {
+            var showtime = _dbContext.Showtimes
+                .Include(s => s.Screen)
+                .ThenInclude(sc => sc.ScreenSeats)
+                .FirstOrDefault(s => s.ShowtimeId == showTimeId);
+
+            if (showtime != null && showtime.Screen != null && showtime.Screen.ScreenSeats.Any())
+            {
+                return Task.FromResult(showtime.Screen.ScreenSeats.LastOrDefault());
+            }
+            else
+            {
+                return Task.FromResult<ScreenSeat>(null);
+            }
+        }
+
     }
 }

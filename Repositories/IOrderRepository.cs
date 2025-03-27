@@ -10,5 +10,7 @@ namespace G5_MovieTicketBookingSystem.Repositories
 
         // Thêm phương thức cập nhật trạng thái đơn hàng
         Task UpdateOrderStatusAsync(int orderId, string status);
+
+       Task<List<OrderItem>> GetOrderItemByUserIdAsync(int userId,int showTimeId);
     }
 }

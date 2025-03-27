@@ -138,5 +138,10 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
         {
             return await _userRoleRepository.GetUserRolesAsync();
         }
+
+        public Task<ScreenSeat> GetScreenSeatByUserId(int? userid)
+        {
+            return _userRepository.GetScreenSeatByUserId(userid);
+        }
     }
 }

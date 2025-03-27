@@ -91,5 +91,15 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
             await _context.SaveChangesAsync();  // Lưu thay đổi vào cơ sở dữ liệu
             return user;  // Trả về người dùng đã được cập nhật
         }
+
+
+        public async Task<ScreenSeat> GetScreenSeatByUserId(int? UserId)
+        {
+            var user = _context.Users
+                .Include(u => u.SeatLocks)
+                .ThenInclude(u => u.ScreenSeat)
+                .LastOrDefault(u => u.UserId == UserId);
+            return user?.SeatLocks.FirstOrDefault()?.ScreenSeat;
+        }
     }
 }
