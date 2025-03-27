@@ -1,4 +1,5 @@
 ﻿using G5_MovieTicketBookingSystem.DTOs;
+using G5_MovieTicketBookingSystem.DTOs.MovieBookingPlan;
 using G5_MovieTicketBookingSystem.Models;
 using System.Threading.Tasks;
 
@@ -11,5 +12,6 @@ namespace G5_MovieTicketBookingSystem.Services
         Task<List<Movie?>> GetHotMoviesAsync();
         Task<List<Movie?>> GetComingSoonAsync();
         Task<List<Movie?>> GetNowShowingAsync();
+        Task<IEnumerable<MovieShowtimeDto>> GetMovieShowtimeDtos(MovieShowtimeFilterDto filter);
     }
 }

@@ -22,10 +22,10 @@ namespace G5_MovieTicketBookingSystem
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
 
-            builder.Services.AddScoped<ToastService>();
+            
 
+            builder.Services.AddScoped<ToastService>();
             builder.Services.AddSignalR();
-            builder.Services.AddHttpContextAccessor();
             builder.Services.AddAntiforgery();
             builder.Services.AddHttpClient();
             builder.Services.AddControllersWithViews();
@@ -95,20 +95,19 @@ namespace G5_MovieTicketBookingSystem
             app.UseStaticFiles();
             app.UseRouting();
 
-            app.UseCors("AllowSpecificOrigin");
-
+            app.UseAntiforgery();
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseAntiforgery();
 
+            // Map components & endpoints
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
 
-
+                // ✅ OK nếu bạn thực sự dùng Razor Pages
             app.MapControllers();
-            app.MapFallbackToFile("pages/404.html");
-
             app.MapHub<MovieHub>("/movieHub");
+
+            
 
             app.Run();
         }

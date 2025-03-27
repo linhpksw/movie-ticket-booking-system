@@ -1,0 +1,63 @@
+﻿@page "/check-ticket"
+@inject ITicketService TicketService
+<h3>CheckTicket</h3>
+
+<section class="section-404 padding-top padding-bottom">
+    <div class="container text-center">
+        <!-- thêm text-center để căn giữa -->
+        <div class="thumb-404">
+            <img src="assets/images/banner/banner02.jpg" alt="Banner">
+        </div>
+        <h3 class="title">Nhập mã số vé:</h3>
+
+        <!-- Bọc form lại để căn giữa và giãn đều -->
+        <div style="max-width: 400px; margin: 0 auto;">
+            <input @bind="ticketCode" id="ticketCode" class="form-control mb-3" style="width: 100%; font-size: 1.1rem;" placeholder="VD: TCK123" />
+            <button class="custom-button w-100" style="font-size: 1.1rem;" @onclick="CheckTicketHandle">Check-in</button>
+        </div>
+
+        @if (checkedIn)
+        {
+            @if (ticketFound && ticketInfo != null)
+            {
+                <div class="alert alert-success mt-4 text-start" style="max-width: 400px; margin: 0 auto;">
+                    <strong>✅ Vé hợp lệ!</strong><br />
+                    <p><strong>Phim:</strong> @ticketInfo.MovieTitle</p>
+                    <p><strong>Thời gian chiếu:</strong> @ticketInfo.Showtime</p>
+                    <p><strong>Ghế:</strong> @ticketInfo.SeatNumber</p>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-danger mt-4" style="max-width: 400px; margin: 0 auto;">
+                    ❌ Mã vé không hợp lệ hoặc không tồn tại.
+                </div>
+            }
+        }
+    </div>
+</section>
+
+
+
+@code {
+    private string ticketCode;
+    private bool checkedIn = false;
+    private bool ticketFound = false;
+    private TicketInfoDto ticketInfo;
+
+
+
+    private async Task CheckTicketHandle()
+    {
+        checkedIn = true;
+        ticketFound = await TicketService.CheckIfTicketExistsAsync(ticketCode);
+        
+        if (ticketFound)
+        {
+            ticketInfo = await TicketService.GetTicketInfoAsync(ticketCode);
+            int x = 1;
+        }
+    }
+
+    
+}
