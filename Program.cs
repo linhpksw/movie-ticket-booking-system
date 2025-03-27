@@ -55,7 +55,7 @@ namespace G5_MovieTicketBookingSystem
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
                        .LogTo(Console.WriteLine, LogLevel.Information)
                        .EnableSensitiveDataLogging());
-
+            builder.Services.AddHttpContextAccessor();
             // Register services
             builder.Services.AddScoped<ICinemaService, CinemaService>();
             builder.Services.AddScoped<IShowtimeService, ShowtimeService>();

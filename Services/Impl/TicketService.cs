@@ -36,7 +36,7 @@ namespace G5_MovieTicketBookingSystem.Services.Impl
             return await _context.Tickets
                 .Where(t => t.OrderItem.Order.UserId == userId)
                 .ToListAsync();
-
+        }
         public async Task<bool> CheckIfTicketExistsAsync(string uniqueCode)
         {
             if (string.IsNullOrEmpty(uniqueCode))

@@ -11,9 +11,11 @@
 @inject ISeatLockService SeatLockService
 @inject NavigationManager Navigation
 
-<h2 style="text-align: center; color: green; font-size: 36px; font-weight: bold; margin-top: 50px;">
+<h2 style="text-align: center; color: green; font-size: 36px; font-weight: bold; margin-top: 300px;">
     Bạn đã đặt vé thành công!
+    @* Mã Vé Của Bạn là : @ticket.UniqueCode *@
 </h2>
+
 
 
 @code {
@@ -32,7 +34,7 @@
         //     ShowtimeId = 0; 
         // }
         // userId = showtime.SeatLocks.LastOrDefault().UserId;
-        userId = 1;
+        userId = 23;
 
         var queryCollection = HttpContextAccessor.HttpContext?.Request.Query;
         if (queryCollection != null)

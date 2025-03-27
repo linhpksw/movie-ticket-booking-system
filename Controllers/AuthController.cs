@@ -1,22 +1,17 @@
-﻿using G5_MovieTicketBookingSystem.Commons;
-using G5_MovieTicketBookingSystem.DTOs;
-using G5_MovieTicketBookingSystem.Models;
+﻿using G5_MovieTicketBookingSystem.DTOs;
 using G5_MovieTicketBookingSystem.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 namespace G5_MovieTicketBookingSystem.Controllers
 {
     [ApiController]
-    [Microsoft.AspNetCore.Mvc.Route("api/[controller]/")]
+    [Route("api/auth")]
     public class AuthController : ControllerBase
     {
         private readonly IUserServices _userServices;
-        [CascadingParameter]
-        public HttpContext? HttpContext { get; set; }
 
         public AuthController(IUserServices userServices)
         {
@@ -26,33 +21,22 @@ namespace G5_MovieTicketBookingSystem.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] UserLoginRequestDto request)
         {
-            UserResponseDto response = await _userServices.Login(request);
-
-            if (response == null)
-            {
-                return Unauthorized(new { message = "Invalid credentials." });
-            }
-
-            int roleId = CommonConstant.CUSTOMER_ROLE;
+            Console.WriteLine("Login");
+            var valid = await _userServices.Login(request);
+            if (valid == null)
+                return Unauthorized("Sai tài khoản hoặc mật khẩu");
 
             var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, response.Email),
-                new Claim(ClaimTypes.Role, roleId.ToString())
-            };
+        {
+            new Claim(ClaimTypes.Name, request.Email)
+        };
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
 
-            if (HttpContext != null)
-            {
-                await HttpContext.SignInAsync(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    principal
-                );
-                Console.WriteLine("haha");
-            }
-            return Ok(response);
+            await HttpContext.SignInAsync(principal);
+
+            return Ok("Đăng nhập thành công");
         }
     }
 }
