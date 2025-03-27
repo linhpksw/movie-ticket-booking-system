@@ -1,12 +1,8 @@
-﻿@page "/movie-booking-plan"
-@rendermode InteractiveServer
+﻿@page "/movie-booking-planaaaaa"
 @inject ICinemaService CinemaService
 @inject IShowtimeService ShowtimeService
 @inject IMovieService MovieService
 @using G5_MovieTicketBookingSystem.DTOs.MovieBookingPlan
-
-
-
 
 <!-- Banner Section -->
 <section class="details-banner hero-area bg_img seat-plan-banner" data-background="assets/images/banner/banner03.jpg">
@@ -24,7 +20,7 @@
         </div>
     </div>
 </section>
-
+<button @onclick="HandleClickDemo">aaaa</button>
 <!-- Book Section -->
 <BookSection Cities="cities"
 AvailableDates="availableDates"
@@ -65,6 +61,10 @@ OnFilterChanged="HandleFilterChange" />
             Console.WriteLine($"Error loading data: {ex.Message}");
         }
     }
+    private async Task HandleClickDemo(){
+        Console.WriteLine("ss");
+    }
+    
 
     private async Task LoadMovieShowtimes()
     {

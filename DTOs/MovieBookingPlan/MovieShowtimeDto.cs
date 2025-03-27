@@ -7,6 +7,7 @@
     }
     public class ShowTimeDetailDto
     {
+        public int ShowtimeId { get; set; }
         public TimeSpan? Showtimehour { get; set; }
         public bool IsSoldOut { get; set; }
     }

@@ -1,5 +1,5 @@
 ﻿@using G5_MovieTicketBookingSystem.DTOs.MovieBookingPlan
-@rendermode InteractiveServer
+
 
 <section class="book-section bg-one">
     <div class="container">
@@ -10,7 +10,7 @@
                     <img src="assets/images/ticket/city.png" alt="ticket">
                 </div>
                 <span class="type">City</span>
-                <select class="select-bar" @onchange="HandleCityChange">
+                <select  @onchange="HandleCityChange">
                     <option value="">Select a city</option>
                     @foreach (var city in cities)
                     {
@@ -25,7 +25,7 @@
                     <img src="assets/images/ticket/date.png" alt="ticket">
                 </div>
                 <span class="type">Date</span>
-                <select class="select-bar" @onchange="HandleDateChange">
+                <select  @onchange="HandleDateChange">
                     @foreach (var date in availableDates)
                     {
                         <option value="@date.ToString("yyyy-MM-dd")">@date.ToString("dd/MM/yyyy")</option>
@@ -39,7 +39,7 @@
                     <img src="assets/images/ticket/cinema.png" alt="ticket">
                 </div>
                 <span class="type">Cinema</span>
-                <select class="select-bar" @onchange="HandleCinemaChange">
+                <select  @onchange="HandleCinemaChange">
                     <option value="">Select a cinema</option>
                     @foreach (var cinema in cinemas)
                     {
@@ -54,7 +54,7 @@
                     <img src="assets/images/ticket/exp.png" alt="ticket">
                 </div>
                 <span class="type">Experience</span>
-                <select class="select-bar" @onchange="HandleExperienceChange">
+                <select  @onchange="HandleExperienceChange">
                     <option value="">Select an experience</option>
                     @foreach (var experience in experiences)
                     {

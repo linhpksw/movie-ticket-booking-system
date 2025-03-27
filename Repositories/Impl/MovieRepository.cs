@@ -60,11 +60,12 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
                 )
                 .Select(s => new
                 {
+                    s.ShowtimeId,
                     s.Movie.Title,
                     s.ShowTime,
                     s.IsSoldOut
                 })
-                .ToListAsync(); // ⛔ Không dùng ToTimeSpan trước ToListAsync
+                .ToListAsync(); // ✅ Lấy dữ liệu trước khi xử lý ToTimeSpan
 
             var result = query
                 .GroupBy(x => x.Title)
@@ -74,7 +75,8 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
                     Showtime = g
                         .Select(x => new ShowTimeDetailDto
                         {
-                            Showtimehour = x.ShowTime.ToTimeSpan(), // ✅ xử lý tại client
+                            ShowtimeId = x.ShowtimeId,
+                            Showtimehour = x.ShowTime.ToTimeSpan(), // ✅ xử lý client-side
                             IsSoldOut = x.IsSoldOut
                         })
                         .OrderBy(s => s.Showtimehour)
@@ -84,6 +86,7 @@ namespace G5_MovieTicketBookingSystem.Repositories.Impl
 
             return result;
         }
+
 
 
 

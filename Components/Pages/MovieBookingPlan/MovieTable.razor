@@ -1,6 +1,6 @@
 ﻿@using G5_MovieTicketBookingSystem.DTOs.MovieBookingPlan
-@rendermode InteractiveServer
 
+@inject NavigationManager Nav
 
 <style>
     .movie-schedule .item {
@@ -39,7 +39,7 @@
                 left: 0;
                 right: 0;
                 bottom: 0;
-                background: repeating-linear-gradient( 45deg, transparent, transparent 5px, rgba(0,0,0,0.03) 5px, rgba(0,0,0,0.03) 10px );
+                background: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(0,0,0,0.03) 5px, rgba(0,0,0,0.03) 10px);
                 z-index: 1;
             }
 
@@ -61,6 +61,7 @@
                 white-space: nowrap;
             }
 </style>
+
 <div class="ticket-plan-section padding-bottom padding-top">
     <div class="container">
         <div class="row justify-content-center">
@@ -80,12 +81,11 @@
                                 </div>
                             </div>
                             <div class="movie-schedule">
-
                                 @foreach (var show in movieShowtimeDto.Showtime)
                                 {
-                                    @if (!show.IsSoldOut)
+                                    if (!show.IsSoldOut)
                                     {
-                                        <div class="item">
+                                        <div class="item" @onclick="@(() => HandleShowtimeClick(show))">
                                             @show.Showtimehour
                                         </div>
                                     }
@@ -95,7 +95,6 @@
                                             @show.Showtimehour
                                         </div>
                                     }
-
                                 }
                             </div>
                         </li>
@@ -117,4 +116,15 @@
 
 @code {
     [Parameter] public IEnumerable<MovieShowtimeDto> movieShowtimeDtos { get; set; } = Array.Empty<MovieShowtimeDto>();
+
+    private void HandleShowtimeClick(ShowTimeDetailDto show)
+    {
+        if (show == null || show.IsSoldOut)
+        {
+            return;
+        }
+
+        // Điều hướng đến trang chọn ghế
+        // Nav.NavigateTo($"/seat-selection?showtimeId={show.Id}");
+    }
 }
